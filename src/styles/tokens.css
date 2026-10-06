@@ -5,18 +5,18 @@
  */
 :root {
   /* Color: superficies */
-  --color-paper: #f6f7f7;        /* fondo general, blanco frío */
-  --color-surface: #ffffff;      /* paneles de admin, menús */
-  --color-ink: #0f1a22;          /* texto principal (AAA sobre paper) */
-  --color-ink-muted: #4a5762;    /* bajadas, metadatos (AA sobre paper) */
-  --color-ink-subtle: #5f6b75;   /* fechas, créditos (AA) */
-  --color-rule: #d9dee2;         /* filetes y divisores */
+  --color-paper: #f6f7f7; /* fondo general, blanco frío */
+  --color-surface: #ffffff; /* paneles de admin, menús */
+  --color-ink: #0f1a22; /* texto principal (AAA sobre paper) */
+  --color-ink-muted: #4a5762; /* bajadas, metadatos (AA sobre paper) */
+  --color-ink-subtle: #5f6b75; /* fechas, créditos (AA) */
+  --color-rule: #d9dee2; /* filetes y divisores */
   /* Color: acento editorial */
-  --color-accent: #0c5c6c;       /* azul petróleo: secciones, enlaces, foco */
+  --color-accent: #0c5c6c; /* azul petróleo: secciones, enlaces, foco */
   --color-accent-strong: #08434f;
   --color-accent-soft: #e3eff1;
   /* Color: semánticos (no son acento) */
-  --color-live: #c4242b;         /* En vivo / Último momento */
+  --color-live: #c4242b; /* En vivo / Último momento */
   --color-success: #1f7a4a;
   --color-warning: #9a6200;
   --color-danger: #b42318;
@@ -32,15 +32,15 @@
   --font-ui: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
 
   /* Escala tipográfica (razón ~1.25, base 16px) */
-  --text-xs: 0.75rem;    /* 12  kicker, créditos */
-  --text-sm: 0.875rem;   /* 14  metadatos, UI */
-  --text-base: 1rem;     /* 16  UI, tarjetas */
-  --text-md: 1.1875rem;  /* 19  cuerpo de nota */
-  --text-lg: 1.375rem;   /* 22  título de tarjeta */
-  --text-xl: 1.75rem;    /* 28  título secundario */
-  --text-2xl: 2.25rem;   /* 36  título de nota (mobile: principal) */
-  --text-3xl: 3rem;      /* 48  título de nota desktop */
-  --text-4xl: 3.75rem;   /* 60  nota principal de portada desktop */
+  --text-xs: 0.75rem; /* 12  kicker, créditos */
+  --text-sm: 0.875rem; /* 14  metadatos, UI */
+  --text-base: 1rem; /* 16  UI, tarjetas */
+  --text-md: 1.1875rem; /* 19  cuerpo de nota */
+  --text-lg: 1.375rem; /* 22  título de tarjeta */
+  --text-xl: 1.75rem; /* 28  título secundario */
+  --text-2xl: 2.25rem; /* 36  título de nota (mobile: principal) */
+  --text-3xl: 3rem; /* 48  título de nota desktop */
+  --text-4xl: 3.75rem; /* 60  nota principal de portada desktop */
   --leading-tight: 1.1;
   --leading-snug: 1.25;
   --leading-body: 1.6;
@@ -57,10 +57,10 @@
   --space-16: 4rem;
 
   /* Layout */
-  --measure: 40rem;      /* ~68 caracteres para el cuerpo de la nota */
+  --measure: 40rem; /* ~68 caracteres para el cuerpo de la nota */
   --container: 76rem;
-  --radius-sm: 2px;      /* imágenes y botones: casi rectos */
-  --radius-md: 4px;      /* inputs y paneles de admin */
+  --radius-sm: 2px; /* imágenes y botones: casi rectos */
+  --radius-md: 4px; /* inputs y paneles de admin */
 
   color-scheme: light;
 }
