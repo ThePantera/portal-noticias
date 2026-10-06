@@ -1,4 +1,4 @@
-import type { Role } from "@/generated/prisma/client";
+import type { Role } from "@/types/article";
 
 /**
  * Tabla de permisos por rol (ADR 0004). En el MVP sólo existe ADMIN; los demás roles
