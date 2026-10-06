@@ -7,7 +7,7 @@ import { slugify, uniqueSlug } from "@/lib/slug";
 import { db } from "@/server/db";
 import { recordArticleEvent, type ArticleEventType } from "@/server/events/outbox";
 import { can, type Actor } from "@/server/permissions";
-import type { ArticleStatus } from "@/types/article";
+import type { ArticleOrigin, ArticleStatus } from "@/types/article";
 
 /**
  * Altas, ediciones y cambios de estado de notas. Cada función valida permisos por su
@@ -155,8 +155,15 @@ async function claimFeaturedRank(tx: Prisma.TransactionClient, rank: number | nu
 
 const RETURN = { id: true, slug: true, title: true, status: true } as const;
 
-/** Crea una nota en borrador. Nunca nace publicada: eso es una transición aparte. */
-export async function createArticle(actor: Actor, input: ArticleInput) {
+/**
+ * Crea una nota en borrador. Nunca nace publicada: eso es una transición aparte.
+ * `origin` marca de dónde vino (el asistente de redacción usa AI_ASSISTED).
+ */
+export async function createArticle(
+  actor: Actor,
+  input: ArticleInput,
+  { origin = "MANUAL" }: { origin?: ArticleOrigin } = {},
+) {
   if (!can(actor, "article:create")) throw new ArticleError("forbidden", "No tenés permiso.");
   const data = parseInput(input);
 
@@ -181,7 +188,7 @@ export async function createArticle(actor: Actor, input: ArticleInput) {
         featuredRank: data.featuredRank,
         mainImageId,
         status: "DRAFT",
-        origin: "MANUAL",
+        origin,
         tags: { create: tagIds.map((tagId) => ({ tagId })) },
       },
       select: RETURN,

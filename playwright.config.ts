@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { defineConfig, devices } from "@playwright/test";
-import { E2E_CRON_SECRET } from "./tests/e2e/e2e-database";
+import { E2E_ASSISTANT_KEY, E2E_CRON_SECRET } from "./tests/e2e/e2e-database";
 
 /**
  * Tests end to end contra el build de producción. Usan E2E_DATABASE_URL (una base
@@ -41,6 +41,7 @@ export default defineConfig({
       SITE_URL: baseURL,
       SITE_NAME: "Portal Noticias",
       CRON_SECRET: E2E_CRON_SECRET,
+      ASSISTANT_API_KEY: E2E_ASSISTANT_KEY,
       // Las imágenes van a disco, dentro de test-results (no se sube al repo).
       STORAGE_DRIVER: "local",
       STORAGE_LOCAL_DIR: "test-results/e2e-storage",

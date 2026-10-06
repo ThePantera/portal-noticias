@@ -61,6 +61,15 @@ async function EditArticle({ params, searchParams }: PageProps<"/admin/notas/[id
         </Link>
         <h1 className="mt-2 font-display text-3xl font-semibold">Editar nota</h1>
       </div>
+      {article.origin === "AI_ASSISTED" ? (
+        <p
+          data-testid="assistant-notice"
+          className="rounded-md border border-warning bg-surface px-4 py-3 text-sm text-ink"
+        >
+          <strong>Nota del asistente de redacción.</strong> Las fuentes están citadas al final del cuerpo. Si
+          algo no está bien, corregilo acá o pedíselo al asistente.
+        </p>
+      ) : null}
       <ArticleEditor
         // Una nota distinta es un editor nuevo, con su propio estado.
         key={article.id}

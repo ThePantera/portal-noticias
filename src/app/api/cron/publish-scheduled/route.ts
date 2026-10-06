@@ -1,7 +1,7 @@
-import { createHash, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { connection } from "next/server";
 import { ARTICLES_TAG, articleTag } from "@/lib/cache-tags";
+import { bearerMatches } from "@/server/auth/bearer";
 import { env } from "@/server/env";
 import { publishDueArticles } from "@/server/jobs/publish-scheduled";
 
@@ -17,28 +17,22 @@ async function handle(request: Request) {
   if (!env.CRON_SECRET) {
     return Response.json({ error: "CRON_SECRET no está configurado." }, { status: 503, headers });
   }
-  if (!isAuthorized(request.headers.get("authorization"), env.CRON_SECRET)) {
+  if (!bearerMatches(request.headers.get("authorization"), env.CRON_SECRET)) {
     return Response.json({ error: "No autorizado." }, { status: 401, headers });
   }
 
   try {
     const published = await publishDueArticles();
     if (published.length > 0) {
-      revalidateTag(ARTICLES_TAG, "max");
-      for (const article of published) revalidateTag(articleTag(article.id), "max");
+      // expire: 0 para que la nota programada aparezca en el primer pedido después de su hora.
+      revalidateTag(ARTICLES_TAG, { expire: 0 });
+      for (const article of published) revalidateTag(articleTag(article.id), { expire: 0 });
     }
     return Response.json({ published: published.map(({ id, slug }) => ({ id, slug })) }, { headers });
   } catch (error) {
     console.error("Publicador de programadas: falló", error);
     return Response.json({ error: "No se pudo publicar." }, { status: 500, headers });
   }
-}
-
-/** Compara en tiempo constante. Hashear antes iguala los largos, que timingSafeEqual exige. */
-function isAuthorized(header: string | null, secret: string): boolean {
-  if (!header?.startsWith("Bearer ")) return false;
-  const digest = (value: string) => createHash("sha256").update(value).digest();
-  return timingSafeEqual(digest(header.slice("Bearer ".length)), digest(secret));
 }
 
 export const GET = handle;
