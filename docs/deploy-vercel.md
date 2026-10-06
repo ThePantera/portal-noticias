@@ -142,6 +142,19 @@ Vercel borra los archivos que se suben cada vez que publica una versión nueva, 
 
 Para publicar una nota con foto hace falta completar la **descripción de la imagen** (qué se ve). La leen los lectores de pantalla y Google. El epígrafe y el crédito son opcionales.
 
+## Paso 11. Darle al asistente su llave para publicar
+
+Con esta llave, el asistente de redacción (Claude) crea, corrige, programa, publica y elimina notas por la API `/api/assistant/articles`, sin entrar al panel y sin tu contraseña. Firma como "Redacción", nunca puede iniciar sesión en `/admin` y no puede tocar usuarios. Ver [ADR 0008](adr/0008-asistente.md).
+
+1. **Inventá una llave** de al menos 32 caracteres, letras y números, sin espacios, como en el paso 8. Tiene que ser distinta de `CRON_SECRET`. No la mandes por el chat.
+2. **En Vercel**: **Settings → Environment Variables → Add**. Nombre `ASSISTANT_API_KEY` y como valor la llave, para **Production**. Guardá y hacé **Redeploy**, como en el paso 5.
+3. **En Claude**, en la configuración del proyecto, entrá a **Environment** y elegí el cloud environment que tiene permitido `portal-noticias-zeta.vercel.app`. Editalo y agregá dos variables de entorno:
+   - `ASSISTANT_API_KEY` con la misma llave.
+   - `PORTAL_URL` con la dirección del sitio, por ejemplo `https://portal-noticias-zeta.vercel.app`, sin barra al final.
+4. Avisale al asistente en el chat que ya está. Las sesiones que empiecen después de guardar el environment ya tienen la llave.
+
+Si la llave se filtra, cambiala en los dos lugares y hacé **Redeploy**: la vieja deja de funcionar en el momento. Aunque alguien la use, no puede crear más de 20 notas por día.
+
 ## De acá en adelante
 
 - **Cada merge a `main`** publica una versión nueva en producción, con las migraciones que traiga.

@@ -87,6 +87,18 @@ GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQ
 
 Páginas, panel y API → servicios (validación, permisos, transiciones, eventos) → Prisma → PostgreSQL, con un outbox de eventos (`domain_events`) que la automatización futura consume sin tocar el núcleo. Ver [ADR 0002](docs/adr/0002-capas.md) y [ADR 0006](docs/adr/0006-eventos.md).
 
+## Asistente de redacción
+
+Desde la segunda etapa, el asistente de redacción (Claude) publica por su cuenta por `/api/assistant/articles`, con `Authorization: Bearer $ASSISTANT_API_KEY`. Usa los mismos servicios que el panel, así que valida igual, respeta los estados y deja sus eventos. Firma como "Redacción", cita sus fuentes al final de cada nota y en el editor sus notas llevan un aviso. Ver [ADR 0008](docs/adr/0008-asistente.md) y el paso 11 de la [guía de deploy](docs/deploy-vercel.md).
+
+| Método   | Ruta                          | Qué hace                                                                                         |
+| -------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/assistant/articles`     | Secciones y últimas 50 notas                                                                     |
+| `POST`   | `/api/assistant/articles`     | Crea una nota; con `action: "publish"` o `"schedule"` (+ `scheduledAt`) la publica o la programa |
+| `GET`    | `/api/assistant/articles/:id` | La nota completa                                                                                 |
+| `PATCH`  | `/api/assistant/articles/:id` | Corrige los campos que vengan; `action` también acepta `"unpublish"` y `"archive"`               |
+| `DELETE` | `/api/assistant/articles/:id` | La elimina (si está publicada o programada, la archiva antes)                                    |
+
 ## Futuras automatizaciones
 
-Fuentes → ingesta → normalización → deduplicación → clasificación → IA → borrador → **revisión humana** → programación → publicación → distribución. La IA nunca publica: todo lo que genera entra como borrador. Ver la sección 11 de la propuesta.
+Fuentes → ingesta → normalización → deduplicación → clasificación → IA → redacción → programación → publicación → distribución. En la primera etapa todo entraba como borrador para revisión humana; desde el 6 de octubre de 2026 Manu habilitó que el asistente publique solo (ADR 0008).

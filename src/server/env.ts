@@ -16,6 +16,15 @@ const schema = z.object({
     .optional()
     .transform((v) => v || undefined)
     .refine((v) => v === undefined || v.length >= 32, "Tiene que tener al menos 32 caracteres."),
+  /**
+   * Llave del asistente de redacción para /api/assistant/articles (ADR 0008): crea, edita,
+   * publica, programa y elimina notas. Vacío: la API responde 503.
+   */
+  ASSISTANT_API_KEY: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined)
+    .refine((v) => v === undefined || v.length >= 32, "Tiene que tener al menos 32 caracteres."),
   /** Código de Google Search Console (método "Etiqueta HTML"). Opcional. */
   GOOGLE_SITE_VERIFICATION: z.string().optional().transform(parseGoogleVerification),
   /**
