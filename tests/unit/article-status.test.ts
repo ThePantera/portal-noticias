@@ -7,6 +7,7 @@ describe("estados de nota", () => {
     for (const status of ARTICLE_STATUSES) {
       expect(ARTICLE_STATUS[status].label).toBeTruthy();
       expect(ARTICLE_STATUS[status].description).toBeTruthy();
+      expect(ARTICLE_STATUS[status].plural).toMatch(/s$/);
     }
   });
 

@@ -104,6 +104,19 @@ El administrador ya existe y la contraseña quedó guardada como hash en la base
 
 `ADMIN_EMAIL` y `ADMIN_NAME` pueden quedar; no tienen nada secreto.
 
+## Paso 8. Activar la publicación automática de notas programadas
+
+Cuando programás una nota, la publica un proceso que corre cada 5 minutos desde GitHub. Vercel en el plan gratis sólo permite tareas una vez por día, por eso se usa GitHub Actions, que es gratis para esto. Mientras no hagas este paso, las notas programadas no salen solas, y el tablero te avisa cuando alguna se pasó de hora.
+
+1. **Inventá un secreto** de al menos 32 caracteres, letras y números, sin espacios. Lo más simple es pedirle una contraseña larga al generador de tu navegador o de tu gestor de contraseñas. No lo compartas con nadie, tampoco en el chat.
+2. **En Vercel**: **Settings → Environment Variables → Add**. Nombre `CRON_SECRET` y como valor el secreto, para **Production**. Guardá y hacé **Redeploy** del último deploy, como en el paso 5.
+3. **En GitHub**, en el repositorio `portal-noticias`: **Settings → Secrets and variables → Actions**.
+   - En la pestaña **Secrets**, tocá **"New repository secret"**: nombre `CRON_SECRET` y el mismo valor.
+   - En la pestaña **Variables**, tocá **"New repository variable"**: nombre `SITE_URL` y como valor la dirección del sitio, por ejemplo `https://portal-noticias-xxxx.vercel.app`, sin barra al final.
+4. **Probalo**: en GitHub, pestaña **Actions → "Publicar notas programadas" → "Run workflow"**. En unos segundos tiene que terminar en verde, y en su log vas a ver `{"published":[]}`, o la lista de notas que publicó.
+
+GitHub puede atrasar estas ejecuciones unos minutos en horas de mucha carga, así que una nota programada a las 9:00 puede salir a las 9:05 o un poco después. La fecha de publicación que se muestra es siempre la que programaste.
+
 ## De acá en adelante
 
 - **Cada merge a `main`** publica una versión nueva en producción, con las migraciones que traiga.
@@ -112,9 +125,10 @@ El administrador ya existe y la contraseña quedó guardada como hash en la base
 
 ## Si algo sale mal
 
-| Qué ves en el log o en el sitio                                                    | Qué significa y qué hacer                                                                                                                                                     |
-| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `La base no tiene administrador. Definí ADMIN_EMAIL, ADMIN_NAME y ADMIN_PASSWORD…` | Falta alguna de las tres variables, o la contraseña tiene menos de 12 caracteres. Agregalas en **Settings → Environment Variables** y hacé **Redeploy**.                      |
-| Error de Prisma sobre la URL o la conexión a la base                               | La base no está conectada al proyecto: repetí el paso 3. Si en **Environment Variables** la base aparece con otros nombres (por ejemplo `POSTGRES_URL`), avisame y lo ajusto. |
-| `/api/health` responde `503`                                                       | La aplicación anda pero no llega a la base. Revisá en Neon que la base no esté suspendida o borrada.                                                                          |
-| El login dice "Email o contraseña incorrectos"                                     | Revisá la contraseña. Si la perdiste, avisame y te paso cómo cambiarla. Después de 5 intentos fallidos el login se bloquea 15 minutos.                                        |
+| Qué ves en el log o en el sitio                                                    | Qué significa y qué hacer                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `La base no tiene administrador. Definí ADMIN_EMAIL, ADMIN_NAME y ADMIN_PASSWORD…` | Falta alguna de las tres variables, o la contraseña tiene menos de 12 caracteres. Agregalas en **Settings → Environment Variables** y hacé **Redeploy**.                                                                                                                              |
+| Error de Prisma sobre la URL o la conexión a la base                               | La base no está conectada al proyecto: repetí el paso 3. Si en **Environment Variables** la base aparece con otros nombres (por ejemplo `POSTGRES_URL`), avisame y lo ajusto.                                                                                                         |
+| Las notas programadas no salen solas                                               | Falta el paso 8, o `CRON_SECRET` no es igual en Vercel y en GitHub. En **GitHub → Actions → "Publicar notas programadas"** el log de la última ejecución dice qué pasó: `No autorizado` es un secreto distinto, y `Falta CRON_SECRET o SITE_URL` es que falta configurarlo en GitHub. |
+| `/api/health` responde `503`                                                       | La aplicación anda pero no llega a la base. Revisá en Neon que la base no esté suspendida o borrada.                                                                                                                                                                                  |
+| El login dice "Email o contraseña incorrectos"                                     | Revisá la contraseña. Si la perdiste, avisame y te paso cómo cambiarla. Después de 5 intentos fallidos el login se bloquea 15 minutos.                                                                                                                                                |

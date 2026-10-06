@@ -11,9 +11,19 @@ async function AuthenticatedShell({ children }: { children: React.ReactNode }) {
     <>
       <header className="border-b border-rule bg-surface">
         <div className="mx-auto flex max-w-site flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-8">
-          <Link href="/admin" className="font-display text-xl font-bold">
-            {env.SITE_NAME} <span className="ml-1 kicker">Panel</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link href="/admin" className="font-display text-xl font-bold">
+              {env.SITE_NAME} <span className="ml-1 kicker">Panel</span>
+            </Link>
+            <nav aria-label="Panel" className="flex gap-4 text-sm font-semibold">
+              <Link href="/admin" className="text-ink-muted hover:text-ink">
+                Tablero
+              </Link>
+              <Link href="/admin/notas" className="text-ink-muted hover:text-ink">
+                Notas
+              </Link>
+            </nav>
+          </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-ink-muted">{user.name}</span>
             <a href="/" target="_blank" rel="noreferrer" className="text-ink-muted hover:text-ink">

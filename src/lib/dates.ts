@@ -33,3 +33,45 @@ export function formatDate(value: Date): string {
 export function toIsoString(value: Date): string {
   return value.toISOString();
 }
+
+const parts = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: TIME_ZONE,
+});
+
+/** Fecha y hora de pared en la zona del portal, como pide `<input type="datetime-local">`: "2026-10-07T09:30". */
+export function toDateTimeInputValue(value: Date): string {
+  const p = Object.fromEntries(parts.formatToParts(value).map((part) => [part.type, part.value]));
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
+}
+
+const DATETIME_LOCAL = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+
+/**
+ * Interpreta "2026-10-07T09:30" como hora de Buenos Aires, sin importar la zona del
+ * servidor (Vercel corre en UTC). Devuelve null si el texto no es una fecha válida.
+ */
+export function parseDateTimeInput(value: string): Date | null {
+  const match = DATETIME_LOCAL.exec(value.trim());
+  if (!match) return null;
+  const [, y, mo, d, h, mi] = match.map(Number);
+  const asUtc = Date.UTC(y, mo - 1, d, h, mi);
+  // Corrimiento de la zona en ese instante; se recalcula una vez por si cae en un cambio de horario.
+  let guess = asUtc - offsetMs(new Date(asUtc));
+  guess = asUtc - offsetMs(new Date(guess));
+  const result = new Date(guess);
+  // Rechaza fechas imposibles como 31/02, que Date.UTC acomoda en silencio.
+  return toDateTimeInputValue(result) === value.trim() ? result : null;
+}
+
+function offsetMs(instant: Date): number {
+  const p = Object.fromEntries(parts.formatToParts(instant).map((part) => [part.type, Number(part.value)]));
+  return (
+    Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - Math.floor(instant.getTime() / 60_000) * 60_000
+  );
+}

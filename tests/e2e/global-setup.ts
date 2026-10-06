@@ -4,6 +4,8 @@ import "dotenv/config";
 import pg from "pg";
 
 export const ADMIN = { email: "e2e@portal.test", name: "Editora E2E", password: "contraseña-e2e-larga" };
+/** Secreto del publicador para el servidor de los tests (no es un secreto real). */
+export const E2E_CRON_SECRET = "e2e-cron-secret-de-prueba-0123456789abcdef";
 
 export default async function globalSetup() {
   const url = process.env.E2E_DATABASE_URL;
