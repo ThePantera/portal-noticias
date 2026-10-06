@@ -1,7 +1,7 @@
 import "server-only";
 import type { $Enums } from "@/generated/prisma/client";
 import { db } from "@/server/db";
-import type { AdminArticleRow } from "@/types/admin";
+import type { AdminArticleRow, CategoryOption, EditableArticle } from "@/types/admin";
 import type { ArticleOrigin, ArticleStatus, Role } from "@/types/article";
 
 // Los tipos de dominio (src/types/article.ts) tienen que coincidir con los enums del esquema.
@@ -54,4 +54,89 @@ export async function listRecentArticles(limit = 8): Promise<AdminArticleRow[]> 
     categoryName: category.name,
     authorName: author.name,
   }));
+}
+
+export const ADMIN_PAGE_SIZE = 20;
+
+export type ArticleListFilter = { status?: ArticleStatus; q?: string; page?: number };
+
+/** Listado del panel con filtro por estado, búsqueda por título y paginado. */
+export async function listArticles({ status, q, page = 1 }: ArticleListFilter) {
+  const where = {
+    ...(status ? { status } : {}),
+    ...(q ? { title: { contains: q, mode: "insensitive" as const } } : {}),
+  };
+  const safePage = Math.max(1, Math.floor(page));
+  const [total, articles] = await Promise.all([
+    db.article.count({ where }),
+    db.article.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (safePage - 1) * ADMIN_PAGE_SIZE,
+      take: ADMIN_PAGE_SIZE,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        publishedAt: true,
+        scheduledAt: true,
+        updatedAt: true,
+        category: { select: { name: true } },
+        author: { select: { name: true } },
+      },
+    }),
+  ]);
+  const rows: AdminArticleRow[] = articles.map(({ category, author, ...rest }) => ({
+    ...rest,
+    categoryName: category.name,
+    authorName: author.name,
+  }));
+  return { rows, total, page: safePage, pageCount: Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE)) };
+}
+
+/** Todo lo que el editor necesita para abrir una nota. */
+export async function getArticleForEdit(id: string): Promise<EditableArticle | null> {
+  const article = await db.article.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      content: true,
+      status: true,
+      origin: true,
+      featuredRank: true,
+      seoTitle: true,
+      seoDescription: true,
+      categoryId: true,
+      authorId: true,
+      publishedAt: true,
+      scheduledAt: true,
+      updatedAt: true,
+      readingTimeMinutes: true,
+      tags: { select: { tag: { select: { name: true } } }, orderBy: { tag: { name: "asc" } } },
+      author: { select: { name: true } },
+      category: { select: { name: true, slug: true } },
+    },
+  });
+  if (!article) return null;
+  const { tags, author, category, content, ...rest } = article;
+  return {
+    ...rest,
+    content: content as EditableArticle["content"],
+    tags: tags.map((t) => t.tag.name),
+    authorName: author.name,
+    categoryName: category.name,
+    categorySlug: category.slug,
+  };
+}
+
+/** Categorías para el selector del editor: activas primero, en el orden de la navegación. */
+export function listCategoryOptions(): Promise<CategoryOption[]> {
+  return db.category.findMany({
+    orderBy: [{ isActive: "desc" }, { sortOrder: "asc" }],
+    select: { id: true, name: true, isActive: true },
+  });
 }

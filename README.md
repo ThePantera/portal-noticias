@@ -43,6 +43,7 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 | `npm run db:validate` / `db:migrate` / `db:deploy` | Prisma: validar, crear migración en desarrollo, aplicar en producción                  |
 | `npm run db:seed` / `db:seed:demo`                 | Categorías iniciales / notas de ejemplo (idempotentes)                                 |
 | `npm run db:bootstrap`                             | Base vacía: categorías y administrador desde `ADMIN_*` (corre en cada deploy)          |
+| `npm run jobs:publish-scheduled`                   | Publica las notas programadas vencidas (lo mismo que hace el cron)                     |
 
 ## Base de datos
 

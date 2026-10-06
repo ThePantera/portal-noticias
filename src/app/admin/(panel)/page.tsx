@@ -37,9 +37,8 @@ async function Dashboard() {
           {overdue === 1
             ? "Hay 1 nota programada cuya hora ya pasó y sigue sin publicarse."
             : `Hay ${overdue} notas programadas cuya hora ya pasó y siguen sin publicarse.`}{" "}
-          {/* El publicador automático llega con el CRUD de notas; hasta entonces el aviso
-              no debe mandar a revisar un servicio que todavía no existe. */}
-          La publicación automática de notas programadas todavía no está activa.
+          El publicador automático corre cada 5 minutos: si el aviso sigue, revisá que esté configurado (paso
+          8 de la guía de deploy).
         </p>
       ) : null}
 

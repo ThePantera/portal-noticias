@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { defineConfig, devices } from "@playwright/test";
+import { E2E_CRON_SECRET } from "./tests/e2e/global-setup";
 
 /**
  * Tests end to end contra el build de producción. Usan E2E_DATABASE_URL (una base
@@ -39,6 +40,7 @@ export default defineConfig({
       DATABASE_URL: process.env.E2E_DATABASE_URL ?? "",
       SITE_URL: baseURL,
       SITE_NAME: "Portal Noticias",
+      CRON_SECRET: E2E_CRON_SECRET,
     },
   },
 });
