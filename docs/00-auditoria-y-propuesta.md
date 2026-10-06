@@ -6,12 +6,12 @@ Fecha: 6 de octubre de 2026. Estado de cada afirmación: **VERIFICADO** (se ejec
 
 ## 1. Auditoría del proyecto actual
 
-| Qué se revisó | Resultado |
-|---|---|
-| Repositorios de GitHub de `ThePantera` (10 repos) | Ninguno es un portal de noticias. Los más recientes son `mi-portfolio`, `BarberiaPOS`, `ManuPrestamos`, `aura-luxury*`, `LUXERY-PERFUM*`. **VERIFICADO** con el listado de repos. |
-| Carpeta compartida del proyecto | Vacía antes de esta fase. **VERIFICADO**. |
-| Carpetas del dispositivo del usuario | No hay ninguna carpeta conectada a este proyecto. **VERIFICADO**. |
-| `package.json`, configuración, `.env`, rutas, backend, base de datos, scripts | No existen: no hay código previo. |
+| Qué se revisó                                                                 | Resultado                                                                                                                                                                         |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Repositorios de GitHub de `ThePantera` (10 repos)                             | Ninguno es un portal de noticias. Los más recientes son `mi-portfolio`, `BarberiaPOS`, `ManuPrestamos`, `aura-luxury*`, `LUXERY-PERFUM*`. **VERIFICADO** con el listado de repos. |
+| Carpeta compartida del proyecto                                               | Vacía antes de esta fase. **VERIFICADO**.                                                                                                                                         |
+| Carpetas del dispositivo del usuario                                          | No hay ninguna carpeta conectada a este proyecto. **VERIFICADO**.                                                                                                                 |
+| `package.json`, configuración, `.env`, rutas, backend, base de datos, scripts | No existen: no hay código previo.                                                                                                                                                 |
 
 **Conclusión:** se parte de cero. No hay código que preservar ni riesgo de sobrescribir nada. La regla de "no destruir" aplica desde ahora sobre lo que se vaya construyendo.
 
@@ -31,19 +31,19 @@ Todo el producto: base Next.js, autenticación, panel, CRUD, editor, media, fron
 
 ## 4. Stack propuesto
 
-| Capa | Elección | Por qué |
-|---|---|---|
-| Framework | **Next.js 16 (App Router) + React 19 + TypeScript estricto** | SSR/ISR para SEO y velocidad, Server Components para mandar poco JavaScript al lector, Route Handlers y Server Actions para el backend sin un servidor aparte. |
-| Base de datos | **PostgreSQL 16** | Relacional, robusta, con búsqueda de texto completo en español incorporada (evita sumar Elasticsearch/Algolia en el MVP). |
-| ORM | **Prisma 7.10** (última estable; la etiqueta `latest` de npm apunta a una 8.0 RC, que descarto) | Esquema tipado, migraciones versionadas, cliente generado. |
-| Estilos | **Tailwind CSS v4** alimentado por tokens CSS propios | Sin hojas de estilo sueltas; los tokens viven en un único archivo y Tailwind los expone. |
-| Editor | **Tiptap 3** (sobre ProseMirror) | Editor estructurado: guarda JSON, no HTML libre. Eso permite renderizar seguro y procesar contenido con IA más adelante. |
-| Autenticación | **Sesiones propias en base de datos + argon2id** (`@node-rs/argon2`) | Ver punto 8. |
-| Validación | **Zod 4** | Un esquema por entrada, compartido entre formulario y servidor. |
-| Imágenes | **sharp** | Validación real del archivo, redimensionado y WebP/AVIF. |
-| Tests | **Vitest** (unitarios e integración contra PostgreSQL real) + **Playwright** (end to end) | Ver Fase 10. |
-| Calidad | ESLint + Prettier + `tsc --noEmit` | Se corren en cada verificación y en CI. |
-| Local | Docker Compose para PostgreSQL | Mismo motor en desarrollo y producción. |
+| Capa          | Elección                                                                                        | Por qué                                                                                                                                                        |
+| ------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework     | **Next.js 16 (App Router) + React 19 + TypeScript estricto**                                    | SSR/ISR para SEO y velocidad, Server Components para mandar poco JavaScript al lector, Route Handlers y Server Actions para el backend sin un servidor aparte. |
+| Base de datos | **PostgreSQL 16**                                                                               | Relacional, robusta, con búsqueda de texto completo en español incorporada (evita sumar Elasticsearch/Algolia en el MVP).                                      |
+| ORM           | **Prisma 7.10** (última estable; la etiqueta `latest` de npm apunta a una 8.0 RC, que descarto) | Esquema tipado, migraciones versionadas, cliente generado.                                                                                                     |
+| Estilos       | **Tailwind CSS v4** alimentado por tokens CSS propios                                           | Sin hojas de estilo sueltas; los tokens viven en un único archivo y Tailwind los expone.                                                                       |
+| Editor        | **Tiptap 3** (sobre ProseMirror)                                                                | Editor estructurado: guarda JSON, no HTML libre. Eso permite renderizar seguro y procesar contenido con IA más adelante.                                       |
+| Autenticación | **Sesiones propias en base de datos + argon2id** (`@node-rs/argon2`)                            | Ver punto 8.                                                                                                                                                   |
+| Validación    | **Zod 4**                                                                                       | Un esquema por entrada, compartido entre formulario y servidor.                                                                                                |
+| Imágenes      | **sharp**                                                                                       | Validación real del archivo, redimensionado y WebP/AVIF.                                                                                                       |
+| Tests         | **Vitest** (unitarios e integración contra PostgreSQL real) + **Playwright** (end to end)       | Ver Fase 10.                                                                                                                                                   |
+| Calidad       | ESLint + Prettier + `tsc --noEmit`                                                              | Se corren en cada verificación y en CI.                                                                                                                        |
+| Local         | Docker Compose para PostgreSQL                                                                  | Mismo motor en desarrollo y producción.                                                                                                                        |
 
 Dependencias que **no** agrego: NextAuth/Auth.js (ver punto 8), un CMS headless (el panel propio es parte del producto), Redux u otro manejo de estado global (no hace falta), librerías de componentes completas (el diseño es propio).
 
@@ -77,18 +77,18 @@ Decisiones detalladas en `docs/adr/`.
 
 Archivo: `prisma/schema.prisma`. Migración: `prisma/migrations/20261006123311_init/`.
 
-| Tabla | Para qué |
-|---|---|
-| `users` | Usuarios con `role` (ADMIN, EDITOR, AUTHOR, CONTRIBUTOR). En el MVP sólo hay un ADMIN. |
-| `sessions` | Sesiones de servidor; el id es el hash SHA-256 del token de la cookie. |
-| `login_attempts` | Límite de intentos por email e IP. |
-| `categories` | Configurables desde el panel: nombre, slug, orden, visible en menú, SEO. |
-| `tags` + `article_tags` | Etiquetas N a N. |
-| `articles` | Nota: título, slug, bajada, contenido (JSON del editor) y su texto plano, estado, origen, tiempo de lectura, rango de destacada, SEO, imagen principal y OG, fechas de creación, actualización, publicación, programación y archivo. |
-| `article_media` | Imágenes adicionales ordenadas (galería). |
-| `article_slug_history` | Slugs anteriores para redirigir con 301 si cambia el título de una nota publicada. |
-| `media` | Imágenes: proveedor de almacenamiento, clave, tipo, peso, dimensiones, alt, epígrafe, crédito y variantes. |
-| `domain_events` | Outbox de eventos para la automatización futura. |
+| Tabla                   | Para qué                                                                                                                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `users`                 | Usuarios con `role` (ADMIN, EDITOR, AUTHOR, CONTRIBUTOR). En el MVP sólo hay un ADMIN.                                                                                                                                               |
+| `sessions`              | Sesiones de servidor; el id es el hash SHA-256 del token de la cookie.                                                                                                                                                               |
+| `login_attempts`        | Límite de intentos por email e IP.                                                                                                                                                                                                   |
+| `categories`            | Configurables desde el panel: nombre, slug, orden, visible en menú, SEO.                                                                                                                                                             |
+| `tags` + `article_tags` | Etiquetas N a N.                                                                                                                                                                                                                     |
+| `articles`              | Nota: título, slug, bajada, contenido (JSON del editor) y su texto plano, estado, origen, tiempo de lectura, rango de destacada, SEO, imagen principal y OG, fechas de creación, actualización, publicación, programación y archivo. |
+| `article_media`         | Imágenes adicionales ordenadas (galería).                                                                                                                                                                                            |
+| `article_slug_history`  | Slugs anteriores para redirigir con 301 si cambia el título de una nota publicada.                                                                                                                                                   |
+| `media`                 | Imágenes: proveedor de almacenamiento, clave, tipo, peso, dimensiones, alt, epígrafe, crédito y variantes.                                                                                                                           |
+| `domain_events`         | Outbox de eventos para la automatización futura.                                                                                                                                                                                     |
 
 Detalles que importan:
 
@@ -169,15 +169,15 @@ portal-noticias/
 
 **Eventos (implementación en Fase 6, contrato definido ahora):**
 
-| Evento | Cuándo |
-|---|---|
-| `ARTICLE_CREATED` | Se crea una nota (cualquier origen). |
-| `ARTICLE_UPDATED` | Cambia el contenido o los metadatos. |
-| `ARTICLE_SCHEDULED` | Pasa a SCHEDULED con fecha futura. |
-| `ARTICLE_PUBLISHED` | Pasa a PUBLISHED (manual o por programación). |
-| `ARTICLE_UNPUBLISHED` | Vuelve de PUBLISHED a DRAFT. |
-| `ARTICLE_ARCHIVED` | Pasa a ARCHIVED. |
-| `ARTICLE_DELETED` | Se elimina. |
+| Evento                | Cuándo                                        |
+| --------------------- | --------------------------------------------- |
+| `ARTICLE_CREATED`     | Se crea una nota (cualquier origen).          |
+| `ARTICLE_UPDATED`     | Cambia el contenido o los metadatos.          |
+| `ARTICLE_SCHEDULED`   | Pasa a SCHEDULED con fecha futura.            |
+| `ARTICLE_PUBLISHED`   | Pasa a PUBLISHED (manual o por programación). |
+| `ARTICLE_UNPUBLISHED` | Vuelve de PUBLISHED a DRAFT.                  |
+| `ARTICLE_ARCHIVED`    | Pasa a ARCHIVED.                              |
+| `ARTICLE_DELETED`     | Se elimina.                                   |
 
 - El servicio de notas escribe el cambio y su evento **en la misma transacción** (outbox). Si la transacción falla, no queda un evento fantasma; si se confirma, el evento no se pierde.
 - Un **despachador** (`server/events/dispatcher.ts`) lee eventos sin procesar y llama a los manejadores registrados, con reintentos (`attempts`, `lastError`). En el MVP no hay manejadores externos: sólo se invalida la caché. Sumar Telegram significa escribir un manejador para `ARTICLE_PUBLISHED`, sin tocar el servicio de notas.
@@ -187,45 +187,45 @@ portal-noticias/
 
 ## 12. Roadmap
 
-| Fase | Contenido | Criterio de terminado (verificado) |
-|---|---|---|
-| 0 | Auditoría | Este documento. **Hecha.** |
-| 1 | Arquitectura + diseño | ADRs, esquema validado, tokens, propuesta visual revisada en 3 tamaños. **Hecha.** |
-| 2 | Base del proyecto | Next.js + TS + Tailwind con tokens, ESLint/Prettier, Docker Compose, `.env.example`, CI de GitHub Actions. `build`, `lint` y `typecheck` en verde. |
-| 3 | Base de datos | Migración aplicada, cliente Prisma, seed con las 10 categorías y notas de ejemplo. Tests de integración contra PostgreSQL. |
-| 4 | Autenticación | Login, logout, rate limit, `requireUser`/`can`, `admin:create`. Tests: contraseña incorrecta, sesión vencida, acceso sin sesión a cada ruta de admin. |
-| 5 | Panel | Layout del admin y dashboard con conteos por estado y acciones rápidas. |
-| 6 | CRUD de notas | Formulario con Tiptap, slug, categoría, tags, imágenes, SEO, borrador, programar, publicar, despublicar, archivar y eliminar, más outbox. Tests de cada transición. |
-| 7 | Frontend público | Portada editorial, nota, categoría, tag, búsqueda, relacionadas y compartir. Estados vacíos y 404. |
-| 8 | SEO | Metadatos, JSON-LD, sitemaps y robots, verificados sobre el HTML generado. |
-| 9 | Responsive + UX | Revisión con Playwright en 390, 820 y 1440 px, en ambos temas. |
-| 10 | Testing + seguridad | Recorrido E2E completo de los 18 pasos del resultado esperado, auditoría de dependencias, cabeceras CSP. |
-| 11 | Optimización | Lighthouse y Core Web Vitals, AVIF, ajuste de caché. |
-| 12 | Preparación para automatización | Despachador de eventos con reintentos, cron de publicación en producción, documentación del pipeline. |
+| Fase | Contenido                       | Criterio de terminado (verificado)                                                                                                                                  |
+| ---- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Auditoría                       | Este documento. **Hecha.**                                                                                                                                          |
+| 1    | Arquitectura + diseño           | ADRs, esquema validado, tokens, propuesta visual revisada en 3 tamaños. **Hecha.**                                                                                  |
+| 2    | Base del proyecto               | Next.js + TS + Tailwind con tokens, ESLint/Prettier, Docker Compose, `.env.example`, CI de GitHub Actions. `build`, `lint` y `typecheck` en verde.                  |
+| 3    | Base de datos                   | Migración aplicada, cliente Prisma, seed con las 10 categorías y notas de ejemplo. Tests de integración contra PostgreSQL.                                          |
+| 4    | Autenticación                   | Login, logout, rate limit, `requireUser`/`can`, `admin:create`. Tests: contraseña incorrecta, sesión vencida, acceso sin sesión a cada ruta de admin.               |
+| 5    | Panel                           | Layout del admin y dashboard con conteos por estado y acciones rápidas.                                                                                             |
+| 6    | CRUD de notas                   | Formulario con Tiptap, slug, categoría, tags, imágenes, SEO, borrador, programar, publicar, despublicar, archivar y eliminar, más outbox. Tests de cada transición. |
+| 7    | Frontend público                | Portada editorial, nota, categoría, tag, búsqueda, relacionadas y compartir. Estados vacíos y 404.                                                                  |
+| 8    | SEO                             | Metadatos, JSON-LD, sitemaps y robots, verificados sobre el HTML generado.                                                                                          |
+| 9    | Responsive + UX                 | Revisión con Playwright en 390, 820 y 1440 px, en ambos temas.                                                                                                      |
+| 10   | Testing + seguridad             | Recorrido E2E completo de los 18 pasos del resultado esperado, auditoría de dependencias, cabeceras CSP.                                                            |
+| 11   | Optimización                    | Lighthouse y Core Web Vitals, AVIF, ajuste de caché.                                                                                                                |
+| 12   | Preparación para automatización | Despachador de eventos con reintentos, cron de publicación en producción, documentación del pipeline.                                                               |
 
 ## Riesgos
 
-| Riesgo | Impacto | Mitigación |
-|---|---|---|
-| Desplegar en Vercel con almacenamiento local | Las imágenes subidas se pierden en cada despliegue | Usar un VPS con Docker y disco persistente, o el `S3Driver` (R2/S3) desde el primer despliegue. **Decisión pendiente del propietario.** |
-| Las notas programadas dependen de un cron externo | Si el cron no corre, la nota no sale a horario | Endpoint idempotente, alerta si hay notas SCHEDULED vencidas hace más de 5 minutos y contador en el dashboard. |
-| XSS a través del contenido del editor | Robo de la sesión del administrador | Se guarda JSON y se renderiza desde una lista cerrada de nodos; los enlaces aceptan sólo `http`, `https` y `mailto`; los embeds se limitan a proveedores permitidos; cabecera CSP. |
-| Contenido de ingesta o IA con errores | Daño reputacional | Regla de revisión humana obligatoria, aplicada en el servicio y no sólo en la interfaz. |
-| Versiones muy nuevas (Next 16, Prisma 7, Tailwind 4, Vitest 5) | Cambios de API o errores tempranos | Fijar versiones exactas en `package.json`, usar el lockfile y no adoptar versiones RC. |
-| Un único administrador | Si pierde la contraseña, no puede entrar | `npm run admin:reset-password` desde el servidor. |
+| Riesgo                                                         | Impacto                                            | Mitigación                                                                                                                                                                         |
+| -------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Desplegar en Vercel con almacenamiento local                   | Las imágenes subidas se pierden en cada despliegue | Usar un VPS con Docker y disco persistente, o el `S3Driver` (R2/S3) desde el primer despliegue. **Decisión pendiente del propietario.**                                            |
+| Las notas programadas dependen de un cron externo              | Si el cron no corre, la nota no sale a horario     | Endpoint idempotente, alerta si hay notas SCHEDULED vencidas hace más de 5 minutos y contador en el dashboard.                                                                     |
+| XSS a través del contenido del editor                          | Robo de la sesión del administrador                | Se guarda JSON y se renderiza desde una lista cerrada de nodos; los enlaces aceptan sólo `http`, `https` y `mailto`; los embeds se limitan a proveedores permitidos; cabecera CSP. |
+| Contenido de ingesta o IA con errores                          | Daño reputacional                                  | Regla de revisión humana obligatoria, aplicada en el servicio y no sólo en la interfaz.                                                                                            |
+| Versiones muy nuevas (Next 16, Prisma 7, Tailwind 4, Vitest 5) | Cambios de API o errores tempranos                 | Fijar versiones exactas en `package.json`, usar el lockfile y no adoptar versiones RC.                                                                                             |
+| Un único administrador                                         | Si pierde la contraseña, no puede entrar           | `npm run admin:reset-password` desde el servidor.                                                                                                                                  |
 
 ---
 
 ## Fase 1 entregada: qué se hizo y cómo se verificó
 
-| Entregable | Estado | Evidencia |
-|---|---|---|
-| `prisma/schema.prisma` (11 tablas, 3 enums, índices) | **VERIFICADO** | `prisma validate`: "The schema is valid". |
-| Migración inicial con búsqueda en español | **VERIFICADO** | `prisma migrate deploy` aplicada en un PostgreSQL 16 limpio; 12 tablas (las 11 del modelo más la de control de Prisma); extensión `unaccent` activa. |
-| Sin diferencias entre esquema y base | **VERIFICADO** | `prisma migrate diff` entre la base migrada y el esquema: "This is an empty migration". |
-| Búsqueda de texto completo | **VERIFICADO** con SQL sobre datos de prueba (luego revertidos): "economica" sin acento encuentra "económicas"; "medida" encuentra "medidas" (raíz); "inflacion" encuentra texto del cuerpo; tras un `UPDATE` del título el trigger actualiza el índice; el título pesa más que el cuerpo. |
-| Tokens de diseño `src/styles/tokens.css` (claro y oscuro) | **VERIFICADO** | Contraste WCAG medido: tinta 16.4:1, secundaria 6.9:1, terciaria 5.1:1, acento 7.1:1, rojo "En vivo" 5.4:1 en tema claro. En tema oscuro, todos por encima de 6:1. La tinta terciaria original (4.3:1) no pasaba AA y la corregí. |
-| Propuesta visual `docs/design/preview.html` | **VERIFICADO** | Playwright en 1440, 820 y 390 px, temas claro y oscuro: sin scroll horizontal, sin errores de consola y fuentes cargadas. Revisé las capturas. |
-| ADRs `docs/adr/0001` a `0007` | **IMPLEMENTADO** (documentación) | |
-| README inicial, `.env.example`, `.gitignore` | **IMPLEMENTADO** | |
-| Aplicación Next.js, auth, panel, frontend | **PENDIENTE** | Fases 2 a 12. |
+| Entregable                                                | Estado                                                                                                                                                                                                                                                                                     | Evidencia                                                                                                                                                                                                                         |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prisma/schema.prisma` (11 tablas, 3 enums, índices)      | **VERIFICADO**                                                                                                                                                                                                                                                                             | `prisma validate`: "The schema is valid".                                                                                                                                                                                         |
+| Migración inicial con búsqueda en español                 | **VERIFICADO**                                                                                                                                                                                                                                                                             | `prisma migrate deploy` aplicada en un PostgreSQL 16 limpio; 12 tablas (las 11 del modelo más la de control de Prisma); extensión `unaccent` activa.                                                                              |
+| Sin diferencias entre esquema y base                      | **VERIFICADO**                                                                                                                                                                                                                                                                             | `prisma migrate diff` entre la base migrada y el esquema: "This is an empty migration".                                                                                                                                           |
+| Búsqueda de texto completo                                | **VERIFICADO** con SQL sobre datos de prueba (luego revertidos): "economica" sin acento encuentra "económicas"; "medida" encuentra "medidas" (raíz); "inflacion" encuentra texto del cuerpo; tras un `UPDATE` del título el trigger actualiza el índice; el título pesa más que el cuerpo. |
+| Tokens de diseño `src/styles/tokens.css` (claro y oscuro) | **VERIFICADO**                                                                                                                                                                                                                                                                             | Contraste WCAG medido: tinta 16.4:1, secundaria 6.9:1, terciaria 5.1:1, acento 7.1:1, rojo "En vivo" 5.4:1 en tema claro. En tema oscuro, todos por encima de 6:1. La tinta terciaria original (4.3:1) no pasaba AA y la corregí. |
+| Propuesta visual `docs/design/preview.html`               | **VERIFICADO**                                                                                                                                                                                                                                                                             | Playwright en 1440, 820 y 390 px, temas claro y oscuro: sin scroll horizontal, sin errores de consola y fuentes cargadas. Revisé las capturas.                                                                                    |
+| ADRs `docs/adr/0001` a `0007`                             | **IMPLEMENTADO** (documentación)                                                                                                                                                                                                                                                           |                                                                                                                                                                                                                                   |
+| README inicial, `.env.example`, `.gitignore`              | **IMPLEMENTADO**                                                                                                                                                                                                                                                                           |                                                                                                                                                                                                                                   |
+| Aplicación Next.js, auth, panel, frontend                 | **PENDIENTE**                                                                                                                                                                                                                                                                              | Fases 2 a 12.                                                                                                                                                                                                                     |

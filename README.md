@@ -2,39 +2,60 @@
 
 Portal de noticias digital con panel de administración propio, preparado para evolucionar hacia la ingesta automática, la asistencia con IA (siempre con revisión humana) y la distribución por eventos.
 
-> **Estado:** Fase 1 (arquitectura y diseño) terminada. La aplicación todavía no existe; se construye en las Fases 2 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
+> **Estado:** Fase 2 (base del proyecto). Hay una aplicación que compila y corre, todavía sin base de datos conectada, autenticación ni contenido. Las Fases 3 a 12 completan el producto. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
 
 ## Stack
+
 Next.js 16 · React 19 · TypeScript · PostgreSQL 16 · Prisma 7 · Tailwind CSS 4 · Tiptap 3 · Zod · sharp · Vitest · Playwright. Justificación en [ADR 0001](docs/adr/0001-stack.md).
 
-## Qué hay hoy
-| Ruta | Contenido |
-|---|---|
-| `docs/00-auditoria-y-propuesta.md` | Auditoría, stack, arquitectura, modelo de datos, carpetas, auth, imágenes, SEO, automatización, roadmap y riesgos |
-| `docs/adr/` | Decisiones de arquitectura |
-| `docs/design/` | Identidad visual y vista previa HTML |
-| `prisma/schema.prisma` | Modelo de datos (validado) |
-| `prisma/migrations/` | Migración inicial con búsqueda en español |
-| `src/styles/tokens.css` | Tokens de diseño en claro y oscuro |
+## Requisitos
 
-## Base de datos (disponible desde ya)
-Requisitos: Node 22+ y PostgreSQL 16 con la extensión `unaccent` (incluida en el paquete estándar de PostgreSQL).
+Node 22 o superior y PostgreSQL 16 con la extensión `unaccent` (viene en el paquete estándar). Con Docker: `docker compose up -d` levanta una base lista para usar.
+
+## Instalación
 
 ```bash
-cp .env.example .env          # completar DATABASE_URL
+cp .env.example .env          # completar DATABASE_URL y el resto
 npm install
-npm run db:validate           # valida el esquema
 npm run db:deploy             # aplica las migraciones
+npm run dev                   # http://localhost:3000
 ```
 
 ## Variables de entorno
-Ver `.env.example`. Ningún secreto va en el código.
 
-## Comandos, desarrollo, producción y testing
-Se documentan en la Fase 2, cuando exista la aplicación.
+Están todas en `.env.example`, sin valores reales. Ningún secreto va en el código. La aplicación valida las variables al arrancar (`src/server/env.ts`) y se detiene con un mensaje claro si falta alguna.
+
+## Comandos
+
+| Comando                                            | Qué hace                                                              |
+| -------------------------------------------------- | --------------------------------------------------------------------- |
+| `npm run dev`                                      | Servidor de desarrollo                                                |
+| `npm run build` / `npm start`                      | Compilación y servidor de producción                                  |
+| `npm run lint`                                     | ESLint, incluidas las reglas de capas                                 |
+| `npm run typecheck`                                | Genera los tipos de rutas y corre `tsc`                               |
+| `npm run format` / `format:check`                  | Prettier                                                              |
+| `npm test`                                         | Vitest (unitarios; los de integración llegan en la Fase 3)            |
+| `npm run check`                                    | Lint + typecheck + formato + tests                                    |
+| `npm run db:validate` / `db:migrate` / `db:deploy` | Prisma: validar, crear migración en desarrollo, aplicar en producción |
+
+## Producción
+
+`npm run db:deploy && npm run build && npm start` detrás de un proxy con HTTPS. La estrategia de despliegue se define con el propietario (ver los riesgos en la propuesta). `/api/health` responde `{"status":"ok"}` para el monitoreo.
+
+## Testing y CI
+
+GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQL 16 real: valida el esquema, aplica las migraciones, comprueba que no haya diferencias entre esquema y base, y corre lint, typecheck, formato, tests y build.
+
+## Documentación
+
+- [Auditoría y propuesta](docs/00-auditoria-y-propuesta.md): stack, arquitectura, modelo de datos, auth, imágenes, SEO, automatización, roadmap y riesgos.
+- [Decisiones de arquitectura](docs/adr/).
+- [Identidad visual](docs/design/identidad-visual.md) y su [vista previa](docs/design/preview.html).
 
 ## Arquitectura en una línea
+
 Páginas, panel y API → servicios (validación, permisos, transiciones, eventos) → Prisma → PostgreSQL, con un outbox de eventos (`domain_events`) que la automatización futura consume sin tocar el núcleo. Ver [ADR 0002](docs/adr/0002-capas.md) y [ADR 0006](docs/adr/0006-eventos.md).
 
 ## Futuras automatizaciones
+
 Fuentes → ingesta → normalización → deduplicación → clasificación → IA → borrador → **revisión humana** → programación → publicación → distribución. La IA nunca publica: todo lo que genera entra como borrador. Ver la sección 11 de la propuesta.

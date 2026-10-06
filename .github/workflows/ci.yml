@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: portal
+          POSTGRES_PASSWORD: portal_ci
+          POSTGRES_DB: portal_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U portal -d portal_ci"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://portal:portal_ci@localhost:5432/portal_ci
+      SITE_URL: http://localhost:3000
+      SITE_NAME: Portal Noticias
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Validar esquema y aplicar migraciones
+        run: |
+          npm run db:validate
+          npm run db:deploy
+      - name: Sin diferencias entre esquema y base
+        run: |
+          diff_sql=$(npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script)
+          echo "$diff_sql"
+          echo "$diff_sql" | grep -q "This is an empty migration"
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
