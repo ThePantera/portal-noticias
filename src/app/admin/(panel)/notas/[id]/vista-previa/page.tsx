@@ -10,7 +10,7 @@ import { getArticleForEdit } from "@/server/services/articles";
 
 export const metadata: Metadata = { title: "Vista previa" };
 
-/** Lo último guardado, con la tipografía del portal. La página pública definitiva llega en la Fase 7. */
+/** Lo último guardado, con la tipografía del portal, aunque la nota no esté publicada. */
 async function Preview({ params }: PageProps<"/admin/notas/[id]/vista-previa">) {
   await requireUser();
   const { id } = await params;

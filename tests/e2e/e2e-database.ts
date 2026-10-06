@@ -1,4 +1,8 @@
-/** Prepara la base de los tests end to end: migraciones desde cero, categorías y un administrador. */
+/**
+ * Base de los tests end to end: migraciones desde cero, categorías y un administrador.
+ * Corre antes del build (lo llama el webServer de playwright.config.ts) porque el build
+ * prerenderiza la portada y las notas leyendo la base.
+ */
 import { execSync } from "node:child_process";
 import "dotenv/config";
 import pg from "pg";
@@ -7,7 +11,7 @@ export const ADMIN = { email: "e2e@portal.test", name: "Editora E2E", password: 
 /** Secreto del publicador para el servidor de los tests (no es un secreto real). */
 export const E2E_CRON_SECRET = "e2e-cron-secret-de-prueba-0123456789abcdef";
 
-export default async function globalSetup() {
+export async function resetE2eDatabase() {
   const url = process.env.E2E_DATABASE_URL;
   if (!url) throw new Error("Falta E2E_DATABASE_URL (una base dedicada; su nombre debe terminar en _e2e).");
   const name = new URL(url).pathname.slice(1);

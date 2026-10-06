@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { defineConfig, devices } from "@playwright/test";
-import { E2E_CRON_SECRET } from "./tests/e2e/global-setup";
+import { E2E_CRON_SECRET } from "./tests/e2e/e2e-database";
 
 /**
  * Tests end to end contra el build de producción. Usan E2E_DATABASE_URL (una base
@@ -17,7 +17,6 @@ const launchOptions = process.env.PLAYWRIGHT_CHROMIUM_PATH
 
 export default defineConfig({
   testDir: "tests/e2e",
-  globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
@@ -32,12 +31,13 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"], launchOptions } },
   ],
   webServer: {
-    command: `npm run build && npm run start -- --port ${PORT}`,
+    command: `npx tsx tests/e2e/reset-db.ts && npm run build && npm run start -- --port ${PORT}`,
     url: `${baseURL}/api/health`,
     reuseExistingServer: false,
     timeout: 240_000,
     env: {
       DATABASE_URL: process.env.E2E_DATABASE_URL ?? "",
+      DATABASE_URL_UNPOOLED: process.env.E2E_DATABASE_URL ?? "",
       SITE_URL: baseURL,
       SITE_NAME: "Portal Noticias",
       CRON_SECRET: E2E_CRON_SECRET,

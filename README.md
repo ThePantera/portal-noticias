@@ -2,7 +2,7 @@
 
 Portal de noticias digital con panel de administración propio, preparado para evolucionar hacia la ingesta automática, la asistencia con IA (siempre con revisión humana) y la distribución por eventos.
 
-> **Estado:** Fase 4 (autenticación). Ya se puede iniciar sesión en `/admin` con un usuario creado desde el servidor. El tablero, el CRUD de notas y las páginas públicas llegan en las Fases 5 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
+> **Estado:** Fase 7 (sitio público). Las notas se escriben, programan y publican desde `/admin`, y se leen en la portada, `/noticias/{slug}`, `/categoria/{slug}`, `/tag/{slug}` y `/buscar`. SEO completo, imágenes y automatización llegan en las Fases 8 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
 
 ## Stack
 
@@ -33,7 +33,7 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 | Comando                                            | Qué hace                                                                               |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `npm run dev`                                      | Servidor de desarrollo                                                                 |
-| `npm run build` / `npm start`                      | Compilación y servidor de producción                                                   |
+| `npm run build` / `npm start`                      | Compilación y servidor de producción (el build lee la base: necesita `DATABASE_URL`)   |
 | `npm run lint`                                     | ESLint, incluidas las reglas de capas                                                  |
 | `npm run typecheck`                                | Genera los tipos de rutas y corre `tsc`                                                |
 | `npm run format` / `format:check`                  | Prettier                                                                               |
@@ -65,6 +65,8 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 ## Producción
 
 El portal se publica en Vercel con la base en Neon: la guía paso a paso está en [docs/deploy-vercel.md](docs/deploy-vercel.md). En cada deploy, `npm run vercel-build` aplica las migraciones, prepara la base si está vacía (`npm run db:bootstrap`) y compila. Fuera de Vercel: `npm run db:deploy && npm run db:bootstrap && npm run build && npm start` detrás de un proxy con HTTPS. `/api/health` responde 200 si la aplicación y la base responden, y 503 si la base no contesta.
+
+El build prerenderiza la portada, las secciones y las notas más recientes leyendo la base, así que corre después de las migraciones. Las páginas públicas se guardan en caché y cada cambio de una nota (guardar, publicar, despublicar, archivar o el publicador automático) la invalida: lo publicado se ve en el acto. Sólo las notas en estado PUBLISHED llegan al sitio público.
 
 ## Testing y CI
 

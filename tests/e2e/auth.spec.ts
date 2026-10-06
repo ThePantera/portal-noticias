@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ADMIN } from "./global-setup";
+import { ADMIN } from "./e2e-database";
 
 async function login(page: import("@playwright/test").Page, password = ADMIN.password) {
   await page.getByLabel("Email").fill(ADMIN.email);
