@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "prisma migrate deploy && npm run db:bootstrap && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
@@ -21,6 +22,7 @@
     "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:demo": "tsx prisma/seed-demo.ts",
+    "db:bootstrap": "tsx scripts/bootstrap.ts",
     "test:integration": "vitest run --project integration",
     "test:all": "vitest run",
     "admin:create": "tsx scripts/admin.ts create",

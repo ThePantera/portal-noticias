@@ -19,7 +19,8 @@ export default async function globalSetup() {
   await client.query("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;");
   await client.end();
 
-  const env = { ...process.env, DATABASE_URL: url };
+  // DATABASE_URL_UNPOOLED también: prisma.config.ts la prefiere y migraría otra base.
+  const env = { ...process.env, DATABASE_URL: url, DATABASE_URL_UNPOOLED: url };
   execSync("npx prisma migrate deploy", { env, stdio: "pipe" });
   execSync("npm run db:seed", { env, stdio: "pipe" });
   execSync("npm run admin:create", {
