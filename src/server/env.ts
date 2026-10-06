@@ -5,7 +5,6 @@ import { parseGoogleVerification } from "@/lib/seo";
 /**
  * Variables de entorno validadas al arrancar. Si falta algo obligatorio,
  * el proceso falla con un mensaje claro en vez de romperse más tarde.
- * Las variables de base de datos, sesiones y media se suman en sus fases.
  */
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -19,6 +18,26 @@ const schema = z.object({
     .refine((v) => v === undefined || v.length >= 32, "Tiene que tener al menos 32 caracteres."),
   /** Código de Google Search Console (método "Etiqueta HTML"). Opcional. */
   GOOGLE_SITE_VERIFICATION: z.string().optional().transform(parseGoogleVerification),
+  /**
+   * Dónde se guardan las imágenes: "local" (disco, sólo para desarrollo) o "vercel-blob".
+   * Vacío: Vercel Blob si está su token, si no el disco.
+   */
+  STORAGE_DRIVER: z
+    .enum(["local", "vercel-blob"])
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  STORAGE_LOCAL_DIR: z.string().min(1).default("./storage"),
+  /** Token de Vercel Blob. Lo carga Vercel al conectar un Blob store al proyecto. */
+  BLOB_READ_WRITE_TOKEN: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+  /** Base pública de las imágenes, para poner un CDN o dominio propio delante. Opcional. */
+  MEDIA_PUBLIC_BASE_URL: z
+    .string()
+    .optional()
+    .transform((v) => v?.replace(/\/+$/, "") || undefined)
+    .pipe(z.union([z.url(), z.string().startsWith("/")]).optional()),
 });
 
 // En Vercel, si no se definió SITE_URL se usa el dominio de producción del proyecto, para

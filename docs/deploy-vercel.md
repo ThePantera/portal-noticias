@@ -130,6 +130,18 @@ Se hace una sola vez. Después, cada nota que publiques entra sola en el sitemap
 
 Google tarda de unos días a un par de semanas en mostrar los primeros datos. Si después cambiás a un dominio propio, se agrega como una propiedad nueva y se repiten estos pasos.
 
+## Paso 10. Activar la subida de imágenes
+
+Vercel borra los archivos que se suben cada vez que publica una versión nueva, así que las fotos se guardan en **Vercel Blob**, un almacenamiento aparte que se crea desde el mismo proyecto. El plan gratis alcanza para empezar.
+
+1. En tu proyecto de Vercel entrá a **Storage → Create Database** (o "Create Store") y elegí **Blob**.
+2. Ponele un nombre, por ejemplo `portal-imagenes`. Si te pregunta el tipo de acceso, elegí **Public**: las fotos de las notas las ve cualquiera.
+3. Conectalo al proyecto con los entornos **Production** y **Preview** marcados. Vercel carga solo la variable `BLOB_READ_WRITE_TOKEN`; no hay que copiar nada.
+4. Hacé **Redeploy**, como en el paso 5.
+5. Probalo: entrá a `/admin`, abrí una nota y en **Imagen principal** elegí una foto. Tiene que aparecer la vista previa enseguida.
+
+Para publicar una nota con foto hace falta completar la **descripción de la imagen** (qué se ve). La leen los lectores de pantalla y Google. El epígrafe y el crédito son opcionales.
+
 ## De acá en adelante
 
 - **Cada merge a `main`** publica una versión nueva en producción, con las migraciones que traiga.
@@ -145,4 +157,7 @@ Google tarda de unos días a un par de semanas en mostrar los primeros datos. Si
 | Las notas programadas no salen solas                                               | Falta el paso 8, o `CRON_SECRET` no es igual en Vercel y en GitHub. En **GitHub → Actions → "Publicar notas programadas"** el log de la última ejecución dice qué pasó: `No autorizado` es un secreto distinto, y `Falta CRON_SECRET o SITE_URL` es que falta configurarlo en GitHub. |
 | `/api/health` responde `503`                                                       | La aplicación anda pero no llega a la base. Revisá en Neon que la base no esté suspendida o borrada.                                                                                                                                                                                  |
 | Search Console dice que no encuentra la etiqueta                                   | Falta el **Redeploy** después de cargar `GOOGLE_SITE_VERIFICATION`, o el valor quedó incompleto. Abrí tu sitio, mirá el código de la página (clic derecho → "Ver código fuente") y buscá `google-site-verification`.                                                                  |
+| Search Console dice "No se ha podido leer" un sitemap recién enviado               | Suele ser transitorio: Google lo vuelve a intentar solo en las horas o días siguientes. Si abrís la dirección en el navegador (por ejemplo `/news-sitemap.xml`) y ves un XML que empieza con `<urlset`, el sitio está bien.                                                           |
+| Al subir una imagen dice "Falta configurar dónde se guardan las imágenes"          | Falta el paso 10, o el Blob store no está conectado a **Production**. Revisá en **Storage** que esté conectado y en **Environment Variables** que exista `BLOB_READ_WRITE_TOKEN`; después hacé **Redeploy**.                                                                          |
+| Al subir una imagen dice "No se pudo subir la imagen"                              | Puede ser que el Blob store se haya creado como privado. Creá uno nuevo con acceso **Public**, conectalo al proyecto, desconectá el viejo y hacé **Redeploy**.                                                                                                                        |
 | El login dice "Email o contraseña incorrectos"                                     | Revisá la contraseña. Si la perdiste, avisame y te paso cómo cambiarla. Después de 5 intentos fallidos el login se bloquea 15 minutos.                                                                                                                                                |

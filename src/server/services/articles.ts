@@ -1,6 +1,7 @@
 import "server-only";
 import type { $Enums } from "@/generated/prisma/client";
 import { db } from "@/server/db";
+import { imageSelect, toPublicImage } from "@/server/media/public-image";
 import type { AdminArticleRow, CategoryOption, EditableArticle } from "@/types/admin";
 import type { ArticleOrigin, ArticleStatus, Role } from "@/types/article";
 
@@ -119,12 +120,14 @@ export async function getArticleForEdit(id: string): Promise<EditableArticle | n
       tags: { select: { tag: { select: { name: true } } }, orderBy: { tag: { name: "asc" } } },
       author: { select: { name: true } },
       category: { select: { name: true, slug: true } },
+      mainImage: { select: { id: true, ...imageSelect } },
     },
   });
   if (!article) return null;
-  const { tags, author, category, content, ...rest } = article;
+  const { tags, author, category, content, mainImage, ...rest } = article;
   return {
     ...rest,
+    mainImage: mainImage ? { id: mainImage.id, ...toPublicImage(mainImage) } : null,
     content: content as EditableArticle["content"],
     tags: tags.map((t) => t.tag.name),
     authorName: author.name,

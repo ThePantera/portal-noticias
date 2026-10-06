@@ -1,3 +1,5 @@
+import type { PublicImage } from "./media";
+
 /** Datos del sitio público. Sólo salen de notas en estado PUBLISHED. */
 
 export type CategoryLink = { name: string; slug: string };
@@ -13,6 +15,7 @@ export type ArticleCardData = {
   readingTimeMinutes: number;
   category: CategoryLink;
   authorName: string;
+  image: PublicImage | null;
 };
 
 export type PublicArticle = ArticleCardData & {

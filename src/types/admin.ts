@@ -1,4 +1,5 @@
 import type { EditorDoc } from "@/lib/content";
+import type { EditorImage } from "./media";
 import type { ArticleOrigin, ArticleStatus } from "./article";
 
 /** Fila de nota que muestra el panel. Compartida entre servicios y componentes. */
@@ -36,6 +37,7 @@ export type EditableArticle = {
   scheduledAt: Date | null;
   updatedAt: Date;
   readingTimeMinutes: number;
+  mainImage: EditorImage | null;
 };
 
 export type CategoryOption = { id: string; name: string; isActive: boolean };

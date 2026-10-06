@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArticleBody } from "@/components/editorial/ArticleBody";
 import { ArticleCard } from "@/components/editorial/ArticleCard";
+import { ArticleFigure } from "@/components/editorial/ArticleImage";
 import { ArticleMeta } from "@/components/editorial/ArticleMeta";
 import { JsonLd } from "@/components/editorial/JsonLd";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
@@ -28,6 +29,12 @@ export async function generateMetadata({ params }: PageProps<"/noticias/[slug]">
   const title = article.seoTitle || article.title;
   const description = article.seoDescription || article.excerpt;
   const path = `/noticias/${article.slug}`;
+  const image = article.image;
+  const ogImage = image
+    ? image.ogUrl
+      ? { url: image.ogUrl, width: 1200, height: 630, alt: image.alt }
+      : { url: image.src, width: image.width, height: image.height, alt: image.alt }
+    : null;
   return {
     title,
     description,
@@ -42,8 +49,11 @@ export async function generateMetadata({ params }: PageProps<"/noticias/[slug]">
       section: article.category.name,
       authors: [article.authorName],
       tags: article.tags.map((t) => t.name),
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
-    twitter: { card: "summary", title, description },
+    twitter: ogImage
+      ? { card: "summary_large_image", title, description, images: [ogImage.url] }
+      : { card: "summary", title, description },
   };
 }
 
@@ -75,6 +85,9 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
             authorName: article.authorName,
             section: article.category.name,
             keywords: article.tags.map((t) => t.name),
+            images: article.image
+              ? [article.image.src, ...(article.image.ogUrl ? [article.image.ogUrl] : [])]
+              : undefined,
           }),
           breadcrumbJsonLd(env.SITE_URL, [
             { name: "Portada", path: "/" },
@@ -104,6 +117,14 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
           />
           <ShareButtons url={url} title={article.title} />
         </div>
+        {article.image ? (
+          <ArticleFigure
+            image={article.image}
+            sizes="(min-width: 768px) 40rem, 100vw"
+            priority
+            className="mt-8"
+          />
+        ) : null}
         <ArticleBody content={article.content} className="mt-8" />
         {article.tags.length > 0 ? (
           <div className="mt-10 border-t border-rule pt-6">

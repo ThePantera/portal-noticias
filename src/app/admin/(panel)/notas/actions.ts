@@ -13,7 +13,9 @@ import {
   updateArticle,
   type ArticleInput,
 } from "@/server/services/article-commands";
+import { MediaError, uploadImage } from "@/server/services/media";
 import type { EditorFormState, EditorIntent } from "@/types/admin";
+import type { UploadImageResult } from "@/types/media";
 
 const INTENTS: readonly EditorIntent[] = ["save", "publish", "schedule", "unpublish", "archive"];
 
@@ -44,6 +46,10 @@ function readInput(formData: FormData): ArticleInput {
     seoTitle: text("seoTitle"),
     seoDescription: text("seoDescription"),
     featuredRank: Number.isInteger(rank) && rank > 0 ? rank : null,
+    mainImageId: text("mainImageId"),
+    mainImageAlt: text("mainImageAlt"),
+    mainImageCaption: text("mainImageCaption"),
+    mainImageCredit: text("mainImageCredit"),
   };
 }
 
@@ -122,4 +128,19 @@ export async function deleteArticleAction(formData: FormData): Promise<void> {
   updateTag(ARTICLES_TAG);
   updateTag(articleTag(id));
   redirect("/admin/notas?eliminada=1");
+}
+
+/** Sube una imagen desde el editor. La nota la engancha recién cuando se guarda. */
+export async function uploadImageAction(formData: FormData): Promise<UploadImageResult> {
+  const user = await requireUser();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Elegí una imagen." };
+  try {
+    const image = await uploadImage(user, Buffer.from(await file.arrayBuffer()));
+    return { ok: true, image };
+  } catch (error) {
+    if (error instanceof MediaError) return { ok: false, message: error.message };
+    console.error("Subida de imagen: error inesperado", error);
+    return { ok: false, message: "No se pudo subir la imagen. Probá de nuevo en unos segundos." };
+  }
 }

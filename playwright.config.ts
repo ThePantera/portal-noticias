@@ -41,6 +41,11 @@ export default defineConfig({
       SITE_URL: baseURL,
       SITE_NAME: "Portal Noticias",
       CRON_SECRET: E2E_CRON_SECRET,
+      // Las imágenes van a disco, dentro de test-results (no se sube al repo).
+      STORAGE_DRIVER: "local",
+      STORAGE_LOCAL_DIR: "test-results/e2e-storage",
+      MEDIA_PUBLIC_BASE_URL: "",
+      BLOB_READ_WRITE_TOKEN: "",
     },
   },
 });

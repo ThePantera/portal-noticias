@@ -8,6 +8,8 @@ import { formatDateTime, toDateTimeInputValue } from "@/lib/dates";
 import { slugify } from "@/lib/slug";
 import type { CategoryOption, EditableArticle, EditorFormState } from "@/types/admin";
 import type { ArticleStatus } from "@/types/article";
+import type { UploadImageResult } from "@/types/media";
+import { MainImageField } from "./MainImageField";
 import { RichTextEditor } from "./RichTextEditor";
 import { StatusBadge } from "./StatusBadge";
 
@@ -16,6 +18,7 @@ type Props = {
   categories: CategoryOption[];
   saveAction: (state: EditorFormState, formData: FormData) => Promise<EditorFormState>;
   deleteAction: (formData: FormData) => Promise<void>;
+  uploadAction: (formData: FormData) => Promise<UploadImageResult>;
   /** Aviso que llega en la URL después de crear una nota o de un error al eliminar. */
   notice?: string;
   maxFeaturedRank: number;
@@ -32,6 +35,7 @@ export function ArticleEditor({
   categories,
   saveAction,
   deleteAction,
+  uploadAction,
   notice,
   maxFeaturedRank,
 }: Props) {
@@ -129,6 +133,13 @@ export function ArticleEditor({
             />
           )}
         </Field>
+
+        <MainImageField
+          initial={article?.mainImage ?? null}
+          uploadAction={uploadAction}
+          onChange={() => setDirty(true)}
+          errors={errors}
+        />
 
         <div className="grid gap-1.5">
           <span id="content-label" className={label}>
