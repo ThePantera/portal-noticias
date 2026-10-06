@@ -1,6 +1,7 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/server/db";
+import { imageSelect, toPublicImage } from "@/server/media/public-image";
 import type {
   ArticleCardData,
   ArticleLookup,
@@ -31,13 +32,19 @@ const cardSelect = {
   readingTimeMinutes: true,
   category: { select: { name: true, slug: true } },
   author: { select: { name: true } },
+  mainImage: { select: imageSelect },
 } as const satisfies Prisma.ArticleSelect;
 
 type CardRow = Prisma.ArticleGetPayload<{ select: typeof cardSelect }>;
 
-function toCard({ author, publishedAt, updatedAt, ...rest }: CardRow): ArticleCardData {
+function toCard({ author, publishedAt, updatedAt, mainImage, ...rest }: CardRow): ArticleCardData {
   // Una nota publicada siempre tiene fecha; si faltara, la última edición es lo más honesto.
-  return { ...rest, publishedAt: publishedAt ?? updatedAt, authorName: author.name };
+  return {
+    ...rest,
+    publishedAt: publishedAt ?? updatedAt,
+    authorName: author.name,
+    image: mainImage ? toPublicImage(mainImage) : null,
+  };
 }
 
 const newestFirst = [

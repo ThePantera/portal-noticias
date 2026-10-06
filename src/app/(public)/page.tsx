@@ -33,9 +33,12 @@ export default async function HomePage() {
       {siteLd}
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
 
-      <section aria-label="Principales" className="grid gap-8 lg:grid-cols-12 lg:gap-x-8">
+      <section
+        aria-label="Principales"
+        className="grid gap-8 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8"
+      >
         <div className="lg:col-span-8">
-          <ArticleCard article={lead} variant="lead" headingLevel="h2" />
+          <ArticleCard article={lead} variant="lead" headingLevel="h2" priority />
         </div>
         {secondary.length > 0 ? (
           <ul className="grid content-start gap-6 border-t border-rule pt-6 md:grid-cols-3 lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1 lg:grid-cols-1 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
@@ -51,7 +54,8 @@ export default async function HomePage() {
             ))}
           </ul>
         ) : null}
-        {/* Sin imágenes, la principal deja aire debajo: en escritorio lo ocupan las dos más recientes. */}
+        {/* En escritorio, las dos más recientes van debajo de la principal. La segunda fila es 1fr
+            para que el alto de la columna de secundarias no abra un hueco debajo de la principal. */}
         {underLead.length > 0 ? (
           <ul className="grid content-start gap-6 border-t border-rule pt-6 md:grid-cols-2 md:gap-8 lg:col-span-8 lg:row-start-2">
             {underLead.map((article) => (

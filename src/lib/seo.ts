@@ -33,6 +33,8 @@ type ArticleLdInput = {
   authorName: string;
   section: string;
   keywords: string[];
+  /** Direcciones de la imagen principal (absolutas o relativas al sitio). Google pide al menos una. */
+  images?: string[];
 };
 
 export function newsArticleJsonLd(input: ArticleLdInput): JsonLd {
@@ -50,6 +52,7 @@ export function newsArticleJsonLd(input: ArticleLdInput): JsonLd {
     publisher: { "@type": "Organization", name: input.siteName, url: absoluteUrl(input.siteUrl, "/") },
     articleSection: input.section,
     ...(input.keywords.length ? { keywords: input.keywords.join(", ") } : {}),
+    ...(input.images?.length ? { image: input.images.map((src) => absoluteUrl(input.siteUrl, src)) } : {}),
     inLanguage: "es-AR",
   };
 }

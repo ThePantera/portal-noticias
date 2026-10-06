@@ -2,7 +2,7 @@
 
 Portal de noticias digital con panel de administración propio, preparado para evolucionar hacia la ingesta automática, la asistencia con IA (siempre con revisión humana) y la distribución por eventos.
 
-> **Estado:** Fase 8 (SEO). Las notas se escriben, programan y publican desde `/admin`, y se leen en la portada, `/noticias/{slug}`, `/categoria/{slug}`, `/tag/{slug}` y `/buscar`. Para buscadores: `/sitemap.xml`, `/news-sitemap.xml` (últimas 48 horas, formato Google News), `/feed.xml` (RSS), `/robots.txt` y datos estructurados `NewsArticle`. Imágenes, seguridad y automatización llegan en las Fases 9 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
+> **Estado:** Fase 8 (SEO) más la subida de imágenes. Las notas se escriben, programan y publican desde `/admin`, y se leen en la portada, `/noticias/{slug}`, `/categoria/{slug}`, `/tag/{slug}` y `/buscar`. Para buscadores: `/sitemap.xml`, `/news-sitemap.xml` (últimas 48 horas, formato Google News), `/feed.xml` (RSS), `/robots.txt` y datos estructurados `NewsArticle`. Cada nota puede llevar una imagen principal, que también se usa para compartir en redes. Responsive, seguridad, optimización y automatización llegan en las Fases 9 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
 
 ## Stack
 
@@ -52,6 +52,11 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 - La búsqueda usa una columna `search_vector` mantenida por un trigger. Ver [ADR 0003](docs/adr/0003-modelo-de-datos.md).
 - Las categorías iniciales salen de `prisma/data/categories.ts` y después se administran desde el panel; el seed nunca pisa cambios.
 - Docker Compose crea `portal_dev` y `portal_test`.
+
+## Imágenes
+
+- Se suben desde el editor. El navegador achica las fotos de más de 4 MB y el servidor las valida (formato por los bytes, decodificación completa, sin metadatos EXIF) y genera variantes WebP y un recorte 1200×630 para redes.
+- En desarrollo se guardan en `./storage` y se sirven por `/media/...`. En producción van a Vercel Blob (paso 10 de la [guía de deploy](docs/deploy-vercel.md)). El proveedor es intercambiable: ver [ADR 0005](docs/adr/0005-media.md).
 
 ## Autenticación
 

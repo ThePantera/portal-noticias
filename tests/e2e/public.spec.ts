@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import sharp from "sharp";
 import { acceptDialogs, login, writeArticle } from "./helpers";
 
 /** Todas las etiquetas robots de la página (Next agrega la suya en los 404) piden no indexar. */
@@ -78,6 +79,66 @@ test("lo que se publica aparece en el sitio y lo que se despublica desaparece", 
   await expect(page.getByRole("link", { name: title })).toHaveCount(0);
   await page.goto(`/buscar?q=${word}`);
   await expect(page.getByText(/No encontramos notas/)).toBeVisible();
+});
+
+test("la foto principal se sube en el editor y sale en la portada, la nota y las redes", async ({
+  page,
+}, info) => {
+  acceptDialogs(page);
+  await login(page);
+  const title = `Represa con foto ${uniqueWord()} ${info.project.name}`;
+  await writeArticle(page, title);
+
+  // Un archivo que no es imagen se rechaza sin romper el formulario.
+  const file = page.getByLabel(/Elegí una imagen/);
+  await file.setInputFiles({
+    name: "falsa.jpg",
+    mimeType: "image/jpeg",
+    buffer: Buffer.from("no soy una foto"),
+  });
+  await expect(page.getByRole("alert").filter({ hasText: "JPG, PNG, WebP o AVIF" })).toBeVisible();
+
+  // Una foto de celular pesada (más de 4 MB): el navegador la achica antes de subirla.
+  const photo = await sharp({
+    create: {
+      width: 3000,
+      height: 2000,
+      channels: 3,
+      background: "#3a6f8f",
+      noise: { type: "gaussian", mean: 120, sigma: 40 },
+    },
+  })
+    .png()
+    .toBuffer();
+  expect(photo.length).toBeGreaterThan(4 * 1024 * 1024);
+  await file.setInputFiles({ name: "represa.png", mimeType: "image/png", buffer: photo });
+  await expect(page.getByTestId("main-image-preview")).toBeVisible();
+
+  // Publicar sin describir la foto no se permite.
+  await page.getByRole("button", { name: "Publicar ahora" }).click();
+  await expect(page.getByTestId("editor-message")).toContainText("falta la descripción de la imagen");
+  await page.getByLabel("Descripción de la imagen").fill("La represa vista desde el aire");
+  await page.getByLabel("Epígrafe").fill("El embalse, en su nivel más bajo.");
+  await page.getByLabel("Crédito").fill("Foto: Agencia");
+  await page.getByRole("button", { name: "Publicar ahora" }).click();
+  await expect(page.getByTestId("editor-status").filter({ visible: true })).toHaveText("Publicada");
+
+  await page.goto("/");
+  const card = page.getByRole("article").filter({ hasText: title }).first();
+  await expect(card.getByRole("img", { includeHidden: true })).toHaveAttribute("srcset", /w480\.webp 480w/);
+
+  await page.getByRole("link", { name: title }).first().click();
+  const figure = page.locator("figure").first();
+  await expect(figure.getByRole("img", { name: "La represa vista desde el aire" })).toBeVisible();
+  await expect(figure).toContainText("El embalse, en su nivel más bajo. Foto: Agencia");
+  const loaded = await figure.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth);
+  expect(loaded).toBeGreaterThan(0);
+
+  const ogImage = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect(ogImage).toMatch(/^http.*\/og\.jpg$/);
+  const og = await page.request.get(ogImage!);
+  expect(og.headers()["content-type"]).toBe("image/jpeg");
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute("content", "summary_large_image");
 });
 
 test("las direcciones inexistentes responden 404 de verdad y no se indexan", async ({ page }) => {

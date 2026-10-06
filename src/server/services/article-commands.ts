@@ -52,6 +52,16 @@ export const articleInputSchema = z.object({
   seoTitle: optionalText(70),
   seoDescription: optionalText(160),
   featuredRank: z.number().int().min(1).max(MAX_FEATURED_RANK).nullable().default(null),
+  /** Imagen principal ya subida (tabla media) y sus textos. Vacío: sin imagen. */
+  mainImageId: z
+    .string()
+    .trim()
+    .max(40)
+    .default("")
+    .transform((v) => v || null),
+  mainImageAlt: z.string().trim().max(200, "Máximo 200 caracteres.").default(""),
+  mainImageCaption: optionalText(300),
+  mainImageCredit: optionalText(120),
 });
 
 export type ArticleInput = z.input<typeof articleInputSchema>;
@@ -119,6 +129,21 @@ async function assertCategory(tx: Prisma.TransactionClient, categoryId: string) 
   }
 }
 
+/** Engancha la imagen principal y guarda sus textos. Devuelve el id o null. */
+async function attachMainImage(tx: Prisma.TransactionClient, data: ReturnType<typeof parseInput>) {
+  if (!data.mainImageId) return null;
+  const { count } = await tx.media.updateMany({
+    where: { id: data.mainImageId },
+    data: { altText: data.mainImageAlt, caption: data.mainImageCaption, credit: data.mainImageCredit },
+  });
+  if (count !== 1) {
+    throw new ArticleError("invalid", "Revisá los campos marcados.", {
+      mainImage: "La imagen ya no está disponible. Subila de nuevo.",
+    });
+  }
+  return data.mainImageId;
+}
+
 /** Sólo una nota por puesto destacado: al asignar el puesto 1 a esta, se lo saca a la que lo tenía. */
 async function claimFeaturedRank(tx: Prisma.TransactionClient, rank: number | null, articleId: string) {
   if (rank === null) return;
@@ -139,6 +164,7 @@ export async function createArticle(actor: Actor, input: ArticleInput) {
     await assertCategory(tx, data.categoryId);
     const slug = await uniqueSlug(slugify(data.slug || data.title), (c) => slugIsTaken(tx, c));
     const tagIds = await connectTags(tx, data.tags);
+    const mainImageId = await attachMainImage(tx, data);
     await claimFeaturedRank(tx, data.featuredRank, "");
     const article = await tx.article.create({
       data: {
@@ -153,6 +179,7 @@ export async function createArticle(actor: Actor, input: ArticleInput) {
         categoryId: data.categoryId,
         authorId: actor.id,
         featuredRank: data.featuredRank,
+        mainImageId,
         status: "DRAFT",
         origin: "MANUAL",
         tags: { create: tagIds.map((tagId) => ({ tagId })) },
@@ -200,6 +227,7 @@ export async function updateArticle(actor: Actor, id: string, input: ArticleInpu
     }
 
     const tagIds = await connectTags(tx, data.tags);
+    const mainImageId = await attachMainImage(tx, data);
     await claimFeaturedRank(tx, data.featuredRank, id);
     const article = await tx.article.update({
       where: { id },
@@ -214,6 +242,7 @@ export async function updateArticle(actor: Actor, id: string, input: ArticleInpu
         seoDescription: data.seoDescription,
         categoryId: data.categoryId,
         featuredRank: data.featuredRank,
+        mainImageId,
         tags: { deleteMany: {}, create: tagIds.map((tagId) => ({ tagId })) },
       },
       select: RETURN,
@@ -253,7 +282,13 @@ export async function transitionArticle(
   return db.$transaction(async (tx) => {
     const current = await tx.article.findUnique({
       where: { id },
-      select: { id: true, status: true, excerpt: true, contentText: true },
+      select: {
+        id: true,
+        status: true,
+        excerpt: true,
+        contentText: true,
+        mainImage: { select: { altText: true } },
+      },
     });
     if (!current) throw new ArticleError("not-found", "La nota no existe.");
     if (!canTransition(transition, current.status)) {
@@ -264,6 +299,9 @@ export async function transitionArticle(
       const missing: Record<string, string> = {};
       if (!current.excerpt) missing.excerpt = "Para publicar hace falta la bajada.";
       if (!current.contentText) missing.content = "Para publicar hace falta el cuerpo de la nota.";
+      if (current.mainImage && !current.mainImage.altText) {
+        missing.mainImageAlt = "Describí la imagen: la leen los lectores de pantalla y los buscadores.";
+      }
       if (Object.keys(missing).length > 0) {
         throw new ArticleError("invalid", "La nota se guardó, pero todavía no se puede publicar.", missing);
       }

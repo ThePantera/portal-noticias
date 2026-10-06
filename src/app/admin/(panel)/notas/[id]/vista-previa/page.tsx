@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ArticleBody } from "@/components/editorial/ArticleBody";
+import { ArticleFigure } from "@/components/editorial/ArticleImage";
 import { formatDate, toIsoString } from "@/lib/dates";
 import { requirePermission, requireUser } from "@/server/auth/current-user";
 import { getArticleForEdit } from "@/server/services/articles";
@@ -42,6 +43,9 @@ async function Preview({ params }: PageProps<"/admin/notas/[id]/vista-previa">) 
           <time dateTime={toIsoString(date)}>{formatDate(date)}</time> · {article.readingTimeMinutes} min de
           lectura
         </p>
+        {article.mainImage ? (
+          <ArticleFigure image={article.mainImage} sizes="(min-width: 768px) 40rem, 100vw" className="mt-8" />
+        ) : null}
         <ArticleBody content={article.content} className="mt-8" />
         {article.tags.length > 0 ? (
           <ul className="mt-10 flex flex-wrap gap-2 border-t border-rule pt-6 text-sm">

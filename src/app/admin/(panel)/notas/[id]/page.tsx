@@ -6,7 +6,7 @@ import { ArticleEditor } from "@/components/admin/ArticleEditor";
 import { requirePermission, requireUser } from "@/server/auth/current-user";
 import { MAX_FEATURED_RANK } from "@/server/services/article-commands";
 import { getArticleForEdit, listCategoryOptions } from "@/server/services/articles";
-import { deleteArticleAction, saveArticleAction } from "../actions";
+import { deleteArticleAction, saveArticleAction, uploadImageAction } from "../actions";
 
 export const metadata: Metadata = { title: "Editar nota" };
 
@@ -14,6 +14,7 @@ const MISSING: Record<string, string> = {
   excerpt: "la bajada",
   content: "el cuerpo",
   scheduledAt: "una fecha y hora futuras",
+  mainImageAlt: "la descripción de la imagen",
 };
 
 /** "la bajada y el cuerpo" a partir de "excerpt,content". */
@@ -67,6 +68,7 @@ async function EditArticle({ params, searchParams }: PageProps<"/admin/notas/[id
         categories={categories}
         saveAction={saveArticleAction}
         deleteAction={deleteArticleAction}
+        uploadAction={uploadImageAction}
         notice={notice}
         maxFeaturedRank={MAX_FEATURED_RANK}
       />

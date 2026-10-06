@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
   // Modelo de caché con "use cache" + cacheTag/revalidateTag (ADR 0002).
   cacheComponents: true,
   poweredByHeader: false,
+  experimental: {
+    // Las imágenes llegan al servidor de hasta 4 MB (src/lib/media.ts), más el sobre del formulario.
+    serverActions: { bodySizeLimit: "4.2mb" },
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

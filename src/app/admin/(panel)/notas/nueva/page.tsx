@@ -6,7 +6,7 @@ import { FreshOnNavigate } from "@/components/admin/FreshOnNavigate";
 import { requirePermission } from "@/server/auth/current-user";
 import { MAX_FEATURED_RANK } from "@/server/services/article-commands";
 import { listCategoryOptions } from "@/server/services/articles";
-import { deleteArticleAction, saveArticleAction } from "../actions";
+import { deleteArticleAction, saveArticleAction, uploadImageAction } from "../actions";
 
 export const metadata: Metadata = { title: "Nueva nota" };
 
@@ -27,6 +27,7 @@ async function NewArticle() {
           categories={categories}
           saveAction={saveArticleAction}
           deleteAction={deleteArticleAction}
+          uploadAction={uploadImageAction}
           maxFeaturedRank={MAX_FEATURED_RANK}
         />
       </FreshOnNavigate>
