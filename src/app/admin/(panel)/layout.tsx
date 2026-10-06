@@ -16,6 +16,9 @@ async function AuthenticatedShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-ink-muted">{user.name}</span>
+            <a href="/" target="_blank" rel="noreferrer" className="text-ink-muted hover:text-ink">
+              Ver el portal
+            </a>
             <form action={logoutAction}>
               <button type="submit" className="font-semibold text-accent underline-offset-4 hover:underline">
                 Cerrar sesión

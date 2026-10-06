@@ -1,5 +1,5 @@
 import "server-only";
-import type { Role } from "@/generated/prisma/client";
+import type { Role } from "@/types/article";
 import { SESSION_TTL_MS } from "@/server/auth/config";
 import { generateSessionToken, hashSessionToken } from "@/server/auth/tokens";
 import { db } from "@/server/db";
