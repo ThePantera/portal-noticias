@@ -42,6 +42,7 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 | `npm run check`                                    | Lint + typecheck + formato + tests                                                     |
 | `npm run db:validate` / `db:migrate` / `db:deploy` | Prisma: validar, crear migración en desarrollo, aplicar en producción                  |
 | `npm run db:seed` / `db:seed:demo`                 | Categorías iniciales / notas de ejemplo (idempotentes)                                 |
+| `npm run db:bootstrap`                             | Base vacía: categorías y administrador desde `ADMIN_*` (corre en cada deploy)          |
 
 ## Base de datos
 
@@ -62,7 +63,7 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 
 ## Producción
 
-`npm run db:deploy && npm run build && npm start` detrás de un proxy con HTTPS. La estrategia de despliegue se define con el propietario (ver los riesgos en la propuesta). `/api/health` responde 200 si la aplicación y la base responden, y 503 si la base no contesta.
+El portal se publica en Vercel con la base en Neon: la guía paso a paso está en [docs/deploy-vercel.md](docs/deploy-vercel.md). En cada deploy, `npm run vercel-build` aplica las migraciones, prepara la base si está vacía (`npm run db:bootstrap`) y compila. Fuera de Vercel: `npm run db:deploy && npm run db:bootstrap && npm run build && npm start` detrás de un proxy con HTTPS. `/api/health` responde 200 si la aplicación y la base responden, y 503 si la base no contesta.
 
 ## Testing y CI
 

@@ -12,7 +12,13 @@ const schema = z.object({
   SITE_NAME: z.string().min(1).default("Portal Noticias"),
 });
 
-const parsed = schema.safeParse(process.env);
+// En Vercel, si no se definió SITE_URL se usa el dominio de producción del proyecto, para
+// que los enlaces canónicos nunca apunten a localhost.
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+const parsed = schema.safeParse({
+  ...process.env,
+  SITE_URL: process.env.SITE_URL || (vercelUrl ? `https://${vercelUrl}` : undefined),
+});
 
 if (!parsed.success) {
   const issues = parsed.error.issues.map((i) => `  - ${i.path.join(".")}: ${i.message}`).join("\n");
