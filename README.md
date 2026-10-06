@@ -2,7 +2,7 @@
 
 Portal de noticias digital con panel de administración propio, preparado para evolucionar hacia la ingesta automática, la asistencia con IA (siempre con revisión humana) y la distribución por eventos.
 
-> **Estado:** Fase 2 (base del proyecto). Hay una aplicación que compila y corre, todavía sin base de datos conectada, autenticación ni contenido. Las Fases 3 a 12 completan el producto. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
+> **Estado:** Fase 3 (base de datos). La aplicación compila, corre y está conectada a PostgreSQL, con categorías y notas de ejemplo. Todavía no tiene autenticación, panel ni páginas públicas de notas (Fases 4 a 12). Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
 
 ## Stack
 
@@ -18,6 +18,8 @@ Node 22 o superior y PostgreSQL 16 con la extensión `unaccent` (viene en el paq
 cp .env.example .env          # completar DATABASE_URL y el resto
 npm install
 npm run db:deploy             # aplica las migraciones
+npm run db:seed               # crea las 10 categorías iniciales
+npm run db:seed:demo          # opcional: notas de ejemplo (sólo desarrollo)
 npm run dev                   # http://localhost:3000
 ```
 
@@ -27,24 +29,34 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 
 ## Comandos
 
-| Comando                                            | Qué hace                                                              |
-| -------------------------------------------------- | --------------------------------------------------------------------- |
-| `npm run dev`                                      | Servidor de desarrollo                                                |
-| `npm run build` / `npm start`                      | Compilación y servidor de producción                                  |
-| `npm run lint`                                     | ESLint, incluidas las reglas de capas                                 |
-| `npm run typecheck`                                | Genera los tipos de rutas y corre `tsc`                               |
-| `npm run format` / `format:check`                  | Prettier                                                              |
-| `npm test`                                         | Vitest (unitarios; los de integración llegan en la Fase 3)            |
-| `npm run check`                                    | Lint + typecheck + formato + tests                                    |
-| `npm run db:validate` / `db:migrate` / `db:deploy` | Prisma: validar, crear migración en desarrollo, aplicar en producción |
+| Comando                                            | Qué hace                                                                               |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `npm run dev`                                      | Servidor de desarrollo                                                                 |
+| `npm run build` / `npm start`                      | Compilación y servidor de producción                                                   |
+| `npm run lint`                                     | ESLint, incluidas las reglas de capas                                                  |
+| `npm run typecheck`                                | Genera los tipos de rutas y corre `tsc`                                                |
+| `npm run format` / `format:check`                  | Prettier                                                                               |
+| `npm test`                                         | Tests unitarios (Vitest, sin base)                                                     |
+| `npm run test:integration`                         | Tests contra PostgreSQL real en `TEST_DATABASE_URL` (la base se borra en cada corrida) |
+| `npm run check`                                    | Lint + typecheck + formato + tests                                                     |
+| `npm run db:validate` / `db:migrate` / `db:deploy` | Prisma: validar, crear migración en desarrollo, aplicar en producción                  |
+| `npm run db:seed` / `db:seed:demo`                 | Categorías iniciales / notas de ejemplo (idempotentes)                                 |
+
+## Base de datos
+
+- Esquema: `prisma/schema.prisma`; migraciones en `prisma/migrations/`. El cliente se genera en `src/generated/prisma` al instalar (`postinstall`).
+- El código de la app usa `db` de `src/server/db.ts` (Prisma 7 con `@prisma/adapter-pg`).
+- La búsqueda usa una columna `search_vector` mantenida por un trigger. Ver [ADR 0003](docs/adr/0003-modelo-de-datos.md).
+- Las categorías iniciales salen de `prisma/data/categories.ts` y después se administran desde el panel; el seed nunca pisa cambios.
+- Docker Compose crea `portal_dev` y `portal_test`.
 
 ## Producción
 
-`npm run db:deploy && npm run build && npm start` detrás de un proxy con HTTPS. La estrategia de despliegue se define con el propietario (ver los riesgos en la propuesta). `/api/health` responde `{"status":"ok"}` para el monitoreo.
+`npm run db:deploy && npm run build && npm start` detrás de un proxy con HTTPS. La estrategia de despliegue se define con el propietario (ver los riesgos en la propuesta). `/api/health` responde 200 si la aplicación y la base responden, y 503 si la base no contesta.
 
 ## Testing y CI
 
-GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQL 16 real: valida el esquema, aplica las migraciones, comprueba que no haya diferencias entre esquema y base, y corre lint, typecheck, formato, tests y build.
+GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQL 16 real: valida el esquema, aplica las migraciones, comprueba que no haya diferencias entre esquema y base, corre los seeds dos veces (para comprobar que no duplican) y corre lint, typecheck, formato, tests unitarios, tests de integración y build.
 
 ## Documentación
 

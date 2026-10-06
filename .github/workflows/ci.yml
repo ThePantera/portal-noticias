@@ -26,6 +26,7 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       DATABASE_URL: postgresql://portal:portal_ci@localhost:5432/portal_ci
+      TEST_DATABASE_URL: postgresql://portal:portal_ci@localhost:5432/portal_test
       SITE_URL: http://localhost:3000
       SITE_NAME: Portal Noticias
     steps:
@@ -47,5 +48,12 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run format:check
+      - name: Seeds (dos veces, para comprobar que son idempotentes)
+        run: |
+          npm run db:seed && npm run db:seed
+          npm run db:seed:demo && npm run db:seed:demo
       - run: npm test
+      - name: Crear base de tests
+        run: PGPASSWORD=portal_ci psql -h localhost -U portal -d portal_ci -c 'CREATE DATABASE portal_test'
+      - run: npm run test:integration
       - run: npm run build
