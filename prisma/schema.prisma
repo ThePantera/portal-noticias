@@ -1,0 +1,265 @@
+// Modelo de datos del portal de noticias.
+// Decisiones documentadas en docs/adr/0003-modelo-de-datos.md.
+// La URL de conexión vive en prisma.config.ts (leída de DATABASE_URL), nunca acá.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────── Usuarios y acceso ───────────────────────────────
+
+/// Roles previstos. En el MVP sólo se usa ADMIN; el resto existe para no
+/// tener que migrar datos cuando se sumen redactores.
+enum Role {
+  ADMIN
+  EDITOR
+  AUTHOR
+  CONTRIBUTOR
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  /// Hash argon2id. Nunca se guarda la contraseña.
+  passwordHash String    @map("password_hash")
+  role         Role      @default(ADMIN)
+  bio          String?
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  sessions      Session[]
+  articles      Article[]
+  uploadedMedia Media[]
+
+  @@map("users")
+}
+
+/// Sesión de servidor. `id` es el SHA-256 del token que viaja en la cookie,
+/// así una filtración de la tabla no permite secuestrar sesiones.
+model Session {
+  id        String   @id
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Intentos de login, para limitar fuerza bruta por email e IP.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ipAddress String?  @map("ip_address")
+  success   Boolean
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+  @@map("login_attempts")
+}
+
+// ─────────────────────────────── Taxonomía ───────────────────────────────
+
+model Category {
+  id             String   @id @default(cuid())
+  name           String   @unique
+  slug           String   @unique
+  description    String?
+  /// Orden en la navegación.
+  sortOrder      Int      @default(0) @map("sort_order")
+  /// Visible en la navegación principal.
+  isActive       Boolean  @default(true) @map("is_active")
+  seoTitle       String?  @map("seo_title")
+  seoDescription String?  @map("seo_description")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  articles Article[]
+
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  articles ArticleTag[]
+
+  @@map("tags")
+}
+
+// ─────────────────────────────── Contenido ───────────────────────────────
+
+enum ArticleStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+/// De dónde vino el contenido. Prepara la etapa de ingesta e IA sin
+/// cambiar el flujo: todo lo que no sea MANUAL igual pasa por revisión humana.
+enum ArticleOrigin {
+  MANUAL
+  IMPORTED
+  AI_ASSISTED
+}
+
+model Article {
+  id                 String        @id @default(cuid())
+  title              String
+  slug               String        @unique
+  /// Bajada.
+  excerpt            String
+  /// Documento del editor (JSON de Tiptap/ProseMirror). Fuente de verdad.
+  content            Json
+  /// Texto plano derivado de `content`: búsqueda, tiempo de lectura, resúmenes.
+  contentText        String        @default("") @map("content_text")
+  status             ArticleStatus @default(DRAFT)
+  origin             ArticleOrigin @default(MANUAL)
+  readingTimeMinutes Int           @default(1) @map("reading_time_minutes")
+  /// null = no destacada; 1 = nota principal de portada; 2..n = secundarias.
+  featuredRank       Int?          @map("featured_rank")
+
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  categoryId  String  @map("category_id")
+  authorId    String  @map("author_id")
+  mainImageId String? @map("main_image_id")
+  ogImageId   String? @map("og_image_id")
+
+  publishedAt DateTime? @map("published_at")
+  scheduledAt DateTime? @map("scheduled_at")
+  archivedAt  DateTime? @map("archived_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  /// Columna generada en SQL (ver migración inicial): title (A), excerpt (B),
+  /// content_text (C) con diccionario 'spanish' y sin acentos.
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
+  category    Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author      User                @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  mainImage   Media?              @relation("ArticleMainImage", fields: [mainImageId], references: [id], onDelete: SetNull)
+  ogImage     Media?              @relation("ArticleOgImage", fields: [ogImageId], references: [id], onDelete: SetNull)
+  tags        ArticleTag[]
+  gallery     ArticleMedia[]
+  slugHistory ArticleSlugHistory[]
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([categoryId, status, publishedAt(sort: Desc)])
+  @@index([status, scheduledAt])
+  @@index([featuredRank])
+  @@index([searchVector], type: Gin)
+  @@map("articles")
+}
+
+model ArticleTag {
+  articleId String @map("article_id")
+  tagId     String @map("tag_id")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+  @@map("article_tags")
+}
+
+/// Slugs anteriores de una nota publicada, para redirigir con 301 si cambia el título.
+model ArticleSlugHistory {
+  slug      String   @id
+  articleId String   @map("article_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@map("article_slug_history")
+}
+
+// ─────────────────────────────── Media ───────────────────────────────
+
+model Media {
+  id           String   @id @default(cuid())
+  /// Proveedor de almacenamiento ("local", "s3", ...). Ver docs/adr/0005-media.md.
+  storageDriver String  @map("storage_driver")
+  /// Clave del original dentro del proveedor; nunca una URL absoluta.
+  storageKey   String   @unique @map("storage_key")
+  mimeType     String   @map("mime_type")
+  sizeBytes    Int      @map("size_bytes")
+  width        Int
+  height       Int
+  altText      String   @default("") @map("alt_text")
+  caption      String?
+  /// Crédito de la foto (fotógrafo / agencia).
+  credit       String?
+  /// Variantes generadas: [{ key, width, height, format, sizeBytes }].
+  variants     Json     @default("[]")
+  uploadedById String?  @map("uploaded_by_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  uploadedBy        User?          @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  mainImageOf       Article[]      @relation("ArticleMainImage")
+  ogImageOf         Article[]      @relation("ArticleOgImage")
+  articleGalleries  ArticleMedia[]
+
+  @@index([createdAt(sort: Desc)])
+  @@map("media")
+}
+
+/// Imágenes adicionales de una nota, ordenadas.
+model ArticleMedia {
+  articleId String @map("article_id")
+  mediaId   String @map("media_id")
+  position  Int    @default(0)
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, mediaId])
+  @@index([articleId, position])
+  @@map("article_media")
+}
+
+// ─────────────────────────────── Eventos (outbox) ───────────────────────────────
+
+/// Outbox transaccional: cada cambio de estado de una nota escribe acá su evento
+/// en la misma transacción. Los consumidores futuros (Telegram, newsletter,
+/// redes, analytics, IA) leen filas sin procesar. Ver docs/adr/0006-eventos.md.
+model DomainEvent {
+  id            String    @id @default(cuid())
+  /// ARTICLE_CREATED, ARTICLE_PUBLISHED, ... (string para sumar tipos sin migrar).
+  type          String
+  aggregateType String    @map("aggregate_type")
+  aggregateId   String    @map("aggregate_id")
+  payload       Json
+  actorId       String?   @map("actor_id")
+  occurredAt    DateTime  @default(now()) @map("occurred_at")
+  processedAt   DateTime? @map("processed_at")
+  attempts      Int       @default(0)
+  lastError     String?   @map("last_error")
+
+  @@index([processedAt, occurredAt])
+  @@index([aggregateType, aggregateId])
+  @@index([type, occurredAt])
+  @@map("domain_events")
+}
