@@ -49,16 +49,34 @@ export function localDriver(dir = env.STORAGE_LOCAL_DIR): StorageDriver {
 }
 
 /**
- * Vercel Blob. La dirección pública sale del id del store, que viene dentro del token
- * (vercel_blob_rw_<storeId>_<secreto>), así no hay que copiarla a mano.
+ * Credenciales de Vercel Blob. Según cómo se conecte el store, Vercel carga una de dos cosas:
+ * - un token `vercel_blob_rw_<storeId>_<secreto>` en BLOB_READ_WRITE_TOKEN (o en otra variable,
+ *   si al conectarlo se eligió otro prefijo), o
+ * - BLOB_STORE_ID, y la función se autentica sola con el token OIDC que Vercel le da en cada pedido.
  */
-export function vercelBlobDriver(token = env.BLOB_READ_WRITE_TOKEN): StorageDriver {
-  const storeId = token?.split("_")[3]?.toLowerCase();
+export function blobCredentials(source: Record<string, string | undefined> = process.env): {
+  token?: string;
+  storeId?: string;
+} {
+  const token =
+    source.BLOB_READ_WRITE_TOKEN?.trim() ||
+    Object.values(source).find((value) => typeof value === "string" && value.startsWith("vercel_blob_rw_"));
+  const rawStoreId = token?.split("_")[3] ?? source.BLOB_STORE_ID?.trim();
+  const storeId = rawStoreId?.replace(/^store_/, "") || undefined;
+  return { token, storeId };
+}
+
+/** Vercel Blob. La dirección pública sale del id del store, así no hay que copiarla a mano. */
+export function vercelBlobDriver(credentials = blobCredentials()): StorageDriver {
+  const { token, storeId } = credentials;
   const base =
-    env.MEDIA_PUBLIC_BASE_URL ?? (storeId ? `https://${storeId}.public.blob.vercel-storage.com` : "");
-  const requireToken = () => {
-    if (!token) throw new StorageNotConfiguredError("Falta BLOB_READ_WRITE_TOKEN.");
-    return token;
+    env.MEDIA_PUBLIC_BASE_URL ??
+    (storeId ? `https://${storeId.toLowerCase()}.public.blob.vercel-storage.com` : "");
+  // Sin token se pasa el id del store y el SDK usa el token OIDC de Vercel.
+  const auth = () => {
+    if (token) return { token };
+    if (storeId) return { storeId };
+    throw new StorageNotConfiguredError("Faltan las credenciales de Vercel Blob.");
   };
   return {
     name: "vercel-blob",
@@ -66,7 +84,7 @@ export function vercelBlobDriver(token = env.BLOB_READ_WRITE_TOKEN): StorageDriv
       assertKey(key);
       await put(key, body, {
         access: "public",
-        token: requireToken(),
+        ...auth(),
         contentType,
         addRandomSuffix: false,
         // Cada clave es única y nunca se sobrescribe: se puede cachear para siempre.
@@ -77,7 +95,7 @@ export function vercelBlobDriver(token = env.BLOB_READ_WRITE_TOKEN): StorageDriv
       if (keys.length)
         await del(
           keys.map((key) => `${base}/${key}`),
-          { token: requireToken() },
+          auth(),
         );
     },
     publicUrl: (key) => `${base}/${key}`,
@@ -86,7 +104,7 @@ export function vercelBlobDriver(token = env.BLOB_READ_WRITE_TOKEN): StorageDriv
 
 /** Proveedor para subir archivos nuevos. */
 export function activeDriverName(): StorageDriverName {
-  return env.STORAGE_DRIVER ?? (env.BLOB_READ_WRITE_TOKEN ? "vercel-blob" : "local");
+  return env.STORAGE_DRIVER ?? (blobCredentials().storeId ? "vercel-blob" : "local");
 }
 
 let override: StorageDriver | null = null;
@@ -110,8 +128,8 @@ export function getUploadDriver(): StorageDriver {
   if (driver.name === "local" && process.env.VERCEL && !override) {
     throw new StorageNotConfiguredError("En Vercel hace falta un Blob store para guardar imágenes.");
   }
-  if (driver.name === "vercel-blob" && !env.BLOB_READ_WRITE_TOKEN && !override) {
-    throw new StorageNotConfiguredError("Falta BLOB_READ_WRITE_TOKEN.");
+  if (driver.name === "vercel-blob" && !blobCredentials().storeId && !override) {
+    throw new StorageNotConfiguredError("Faltan BLOB_READ_WRITE_TOKEN o BLOB_STORE_ID.");
   }
   return driver;
 }
