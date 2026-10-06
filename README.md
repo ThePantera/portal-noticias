@@ -2,7 +2,7 @@
 
 Portal de noticias digital con panel de administración propio, preparado para evolucionar hacia la ingesta automática, la asistencia con IA (siempre con revisión humana) y la distribución por eventos.
 
-> **Estado:** Fase 7 (sitio público). Las notas se escriben, programan y publican desde `/admin`, y se leen en la portada, `/noticias/{slug}`, `/categoria/{slug}`, `/tag/{slug}` y `/buscar`. SEO completo, imágenes y automatización llegan en las Fases 8 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
+> **Estado:** Fase 8 (SEO). Las notas se escriben, programan y publican desde `/admin`, y se leen en la portada, `/noticias/{slug}`, `/categoria/{slug}`, `/tag/{slug}` y `/buscar`. Para buscadores: `/sitemap.xml`, `/news-sitemap.xml` (últimas 48 horas, formato Google News), `/feed.xml` (RSS), `/robots.txt` y datos estructurados `NewsArticle`. Imágenes, seguridad y automatización llegan en las Fases 9 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
 
 ## Stack
 

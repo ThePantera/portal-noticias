@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { Suspense } from "react";
 import { ArticleBody } from "@/components/editorial/ArticleBody";
 import { ArticleCard } from "@/components/editorial/ArticleCard";
 import { ArticleMeta } from "@/components/editorial/ArticleMeta";
+import { JsonLd } from "@/components/editorial/JsonLd";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { ShareButtons } from "@/components/editorial/ShareButtons";
+import { FEED_ALTERNATE_TYPES, breadcrumbJsonLd, newsArticleJsonLd } from "@/lib/seo";
 import { env } from "@/server/env";
 import { getArticleBySlug, getRecentSlugs, getRelatedArticles } from "@/server/services/public-content";
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/noticias/[slug]">
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, types: FEED_ALTERNATE_TYPES },
     openGraph: {
       type: "article",
       url: path,
@@ -46,7 +47,11 @@ export async function generateMetadata({ params }: PageProps<"/noticias/[slug]">
   };
 }
 
-async function ArticleView({ params }: PageProps<"/noticias/[slug]">) {
+/**
+ * Sin Suspense alrededor de los parámetros: todo lo que lee está en caché y la ruta tiene
+ * generateStaticParams, así que una dirección inexistente responde con un 404 de verdad.
+ */
+export default async function ArticlePage({ params }: PageProps<"/noticias/[slug]">) {
   const { slug } = await params;
   const result = await getArticleBySlug(slug);
   if (result.kind === "redirect") permanentRedirect(`/noticias/${result.slug}`);
@@ -56,7 +61,28 @@ async function ArticleView({ params }: PageProps<"/noticias/[slug]">) {
   const url = new URL(`/noticias/${article.slug}`, env.SITE_URL).toString();
 
   return (
-    <>
+    <div className="px-4 py-8 md:px-8 md:py-12">
+      <JsonLd
+        data={[
+          newsArticleJsonLd({
+            siteUrl: env.SITE_URL,
+            siteName: env.SITE_NAME,
+            slug: article.slug,
+            title: article.seoTitle || article.title,
+            description: article.seoDescription || article.excerpt,
+            publishedAt: article.publishedAt,
+            updatedAt: article.updatedAt,
+            authorName: article.authorName,
+            section: article.category.name,
+            keywords: article.tags.map((t) => t.name),
+          }),
+          breadcrumbJsonLd(env.SITE_URL, [
+            { name: "Portada", path: "/" },
+            { name: article.category.name, path: `/categoria/${article.category.slug}` },
+            { name: article.title, path: `/noticias/${article.slug}` },
+          ]),
+        ]}
+      />
       <article className="mx-auto w-full max-w-measure">
         <nav aria-label="Ruta" className="text-sm">
           <Link href={`/categoria/${article.category.slug}`} className="kicker hover:underline">
@@ -110,16 +136,6 @@ async function ArticleView({ params }: PageProps<"/noticias/[slug]">) {
           </ul>
         </section>
       ) : null}
-    </>
-  );
-}
-
-export default function ArticlePage(props: PageProps<"/noticias/[slug]">) {
-  return (
-    <div className="px-4 py-8 md:px-8 md:py-12">
-      <Suspense fallback={<p className="mx-auto max-w-measure text-sm text-ink-subtle">Cargando la nota…</p>}>
-        <ArticleView {...props} />
-      </Suspense>
     </div>
   );
 }

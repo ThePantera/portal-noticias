@@ -259,3 +259,50 @@ export async function listRecentSlugs(limit = 20): Promise<string[]> {
   });
   return rows.map((r) => r.slug);
 }
+
+export const NEWS_SITEMAP_HOURS = 48;
+export const FEED_SIZE = 20;
+
+/** Todo lo indexable: notas publicadas, secciones activas y etiquetas con alguna nota publicada. */
+export async function listSitemapEntries() {
+  const [articles, categories, tags] = await Promise.all([
+    db.article.findMany({
+      where: PUBLISHED,
+      orderBy: newestFirst,
+      take: 50_000,
+      select: { slug: true, updatedAt: true },
+    }),
+    db.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.tag.findMany({
+      where: { articles: { some: { article: PUBLISHED } } },
+      orderBy: { slug: "asc" },
+      select: { slug: true },
+    }),
+  ]);
+  return { articles, categories, tags };
+}
+
+/** Notas publicadas en las últimas 48 horas, para el sitemap de Google News. */
+export function listNewsSitemapArticles(now: Date) {
+  return db.article.findMany({
+    where: { ...PUBLISHED, publishedAt: { gte: new Date(now.getTime() - NEWS_SITEMAP_HOURS * 3_600_000) } },
+    orderBy: newestFirst,
+    take: 1000,
+    select: { slug: true, title: true, publishedAt: true },
+  });
+}
+
+/** Las últimas notas para el feed RSS. */
+export async function listFeedArticles(): Promise<ArticleCardData[]> {
+  const rows = await db.article.findMany({
+    where: PUBLISHED,
+    orderBy: newestFirst,
+    take: FEED_SIZE,
+    select: cardSelect,
+  });
+  return rows.map(toCard);
+}

@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { parseGoogleVerification } from "@/lib/seo";
 
 /**
  * Variables de entorno validadas al arrancar. Si falta algo obligatorio,
@@ -16,6 +17,8 @@ const schema = z.object({
     .optional()
     .transform((v) => v || undefined)
     .refine((v) => v === undefined || v.length >= 32, "Tiene que tener al menos 32 caracteres."),
+  /** Código de Google Search Console (método "Etiqueta HTML"). Opcional. */
+  GOOGLE_SITE_VERIFICATION: z.string().optional().transform(parseGoogleVerification),
 });
 
 // En Vercel, si no se definió SITE_URL se usa el dominio de producción del proyecto, para
