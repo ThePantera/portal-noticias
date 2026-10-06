@@ -40,6 +40,17 @@ test("lo que se publica aparece en el sitio y lo que se despublica desaparece", 
     encodeURIComponent(articleUrl),
   );
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", articleUrl);
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((scripts) => scripts.flatMap((s) => [JSON.parse(s.textContent ?? "null")].flat()));
+  expect(ld.find((item: { "@type": string }) => item["@type"] === "NewsArticle")).toMatchObject({
+    headline: title,
+    url: articleUrl,
+  });
+  expect(await (await page.request.get("/sitemap.xml")).text()).toContain(
+    `${new URL(articleUrl).pathname}</loc>`,
+  );
+  expect(await (await page.request.get("/feed.xml")).text()).toContain(title);
 
   // Sección y etiqueta enlazadas desde la nota.
   await page.getByRole("navigation", { name: "Ruta" }).getByRole("link", { name: "Economía" }).click();
@@ -69,12 +80,37 @@ test("lo que se publica aparece en el sitio y lo que se despublica desaparece", 
   await expect(page.getByText(/No encontramos notas/)).toBeVisible();
 });
 
-test("una dirección inexistente muestra el 404 y no se indexa", async ({ page }) => {
-  await page.goto("/noticias/esta-nota-no-existe");
-  await expect(page.getByText("No encontramos esta página")).toBeVisible();
-  await expectNoindex(page);
-  await page.goto("/categoria/no-existe");
-  await expect(page.getByText("No encontramos esta página")).toBeVisible();
+test("las direcciones inexistentes responden 404 de verdad y no se indexan", async ({ page }) => {
+  for (const path of ["/noticias/esta-nota-no-existe", "/categoria/no-existe", "/tag/no-existe"]) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(404);
+    await expect(page.getByText("No encontramos esta página")).toBeVisible();
+    await expectNoindex(page);
+  }
+});
+
+test("buscadores: robots, sitemaps, RSS y datos estructurados", async ({ page, request }) => {
+  const robots = await (await request.get("/robots.txt")).text();
+  expect(robots).toContain("Disallow: /admin");
+  expect(robots).toContain("/sitemap.xml");
+
+  for (const [path, type] of [
+    ["/sitemap.xml", "xml"],
+    ["/news-sitemap.xml", "xml"],
+    ["/feed.xml", "rss+xml"],
+  ]) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()["content-type"], path).toContain(type);
+  }
+  expect(await (await request.get("/sitemap.xml")).text()).toContain("/categoria/economia</loc>");
+
+  await page.goto("/");
+  const types = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((scripts) => scripts.flatMap((s) => [JSON.parse(s.textContent ?? "null")].flat()));
+  expect(types.map((t: { "@type": string }) => t["@type"])).toEqual(["WebSite", "NewsMediaOrganization"]);
+  await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveCount(1);
 });
 
 test("las páginas públicas no desbordan a lo ancho", async ({ page }) => {

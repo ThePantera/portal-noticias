@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Libre_Franklin, Newsreader } from "next/font/google";
+import { FEED_ALTERNATE_TYPES } from "@/lib/seo";
 import { env } from "@/server/env";
 import "@/styles/globals.css";
 
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   title: { default: env.SITE_NAME, template: `%s | ${env.SITE_NAME}` },
   description: "Noticias de política, economía, tecnología, mundo, sociedad, deportes y cultura.",
   openGraph: { siteName: env.SITE_NAME, locale: "es_AR", type: "website" },
+  alternates: { types: FEED_ALTERNATE_TYPES },
 };
 
 export const viewport: Viewport = {

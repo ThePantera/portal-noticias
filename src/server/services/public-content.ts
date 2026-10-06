@@ -60,5 +60,27 @@ export async function getRecentSlugs() {
   return queries.listRecentSlugs();
 }
 
+export async function getSitemapEntries() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(ARTICLES_TAG, CATEGORIES_TAG);
+  return queries.listSitemapEntries();
+}
+
+/** La ventana de 48 horas se calcula adentro de la caché, que se renueva cada hora o al publicar. */
+export async function getNewsSitemapArticles() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(ARTICLES_TAG);
+  return queries.listNewsSitemapArticles(new Date());
+}
+
+export async function getFeedArticles() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(ARTICLES_TAG);
+  return queries.listFeedArticles();
+}
+
 /** La búsqueda depende de lo que escribe cada lector: no se guarda en caché. */
 export const searchArticles = queries.searchArticles;

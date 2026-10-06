@@ -1,5 +1,8 @@
 import { ArticleCard } from "@/components/editorial/ArticleCard";
+import { JsonLd } from "@/components/editorial/JsonLd";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
+import { websiteJsonLd } from "@/lib/seo";
+import { env } from "@/server/env";
 import { getHomepage } from "@/server/services/public-content";
 
 export default async function HomePage() {
@@ -7,9 +10,13 @@ export default async function HomePage() {
   const underLead = recent.slice(0, 2);
   const latest = recent.slice(2);
 
+  // El sitio y su buscador se describen aunque todavía no haya notas.
+  const siteLd = <JsonLd data={websiteJsonLd(env.SITE_URL, env.SITE_NAME)} />;
+
   if (!lead) {
     return (
       <section className="mx-auto max-w-site px-4 py-16 md:px-8">
+        {siteLd}
         <p className="kicker">Portada</p>
         <h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight font-semibold md:text-5xl">
           Todavía no hay noticias publicadas
@@ -23,7 +30,8 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto grid max-w-site gap-12 px-4 py-8 md:px-8 md:py-10">
-      <h1 className="sr-only">Portada</h1>
+      {siteLd}
+      <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
 
       <section aria-label="Principales" className="grid gap-8 lg:grid-cols-12 lg:gap-x-8">
         <div className="lg:col-span-8">

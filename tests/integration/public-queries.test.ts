@@ -10,7 +10,10 @@ import {
   getCategoryPage,
   getHomepage,
   getTagPage,
+  listFeedArticles,
   listNavCategories,
+  listNewsSitemapArticles,
+  listSitemapEntries,
   listRelatedArticles,
   PUBLIC_PAGE_SIZE,
   searchArticles,
@@ -175,5 +178,20 @@ describe("sitio público", () => {
     await testDb.category.update({ where: { id: category.id }, data: { isActive: false } });
     expect(await listNavCategories()).toEqual([]);
     expect(await getCategoryPage(category.slug)).toBeNull();
+  });
+
+  it("sitemaps y RSS sólo listan lo publicado; el de noticias, las últimas 48 horas", async () => {
+    const { admin, publish, draft } = await setup();
+    await publish({ title: "Hoy", tags: ["Visible"] }, 60);
+    await publish({ title: "Hace tres días" }, 3 * 24 * 60);
+    await draft({ title: "Borrador", tags: ["Oculta"] });
+    const archived = await publish({ title: "Archivada" });
+    await transitionArticle(admin, archived, "archive");
+
+    const { articles, tags } = await listSitemapEntries();
+    expect(articles.map((a) => a.slug).sort()).toEqual(["hace-tres-dias", "hoy"]);
+    expect(tags.map((t) => t.slug)).toEqual(["visible"]);
+    expect((await listNewsSitemapArticles(new Date())).map((a) => a.title)).toEqual(["Hoy"]);
+    expect((await listFeedArticles()).map((a) => a.title)).toEqual(["Hoy", "Hace tres días"]);
   });
 });
