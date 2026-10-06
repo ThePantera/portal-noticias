@@ -2,7 +2,7 @@
 
 Portal de noticias digital con panel de administración propio, preparado para evolucionar hacia la ingesta automática, la asistencia con IA (siempre con revisión humana) y la distribución por eventos.
 
-> **Estado:** Fase 3 (base de datos). La aplicación compila, corre y está conectada a PostgreSQL, con categorías y notas de ejemplo. Todavía no tiene autenticación, panel ni páginas públicas de notas (Fases 4 a 12). Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
+> **Estado:** Fase 4 (autenticación). Ya se puede iniciar sesión en `/admin` con un usuario creado desde el servidor. El tablero, el CRUD de notas y las páginas públicas llegan en las Fases 5 a 12. Ver [la auditoría y propuesta](docs/00-auditoria-y-propuesta.md).
 
 ## Stack
 
@@ -20,7 +20,8 @@ npm install
 npm run db:deploy             # aplica las migraciones
 npm run db:seed               # crea las 10 categorías iniciales
 npm run db:seed:demo          # opcional: notas de ejemplo (sólo desarrollo)
-npm run dev                   # http://localhost:3000
+npm run admin:create          # crea tu usuario de administrador
+npm run dev                   # http://localhost:3000, panel en /admin
 ```
 
 ## Variables de entorno
@@ -50,13 +51,22 @@ Están todas en `.env.example`, sin valores reales. Ningún secreto va en el có
 - Las categorías iniciales salen de `prisma/data/categories.ts` y después se administran desde el panel; el seed nunca pisa cambios.
 - Docker Compose crea `portal_dev` y `portal_test`.
 
+## Autenticación
+
+- No hay registro público: el administrador se crea con `npm run admin:create` desde el servidor.
+- Sesiones en base de datos con cookie `httpOnly`; en la base se guarda sólo el SHA-256 del token. Contraseñas con argon2id, mínimo 12 caracteres.
+- Tras 5 intentos fallidos por email (o 20 por IP) en 15 minutos, el login se bloquea por 15 minutos.
+- Toda página, Server Action y Route Handler del panel valida la sesión contra la base con `requireUser()` / `requirePermission()`. `src/proxy.ts` sólo redirige: no es la barrera de seguridad.
+- Si perdés la contraseña: `npm run admin:reset-password`.
+  Ver [ADR 0004](docs/adr/0004-autenticacion.md).
+
 ## Producción
 
 `npm run db:deploy && npm run build && npm start` detrás de un proxy con HTTPS. La estrategia de despliegue se define con el propietario (ver los riesgos en la propuesta). `/api/health` responde 200 si la aplicación y la base responden, y 503 si la base no contesta.
 
 ## Testing y CI
 
-GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQL 16 real: valida el esquema, aplica las migraciones, comprueba que no haya diferencias entre esquema y base, corre los seeds dos veces (para comprobar que no duplican) y corre lint, typecheck, formato, tests unitarios, tests de integración y build.
+GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQL 16 real: valida el esquema, aplica las migraciones, comprueba que no haya diferencias entre esquema y base, corre los seeds dos veces (para comprobar que no duplican) y corre lint, typecheck, formato, tests unitarios, tests de integración, build y tests end to end en navegador.
 
 ## Documentación
 

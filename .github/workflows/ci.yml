@@ -27,6 +27,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://portal:portal_ci@localhost:5432/portal_ci
       TEST_DATABASE_URL: postgresql://portal:portal_ci@localhost:5432/portal_test
+      E2E_DATABASE_URL: postgresql://portal:portal_ci@localhost:5432/portal_e2e
       SITE_URL: http://localhost:3000
       SITE_NAME: Portal Noticias
     steps:
@@ -53,7 +54,19 @@ jobs:
           npm run db:seed && npm run db:seed
           npm run db:seed:demo && npm run db:seed:demo
       - run: npm test
-      - name: Crear base de tests
-        run: PGPASSWORD=portal_ci psql -h localhost -U portal -d portal_ci -c 'CREATE DATABASE portal_test'
+      - name: Crear bases de tests
+        run: |
+          PGPASSWORD=portal_ci psql -h localhost -U portal -d portal_ci -c 'CREATE DATABASE portal_test'
+          PGPASSWORD=portal_ci psql -h localhost -U portal -d portal_ci -c 'CREATE DATABASE portal_e2e'
       - run: npm run test:integration
-      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Tests end to end (compila y levanta el servidor de producción)
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

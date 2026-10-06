@@ -1,6 +1,6 @@
 # ADR 0004: Autenticación y autorización
 
-**Estado:** propuesto (6 oct 2026)
+**Estado:** aceptado e implementado (6 oct 2026)
 
 ## Decisión
 
@@ -15,3 +15,12 @@ Sesiones propias en base de datos (token aleatorio de 32 bytes en una cookie htt
 ## Consecuencias
 
 Unas 150 líneas propias, cubiertas por tests (login correcto e incorrecto, rate limit, sesión vencida, logout, acceso sin sesión y con un rol insuficiente).
+
+## Detalles de la implementación
+
+- Cookie `portal_session`; en producción `__Host-portal_session` (exige Secure, path=/ y sin dominio, así ningún subdominio puede pisarla). `httpOnly`, `SameSite=Lax`, vencimiento igual al de la sesión en base.
+- Si el email no existe se verifica igual contra un hash descartable, para que la respuesta tarde lo mismo y no se pueda deducir qué cuentas existen por el tiempo.
+- El bloqueo por email cuenta los fallos desde el último acceso correcto dentro de la ventana, así un login exitoso limpia el contador.
+- Sin permiso se responde 404 (`notFound()`) en vez de 403, para no revelar qué rutas existen.
+- Las Server Actions de Next verifican el origen de la petición, lo que cubre CSRF en el login y el logout.
+- Cambiar la contraseña cierra todas las sesiones de ese usuario.
