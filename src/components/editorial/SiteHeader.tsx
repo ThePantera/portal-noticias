@@ -1,14 +1,13 @@
 import Link from "next/link";
+import type { CategoryLink } from "@/types/public";
+import { SiteNav } from "./SiteNav";
 
-type SiteHeaderProps = { siteName: string };
+type SiteHeaderProps = { siteName: string; categories: CategoryLink[] };
 
-/**
- * Cabecera pública. La navegación por categorías se completa en la Fase 7,
- * cuando las categorías se lean de la base (no se hardcodean).
- */
-export function SiteHeader({ siteName }: SiteHeaderProps) {
+/** Cabecera pública: nombre del portal, búsqueda y la fila de secciones (salen de la base). */
+export function SiteHeader({ siteName, categories }: SiteHeaderProps) {
   return (
-    <header className="border-b border-rule">
+    <header>
       <div className="mx-auto flex max-w-site items-center justify-between gap-4 px-4 py-4 md:px-8">
         <Link
           href="/"
@@ -16,7 +15,7 @@ export function SiteHeader({ siteName }: SiteHeaderProps) {
         >
           {siteName}
         </Link>
-        <form action="/buscar" role="search" className="min-w-0">
+        <form action="/buscar" role="search" className="flex min-w-0 flex-1 justify-end">
           <label htmlFor="site-search" className="sr-only">
             Buscar noticias
           </label>
@@ -24,10 +23,13 @@ export function SiteHeader({ siteName }: SiteHeaderProps) {
             id="site-search"
             name="q"
             type="search"
-            placeholder="Buscar noticias"
-            className="w-36 min-w-0 rounded border border-rule bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-subtle sm:w-56"
+            placeholder="Buscar"
+            className="w-full max-w-56 min-w-0 rounded border border-rule bg-surface px-3 py-2 text-base text-ink placeholder:text-ink-subtle"
           />
         </form>
+      </div>
+      <div className="border-t border-rule">
+        <SiteNav categories={categories} />
       </div>
     </header>
   );
