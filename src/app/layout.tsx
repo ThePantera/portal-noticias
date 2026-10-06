@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   description: "Noticias de política, economía, tecnología, mundo, sociedad, deportes y cultura.",
   openGraph: { siteName: env.SITE_NAME, locale: "es_AR", type: "website" },
   alternates: { types: FEED_ALTERNATE_TYPES },
+  ...(env.GOOGLE_SITE_VERIFICATION ? { verification: { google: env.GOOGLE_SITE_VERIFICATION } } : {}),
 };
 
 export const viewport: Viewport = {

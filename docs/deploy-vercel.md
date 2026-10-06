@@ -117,6 +117,19 @@ Cuando programás una nota, la publica un proceso que corre cada 5 minutos desde
 
 GitHub puede atrasar estas ejecuciones unos minutos en horas de mucha carga, así que una nota programada a las 9:00 puede salir a las 9:05 o un poco después. La fecha de publicación que se muestra es siempre la que programaste.
 
+## Paso 9. Dar de alta el sitio en Google Search Console
+
+Se hace una sola vez. Después, cada nota que publiques entra sola en el sitemap y Google lo vuelve a leer por su cuenta.
+
+1. Entrá a [search.google.com/search-console](https://search.google.com/search-console) con tu cuenta de Google y tocá **"Agregar propiedad"**.
+2. Elegí **"Prefijo de la URL"** (no "Dominio": una dirección `.vercel.app` no permite el método por DNS) y pegá la dirección del sitio, por ejemplo `https://portal-noticias-xxxx.vercel.app`.
+3. En los métodos de verificación, abrí **"Etiqueta HTML"** y copiá la etiqueta que te muestra. Empieza con `<meta name="google-site-verification"`.
+4. **En Vercel**: **Settings → Environment Variables → Add**. Nombre `GOOGLE_SITE_VERIFICATION` y como valor la etiqueta entera, o sólo el código que está entre las comillas de `content`. Guardala para **Production** y hacé **Redeploy**, como en el paso 5.
+5. Cuando termine el deploy, volvé a Search Console y tocá **"Verificar"**.
+6. En el menú de la izquierda, entrá a **Sitemaps** y agregá `sitemap.xml`. Después agregá también `news-sitemap.xml`.
+
+Google tarda de unos días a un par de semanas en mostrar los primeros datos. Si después cambiás a un dominio propio, se agrega como una propiedad nueva y se repiten estos pasos.
+
 ## De acá en adelante
 
 - **Cada merge a `main`** publica una versión nueva en producción, con las migraciones que traiga.
@@ -131,4 +144,5 @@ GitHub puede atrasar estas ejecuciones unos minutos en horas de mucha carga, as�
 | Error de Prisma sobre la URL o la conexión a la base                               | La base no está conectada al proyecto: repetí el paso 3. Si en **Environment Variables** la base aparece con otros nombres (por ejemplo `POSTGRES_URL`), avisame y lo ajusto.                                                                                                         |
 | Las notas programadas no salen solas                                               | Falta el paso 8, o `CRON_SECRET` no es igual en Vercel y en GitHub. En **GitHub → Actions → "Publicar notas programadas"** el log de la última ejecución dice qué pasó: `No autorizado` es un secreto distinto, y `Falta CRON_SECRET o SITE_URL` es que falta configurarlo en GitHub. |
 | `/api/health` responde `503`                                                       | La aplicación anda pero no llega a la base. Revisá en Neon que la base no esté suspendida o borrada.                                                                                                                                                                                  |
+| Search Console dice que no encuentra la etiqueta                                   | Falta el **Redeploy** después de cargar `GOOGLE_SITE_VERIFICATION`, o el valor quedó incompleto. Abrí tu sitio, mirá el código de la página (clic derecho → "Ver código fuente") y buscá `google-site-verification`.                                                                  |
 | El login dice "Email o contraseña incorrectos"                                     | Revisá la contraseña. Si la perdiste, avisame y te paso cómo cambiarla. Después de 5 intentos fallidos el login se bloquea 15 minutos.                                                                                                                                                |

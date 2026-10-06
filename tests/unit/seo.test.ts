@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { breadcrumbJsonLd, escapeXml, newsArticleJsonLd, serializeJsonLd, websiteJsonLd } from "@/lib/seo";
+import {
+  breadcrumbJsonLd,
+  escapeXml,
+  newsArticleJsonLd,
+  parseGoogleVerification,
+  serializeJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo";
 
 describe("JSON-LD", () => {
   it("no deja cerrar el script ni inyectar HTML, y sigue siendo JSON válido", () => {
@@ -52,5 +59,16 @@ describe("XML", () => {
     expect(escapeXml(`Tom & "Jerry" <b>'s</b>\u0007`)).toBe(
       "Tom &amp; &quot;Jerry&quot; &lt;b&gt;&apos;s&lt;/b&gt;",
     );
+  });
+});
+
+describe("verificación de Google", () => {
+  it("acepta el código solo o la etiqueta completa, y descarta lo que no lo es", () => {
+    const code = "AbC123_def-456ghiJKL";
+    expect(parseGoogleVerification(code)).toBe(code);
+    expect(parseGoogleVerification(`<meta name="google-site-verification" content="${code}" />`)).toBe(code);
+    expect(parseGoogleVerification("")).toBeUndefined();
+    expect(parseGoogleVerification(undefined)).toBeUndefined();
+    expect(parseGoogleVerification('"><script>alert(1)</script>')).toBeUndefined();
   });
 });

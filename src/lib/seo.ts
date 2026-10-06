@@ -106,3 +106,15 @@ export function escapeXml(value: string): string {
  * que define su `canonical` tiene que repetir esto o el enlace desaparece.
  */
 export const FEED_ALTERNATE_TYPES = { "application/rss+xml": "/feed.xml" };
+
+/**
+ * Código de verificación de Google Search Console. Acepta el código solo o la etiqueta
+ * completa que copia Google (`<meta name="google-site-verification" content="…" />`).
+ * Si no tiene la forma esperada devuelve undefined: un error al pegar no tumba el sitio.
+ */
+export function parseGoogleVerification(value: string | undefined): string | undefined {
+  const raw = value?.trim();
+  if (!raw) return undefined;
+  const code = /content\s*=\s*["']([^"']+)["']/i.exec(raw)?.[1] ?? raw;
+  return /^[A-Za-z0-9_-]{10,100}$/.test(code) ? code : undefined;
+}
