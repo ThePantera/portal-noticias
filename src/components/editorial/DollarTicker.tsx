@@ -11,7 +11,7 @@ export function DollarTicker({ initial }: { initial: DollarRates | null }) {
 
   return (
     <section aria-label="Cotización del dólar" className="bg-night text-on-night">
-      <div className="mx-auto flex max-w-site [scrollbar-width:none] items-center gap-5 overflow-x-auto px-4 py-2 text-xs md:px-8">
+      <div className="relative mx-auto flex max-w-site [scrollbar-width:none] items-center gap-5 overflow-x-auto px-4 py-2 text-xs md:px-8">
         <p className="flex shrink-0 items-center gap-2 font-semibold tracking-wide text-on-night-muted uppercase">
           <span aria-hidden="true" className="live-dot" />
           Dólar hoy
