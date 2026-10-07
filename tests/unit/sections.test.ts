@@ -5,6 +5,7 @@ describe("color por sección", () => {
   it("cada sección conocida tiene su color y una nueva usa el acento", () => {
     expect(sectionTone("gaming")).toEqual({ "--section": "var(--color-hue-violet)" });
     expect(sectionTone("mundo")).toEqual({ "--section": "var(--color-hue-blue)" });
+    expect(sectionTone("ciberseguridad")).toEqual({ "--section": "var(--color-hue-rose)" });
     expect(sectionTone("seccion-nueva")).toEqual({});
   });
 

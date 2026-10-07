@@ -23,7 +23,9 @@ export function SectionHeader({
         id={id}
         className={`flex items-center gap-2.5 font-display text-xl font-extrabold tracking-tight md:text-2xl ${inverse ? "text-on-night" : "text-ink"}`}
       >
-        <span aria-hidden="true" className="h-6 w-1.5 rounded-full bg-section" />
+        <span aria-hidden="true" className="font-mono text-lg font-bold text-section md:text-xl">
+          &gt;
+        </span>
         {title}
       </h2>
       {href ? (
