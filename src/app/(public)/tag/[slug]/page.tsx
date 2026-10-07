@@ -49,9 +49,9 @@ export default async function TagPage({ params, searchParams }: PageProps<"/tag/
 
   return (
     <div className="mx-auto grid max-w-site gap-8 px-4 py-8 md:px-8 md:py-10">
-      <header className="border-b-2 border-ink pb-4">
+      <header className="rounded-card border border-rule bg-surface p-6 shadow-card md:p-8">
         <p className="kicker">Etiqueta</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{tag.name}</h1>
+        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight md:text-5xl">{tag.name}</h1>
         <p className="mt-2 text-sm text-ink-subtle">{total === 1 ? "1 nota" : `${total} notas`}</p>
       </header>
       <Suspense fallback={<p className="text-sm text-ink-subtle">Cargando las notas…</p>}>

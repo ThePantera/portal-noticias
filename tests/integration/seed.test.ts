@@ -8,8 +8,8 @@ import { resetDatabase, testDb } from "./setup/db";
 beforeEach(resetDatabase);
 
 describe("seed de categorías", () => {
-  it("crea las 10 categorías en orden y es idempotente", async () => {
-    expect(await seedCategories(testDb)).toBe(10);
+  it("crea las 11 categorías en orden y es idempotente", async () => {
+    expect(await seedCategories(testDb)).toBe(11);
     expect(await seedCategories(testDb)).toBe(0);
     const categories = await testDb.category.findMany({ orderBy: { sortOrder: "asc" } });
     expect(categories.map((c) => c.slug)).toEqual(INITIAL_CATEGORIES.map((c) => c.slug));
