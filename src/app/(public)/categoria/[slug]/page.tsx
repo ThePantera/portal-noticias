@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: PageProps<"/categoria/[slug]"
     title: category.seoTitle || category.name,
     description: category.seoDescription || category.description || `Últimas noticias de ${category.name}.`,
     alternates: { canonical: `/categoria/${category.slug}`, types: FEED_ALTERNATE_TYPES },
+    ...(category.isActive ? {} : { robots: { index: false } }),
   };
 }
 

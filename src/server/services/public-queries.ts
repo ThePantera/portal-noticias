@@ -70,14 +70,17 @@ const HERO_SIZE = 5;
  * últimas y un carril por sección, sin repetir lo que ya está arriba.
  */
 export async function getHomepage(): Promise<HomepageData> {
+  // La portada sólo muestra notas de las secciones del menú: las de una sección oculta siguen
+  // en su dirección, en la búsqueda y en su sección, pero no arriba.
+  const onHome = { ...PUBLISHED, category: { isActive: true } } satisfies Prisma.ArticleWhereInput;
   const [featured, recent, categories] = await Promise.all([
     db.article.findMany({
-      where: { ...PUBLISHED, featuredRank: { not: null } },
+      where: { ...onHome, featuredRank: { not: null } },
       orderBy: [{ featuredRank: "asc" }, ...newestFirst],
       take: HERO_SIZE,
       select: cardSelect,
     }),
-    db.article.findMany({ where: PUBLISHED, orderBy: newestFirst, take: HERO_SIZE + 8, select: cardSelect }),
+    db.article.findMany({ where: onHome, orderBy: newestFirst, take: HERO_SIZE + 8, select: cardSelect }),
     listNavCategories(),
   ]);
 
@@ -201,11 +204,21 @@ async function pageOf(where: Prisma.ArticleWhereInput, page: number): Promise<Ar
   };
 }
 
-/** Sección activa con sus notas, o null si no existe o está desactivada. */
+/**
+ * Sección con sus notas, o null si no existe. Una sección desactivada sale del menú y de la
+ * portada, pero su página sigue (sin indexar) para no romper los enlaces de sus notas.
+ */
 export async function getCategoryPage(slug: string, page = 1) {
   const category = await db.category.findFirst({
-    where: { slug, isActive: true },
-    select: { name: true, slug: true, description: true, seoTitle: true, seoDescription: true },
+    where: { slug },
+    select: {
+      name: true,
+      slug: true,
+      description: true,
+      seoTitle: true,
+      seoDescription: true,
+      isActive: true,
+    },
   });
   if (!category) return null;
   return { category, ...(await pageOf({ ...PUBLISHED, category: { slug } }, page)) };

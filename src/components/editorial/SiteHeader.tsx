@@ -3,6 +3,7 @@ import type { DollarRates } from "@/types/exchange";
 import type { CategoryLink } from "@/types/public";
 import { DollarTicker } from "./DollarTicker";
 import { SiteNav } from "./SiteNav";
+import { ThemeToggle } from "./ThemeToggle";
 
 type SiteHeaderProps = { siteName: string; categories: CategoryLink[]; rates: DollarRates | null };
 
@@ -17,17 +18,20 @@ export function SiteHeader({ siteName, categories, rates }: SiteHeaderProps) {
       <header className="sticky top-0 z-30 border-b border-rule bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-site items-center justify-between gap-4 px-4 pt-3 pb-2 md:px-8 md:pt-4">
           <Link href="/" className="flex min-w-0 items-center gap-2.5">
+            {/* Marca tipo prompt de terminal, con el cursor que titila. */}
             <span
               aria-hidden="true"
-              className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent font-display text-lg font-extrabold text-surface md:size-10"
+              className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent font-mono text-base font-bold text-surface md:size-10"
             >
-              {siteName.charAt(0).toUpperCase()}
+              <span>
+                &gt;<span className="terminal-cursor">_</span>
+              </span>
             </span>
             <span className="truncate font-display text-xl font-extrabold tracking-tight md:text-2xl">
               {siteName}
             </span>
           </Link>
-          <form action="/buscar" role="search" className="flex min-w-0 flex-1 justify-end">
+          <form action="/buscar" role="search" className="flex min-w-0 flex-1 items-center justify-end gap-2">
             <div className="relative w-full max-w-72 min-w-0">
               <label htmlFor="site-search" className="sr-only">
                 Buscar noticias
@@ -44,10 +48,11 @@ export function SiteHeader({ siteName, categories, rates }: SiteHeaderProps) {
                 id="site-search"
                 name="q"
                 type="search"
-                placeholder="Buscar noticias"
+                placeholder="grep noticias…"
                 className="w-full rounded-full border border-rule bg-surface py-2 pr-4 pl-9 text-base text-ink shadow-card placeholder:text-ink-subtle"
               />
             </div>
+            <ThemeToggle />
           </form>
         </div>
         <SiteNav categories={categories} />
