@@ -37,7 +37,7 @@ export function isAllowedLicense(shortName: string): boolean {
   if (/\b(nc|nd)\b/.test(name)) return false;
   if (name === "cc0" || name.startsWith("cc0 ")) return true;
   if (name.startsWith("public domain") || name === "pd" || name.startsWith("pd-")) return true;
-  return /^cc[ -]by(-sa)?( \d(\.\d)?)?( [a-z-]+)?$/.test(name);
+  return /^cc[ -]by(-sa)?([ -]\d(\.\d)?)?( [a-z-]+)?$/.test(name);
 }
 
 /** Texto plano a partir del HTML que trae Commons en autor y descripción. */
