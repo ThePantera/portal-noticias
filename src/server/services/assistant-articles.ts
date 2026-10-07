@@ -13,6 +13,7 @@ import {
   type ArticleInput,
 } from "./article-commands";
 import { getArticleForEdit } from "./articles";
+import { CommonsError, downloadCommonsPhoto } from "./commons";
 import { MediaError, uploadImage } from "./media";
 
 /**
@@ -44,14 +45,33 @@ const sourceSchema = z.object({
   url: z.url({ protocol: /^https?$/, message: "Tiene que ser una dirección http o https." }).max(500),
 });
 
-const imageSchema = z.object({
-  /** Bytes de la imagen en base64. */
-  data: z.base64("La imagen tiene que venir en base64."),
-  alt: z.string().trim().min(1, "Falta la descripción de la imagen.").max(200),
-  caption: z.string().max(300).optional(),
-  /** Autor y licencia: sin crédito no se usa una foto. */
-  credit: z.string().trim().min(1, "Falta el crédito de la imagen.").max(120),
-});
+/**
+ * La imagen llega de una de dos formas: los bytes en base64 (con crédito obligatorio) o el
+ * título de una foto de Wikimedia Commons, que el sitio descarga y acredita solo (ADR 0009).
+ */
+const imageSchema = z
+  .object({
+    /** Bytes de la imagen en base64. */
+    data: z.base64("La imagen tiene que venir en base64.").optional(),
+    /** Título de un archivo de Commons, por ejemplo "File:Obelisco de Buenos Aires.jpg". */
+    commons: z
+      .string()
+      .trim()
+      .regex(/^File:.+/, 'Tiene que ser el título del archivo, empezando con "File:".')
+      .max(250)
+      .optional(),
+    alt: z.string().trim().min(1, "Falta la descripción de la imagen.").max(200),
+    caption: z.string().max(300).optional(),
+    /** Autor y licencia: sin crédito no se usa una foto. Con `commons`, si falta, se arma solo. */
+    credit: z.string().trim().min(1, "Falta el crédito de la imagen.").max(120).optional(),
+  })
+  .refine((v) => Boolean(v.data) !== Boolean(v.commons), {
+    path: ["data"],
+    message: "Mandá la imagen en `data` (base64) o en `commons`, una de las dos.",
+  })
+  .refine((v) => !v.data || v.credit, { path: ["credit"], message: "Falta el crédito de la imagen." });
+
+type ImageField = z.output<typeof imageSchema>;
 
 /** Qué hacer con la nota después de guardarla. Sin `action`, queda como estaba (o en borrador). */
 const actionSchema = z
@@ -168,15 +188,33 @@ function assertArticle(article: ArticleInput) {
     throw new AssistantError("invalid", "Revisá los campos marcados.", fieldErrorsOf(check.error));
 }
 
-async function upload(actor: Actor, data: string): Promise<string> {
-  const bytes = Buffer.from(data, "base64");
-  if (bytes.length > MAX_ASSISTANT_IMAGE_BYTES) {
-    throw new AssistantError("invalid", "Revisá los campos marcados.", {
-      image: "La imagen supera los 3 MB.",
-    });
+/** Bytes y crédito de la imagen pedida: los que vinieron en base64 o la foto de Commons. */
+async function resolveImage(image: ImageField): Promise<{ bytes: Buffer; credit: string }> {
+  if (image.data) {
+    const bytes = Buffer.from(image.data, "base64");
+    if (bytes.length > MAX_ASSISTANT_IMAGE_BYTES) {
+      throw new AssistantError("invalid", "Revisá los campos marcados.", {
+        image: "La imagen supera los 3 MB.",
+      });
+    }
+    return { bytes, credit: image.credit ?? "" };
   }
   try {
-    return (await uploadImage(actor, bytes)).id;
+    const { photo, bytes } = await downloadCommonsPhoto(image.commons ?? "");
+    return { bytes, credit: image.credit ?? photo.credit };
+  } catch (error) {
+    if (error instanceof CommonsError) {
+      throw new AssistantError(error.code, error.message, { "image.commons": error.message });
+    }
+    throw error;
+  }
+}
+
+/** Sube la imagen pedida y devuelve su id y el crédito que le corresponde. */
+async function upload(actor: Actor, image: ImageField): Promise<{ id: string; credit: string }> {
+  const { bytes, credit } = await resolveImage(image);
+  try {
+    return { id: (await uploadImage(actor, bytes)).id, credit };
   } catch (error) {
     if (error instanceof MediaError) {
       throw new AssistantError(error.code === "invalid" ? "invalid" : "unavailable", error.message, {
@@ -263,10 +301,15 @@ export async function createAssistantArticle(raw: unknown) {
     seoDescription: input.seoDescription,
     mainImageAlt: input.image?.alt ?? "",
     mainImageCaption: input.image?.caption,
-    mainImageCredit: input.image?.credit,
+    // Con Commons el crédito se arma al descargar; mientras tanto se valida con uno provisorio.
+    mainImageCredit: input.image ? (input.image.credit ?? "Wikimedia Commons") : undefined,
   };
   assertArticle(article);
-  if (input.image) article.mainImageId = await upload(actor, input.image.data);
+  if (input.image) {
+    const uploaded = await upload(actor, input.image);
+    article.mainImageId = uploaded.id;
+    article.mainImageCredit = uploaded.credit;
+  }
 
   const created = await translate(() => createArticle(actor, article, { origin: "AI_ASSISTED" }));
   try {
@@ -308,13 +351,16 @@ export async function updateAssistantArticle(id: string, raw: unknown) {
       input.image?.caption ??
       (input.imageCaption === undefined ? image?.caption : input.imageCaption) ??
       undefined,
-    mainImageCredit:
-      input.image?.credit ??
-      (input.imageCredit === undefined ? image?.credit : input.imageCredit) ??
-      undefined,
+    mainImageCredit: input.image
+      ? (input.image.credit ?? "Wikimedia Commons")
+      : ((input.imageCredit === undefined ? image?.credit : input.imageCredit) ?? undefined),
   };
   assertArticle(article);
-  if (input.image) article.mainImageId = await upload(actor, input.image.data);
+  if (input.image) {
+    const uploaded = await upload(actor, input.image);
+    article.mainImageId = uploaded.id;
+    article.mainImageCredit = uploaded.credit;
+  }
 
   const updated = await translate(() => updateArticle(actor, id, article));
   return (await applyAction(actor, id, input)) ?? updated;
