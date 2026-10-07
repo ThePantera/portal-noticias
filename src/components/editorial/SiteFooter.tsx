@@ -21,6 +21,11 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/mercados" className="hover:text-on-night">
+                  Mercados
+                </Link>
+              </li>
             </ul>
           </nav>
         ) : null}
