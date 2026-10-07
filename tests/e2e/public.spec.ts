@@ -178,10 +178,21 @@ test("las páginas públicas no desbordan a lo ancho", async ({ page }) => {
   for (const path of ["/", "/categoria/economia", "/buscar?q=economia", "/noticias/esta-nota-no-existe"]) {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
-    const { scroll, client } = await page.evaluate(() => ({
-      scroll: document.documentElement.scrollWidth,
-      client: document.documentElement.clientWidth,
-    }));
-    expect(scroll, path).toBeLessThanOrEqual(client);
+    const { scroll, client, culprits } = await page.evaluate(() => {
+      const client = document.documentElement.clientWidth;
+      // Si desborda, el mensaje dice qué elementos se pasan del borde derecho.
+      const culprits = [...document.querySelectorAll("body *")]
+        .filter((el) => el.getBoundingClientRect().right > client + 1)
+        .filter((el) => {
+          // Lo que queda adentro de algo con scroll o recorte propio no desborda la página.
+          for (let p = el.parentElement; p && p !== document.body; p = p.parentElement)
+            if (getComputedStyle(p).overflowX !== "visible") return false;
+          return true;
+        })
+        .slice(0, 5)
+        .map((el) => `${el.tagName.toLowerCase()}.${[...el.classList].join(".")}`);
+      return { scroll: document.documentElement.scrollWidth, client, culprits };
+    });
+    expect(scroll, `${path}: ${culprits.join(" | ")}`).toBeLessThanOrEqual(client);
   }
 });
