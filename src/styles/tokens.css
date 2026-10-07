@@ -4,6 +4,8 @@
  * Concepto (rediseño 2026-10): portal moderno tipo panel. Fondo frío, tarjetas con radio y
  * sombra suave, azul eléctrico como acento y un color propio por sección. El rojo sigue
  * reservado para "En vivo"/"Último momento".
+ * Perfil IT (2026-10-07): oscuro por defecto (data-theme="dark" en <html>, el lector puede pasar
+ * a claro) y monoespaciada en etiquetas y cifras, como en una terminal.
  */
 :root {
   /* Color: superficies */
@@ -49,6 +51,8 @@
   --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Newsreader", "Iowan Old Style", Georgia, serif;
   --font-ui: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, Menlo, monospace; /* etiquetas, cifras, detalles tipo terminal */
 
   /* Escala tipográfica (razón ~1.25, base 16px) */
   --text-xs: 0.75rem; /* 12  kicker, créditos */

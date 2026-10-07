@@ -17,6 +17,11 @@ const HUES: Record<string, string> = {
   ciencia: "--color-hue-teal",
   tendencias: "--color-hue-orange",
   gaming: "--color-hue-violet",
+  ia: "--color-hue-blue",
+  programacion: "--color-hue-green",
+  ciberseguridad: "--color-hue-rose",
+  hardware: "--color-hue-orange",
+  "trabajo-it": "--color-hue-teal",
 };
 
 /** Estilo en línea que fija el color de la sección para todo lo que está adentro. */

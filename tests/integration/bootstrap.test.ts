@@ -10,7 +10,7 @@ const admin = { email: " Editora@Portal.test ", name: "Editora", password: "una-
 describe("bootstrap del deploy", () => {
   it("en una base vacía carga las categorías y crea el administrador", async () => {
     expect(await bootstrap(testDb, admin)).toEqual({
-      categoriesCreated: 11,
+      categoriesCreated: 16,
       adminCreated: "editora@portal.test",
     });
     const user = await testDb.user.findUniqueOrThrow({ where: { email: "editora@portal.test" } });

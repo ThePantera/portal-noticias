@@ -9,7 +9,10 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
       <div className="mx-auto grid max-w-site gap-8 px-4 py-10 text-sm md:grid-cols-[1fr_2fr] md:px-8">
         <div>
           <p className="font-display text-xl font-extrabold tracking-tight text-on-night">{siteName}</p>
-          <p className="mt-2 max-w-xs">Noticias de Buenos Aires, la Argentina y el mundo.</p>
+          <p className="mt-2 max-w-xs">
+            Noticias de tecnología para la comunidad IT: IA, código, ciberseguridad, hardware, gaming y
+            laburo.
+          </p>
         </div>
         {categories.length > 0 ? (
           <nav aria-label="Secciones del pie">
