@@ -5,3 +5,6 @@ src/generated
 prisma/migrations
 package-lock.json
 docs/design/preview.html
+
+# Skills de terceros (vercel-labs), copiadas tal cual
+.claude/skills

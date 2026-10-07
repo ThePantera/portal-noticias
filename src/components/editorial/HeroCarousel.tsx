@@ -66,7 +66,7 @@ export function HeroCarousel({ articles }: { articles: ArticleCardData[] }) {
     <section
       aria-roledescription="carrusel"
       aria-label="Noticias destacadas"
-      className="grid gap-3"
+      className="grid grid-cols-1 gap-3"
       onPointerEnter={(event) => event.pointerType === "mouse" && setHovered(true)}
       onPointerLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
