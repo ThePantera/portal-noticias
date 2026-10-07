@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/editorial/JsonLd";
 import { Pagination } from "@/components/editorial/Pagination";
 import { pageParam } from "@/lib/search-params";
 import { FEED_ALTERNATE_TYPES, breadcrumbJsonLd } from "@/lib/seo";
+import { sectionTone } from "@/lib/sections";
 import { env } from "@/server/env";
 import { getCategoryPage, getNavCategories } from "@/server/services/public-content";
 
@@ -67,9 +68,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps<"
           { name: category.name, path: `/categoria/${category.slug}` },
         ])}
       />
-      <header className="border-b-2 border-ink pb-4">
+      <header
+        style={sectionTone(category.slug)}
+        className="relative overflow-hidden rounded-card border border-rule bg-surface p-6 shadow-card md:p-8"
+      >
+        <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-section" />
         <p className="kicker">Sección</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold md:text-4xl">{category.name}</h1>
+        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight md:text-5xl">
+          {category.name}
+        </h1>
         {category.description ? (
           <p className="mt-2 max-w-measure text-ink-muted">{category.description}</p>
         ) : null}

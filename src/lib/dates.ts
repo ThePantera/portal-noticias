@@ -24,6 +24,25 @@ export function formatDateTime(value: Date): string {
   return dateTime.format(value);
 }
 
+const timeOnly = new Intl.DateTimeFormat("es-AR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: TIME_ZONE,
+});
+
+/** "11:30", en hora de Buenos Aires. */
+export function formatTime(value: Date): string {
+  return timeOnly.format(value);
+}
+
+const dayMonth = new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "short", timeZone: TIME_ZONE });
+
+/** "6 oct", para listas donde la hora ya dice casi todo. */
+export function formatDayMonth(value: Date): string {
+  return dayMonth.format(value).replace(/\.$/, "");
+}
+
 /** "6 de octubre de 2026". */
 export function formatDate(value: Date): string {
   return dateOnly.format(value);

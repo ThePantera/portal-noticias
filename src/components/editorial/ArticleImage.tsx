@@ -44,7 +44,13 @@ export function ArticleFigure({ image, sizes, priority, className = "" }: Props)
   const hasCaption = Boolean(image.caption || image.credit);
   return (
     <figure className={className}>
-      <ArticleImage image={image} sizes={sizes} priority={priority} aspect="aspect-auto" />
+      <ArticleImage
+        image={image}
+        sizes={sizes}
+        priority={priority}
+        aspect="aspect-auto"
+        className="rounded-card"
+      />
       {hasCaption ? (
         <figcaption className="mt-2 text-sm text-ink-subtle">
           {image.caption}

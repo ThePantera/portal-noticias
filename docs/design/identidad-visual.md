@@ -1,4 +1,15 @@
-# Identidad visual (propuesta, Fase 1)
+# Identidad visual
+
+> **Rediseño (7 oct 2026).** Manu pidió un sitio más moderno, "con dashboard". Lo que sigue en esta sección manda sobre la propuesta original de la Fase 1, que queda debajo como historia.
+>
+> - **Concepto:** portal tipo panel. Fondo frío (`paper`), tarjetas blancas (`surface`) con radio de 16 px y sombra suave, azul eléctrico como acento (`#1f4fd6` / `#7aa2ff` en oscuro) y un color por sección (`--color-hue-*`, asignados en `src/lib/sections.ts`). El rojo sigue reservado para "En vivo".
+> - **Tipografía:** Inter Tight (titulares, navegación y panel, en negrita y con interletra apretada) y Newsreader sólo para bajadas y cuerpo de nota.
+> - **Superficie oscura** (`night`): barra del dólar, nota principal sobre su foto, bloque destacado de Gaming y pie.
+> - **Portada:** nota principal grande con el título sobre la foto; al costado, el panel del dólar en vivo y el minuto a minuto; debajo, tres secundarias, últimas noticias en cuatro columnas y un bloque por sección.
+> - **Navegación:** cabecera fija con marca, búsqueda redondeada y secciones en píldoras (la activa, rellena).
+> - **Cotizaciones:** ver ADR 0009.
+
+## Propuesta original (Fase 1)
 
 Vista previa navegable: `docs/design/preview.html`. Tokens: `src/styles/tokens.css`.
 

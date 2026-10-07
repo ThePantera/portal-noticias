@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/editorial/JsonLd";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { ShareButtons } from "@/components/editorial/ShareButtons";
 import { FEED_ALTERNATE_TYPES, breadcrumbJsonLd, newsArticleJsonLd } from "@/lib/seo";
+import { sectionTone } from "@/lib/sections";
 import { env } from "@/server/env";
 import { getArticleBySlug, getRecentSlugs, getRelatedArticles } from "@/server/services/public-content";
 
@@ -96,13 +97,13 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
           ]),
         ]}
       />
-      <article className="mx-auto w-full max-w-measure">
+      <article className="mx-auto w-full max-w-measure" style={sectionTone(article.category.slug)}>
         <nav aria-label="Ruta" className="text-sm">
-          <Link href={`/categoria/${article.category.slug}`} className="kicker hover:underline">
+          <Link href={`/categoria/${article.category.slug}`} className="section-pill hover:underline">
             {article.category.name}
           </Link>
         </nav>
-        <h1 className="mt-3 font-display text-3xl leading-tight font-semibold md:text-5xl">
+        <h1 className="mt-4 font-display text-3xl leading-tight font-extrabold tracking-tight md:text-5xl">
           {article.title}
         </h1>
         {article.excerpt ? (
@@ -134,7 +135,7 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
                 <li key={tag.slug}>
                   <Link
                     href={`/tag/${tag.slug}`}
-                    className="inline-flex min-h-9 items-center rounded-sm border border-rule px-2.5 text-ink-muted hover:border-ink hover:text-ink"
+                    className="inline-flex min-h-9 items-center rounded-full border border-rule bg-surface px-3 text-ink-muted hover:border-ink hover:text-ink"
                   >
                     {tag.name}
                   </Link>
@@ -148,10 +149,10 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
       {related.length > 0 ? (
         <section aria-labelledby="relacionadas" className="mx-auto mt-16 grid w-full max-w-site gap-6">
           <SectionHeader id="relacionadas" title="Seguí leyendo" />
-          <ul className="grid gap-x-8 gap-y-6 md:grid-cols-3">
+          <ul className="grid gap-6 md:grid-cols-3">
             {related.map((item) => (
               <li key={item.id}>
-                <ArticleCard article={item} variant="compact" />
+                <ArticleCard article={item} variant="secondary" />
               </li>
             ))}
           </ul>

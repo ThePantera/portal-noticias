@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   formatDate,
   formatDateTime,
+  formatDayMonth,
+  formatTime,
   parseDateTimeInput,
   toDateTimeInputValue,
   toIsoString,
@@ -13,6 +15,11 @@ const sample = new Date("2026-10-06T14:30:00.000Z");
 describe("fechas", () => {
   it("formatea en la zona horaria del portal, no en la del servidor", () => {
     expect(formatDateTime(sample)).toBe("06/10/2026, 11:30");
+  });
+
+  it("formatea la hora sola en 24 horas", () => {
+    expect(formatTime(sample)).toBe("11:30");
+    expect(formatDayMonth(sample)).toBe("6 oct");
   });
 
   it("formatea la fecha larga en español", () => {

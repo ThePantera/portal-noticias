@@ -1,35 +1,54 @@
 /*
  * Tokens de diseño del portal. Fuente única para colores, tipografía y espaciado.
- * En la Fase 2 se exponen a Tailwind v4 mediante @theme (ver docs/design/identidad-visual.md).
- * Concepto: tinta azul petróleo sobre papel frío; el rojo se reserva para "En vivo"/"Último momento".
+ * Se exponen a Tailwind v4 mediante @theme (ver globals.css y docs/design/identidad-visual.md).
+ * Concepto (rediseño 2026-10): portal moderno tipo panel. Fondo frío, tarjetas con radio y
+ * sombra suave, azul eléctrico como acento y un color propio por sección. El rojo sigue
+ * reservado para "En vivo"/"Último momento".
  */
 :root {
   /* Color: superficies */
-  --color-paper: #f6f7f7; /* fondo general, blanco frío */
-  --color-surface: #ffffff; /* paneles de admin, menús */
-  --color-ink: #0f1a22; /* texto principal (AAA sobre paper) */
-  --color-ink-muted: #4a5762; /* bajadas, metadatos (AA sobre paper) */
-  --color-ink-subtle: #5f6b75; /* fechas, créditos (AA) */
-  --color-rule: #d9dee2; /* filetes y divisores */
-  /* Color: acento editorial */
-  --color-accent: #0c5c6c; /* azul petróleo: secciones, enlaces, foco */
-  --color-accent-strong: #08434f;
-  --color-accent-soft: #e3eff1;
+  --color-paper: #f3f5f9; /* fondo general */
+  --color-surface: #ffffff; /* tarjetas, paneles, menús */
+  --color-surface-muted: #e9edf4; /* chips, fondos de bloque, hover */
+  --color-ink: #0b1220; /* texto principal (AAA) */
+  --color-ink-muted: #44516a; /* bajadas, metadatos (AA) */
+  --color-ink-subtle: #5a677c; /* fechas, créditos (AA) */
+  --color-rule: #dce2eb; /* bordes y divisores */
+  /* Superficie siempre oscura: barra de cotizaciones, portada sobre foto, bloque Gaming */
+  --color-night: #0b1220;
+  --color-night-raised: #162036;
+  --color-on-night: #f3f6fb;
+  --color-on-night-muted: #b4c0d3;
+  /* Color: acento */
+  --color-accent: #1f4fd6; /* azul eléctrico: enlaces, foco, sección activa */
+  --color-accent-strong: #163ba6;
+  --color-accent-soft: #e3ebff;
+  /* Color por sección (texto AA sobre surface y paper) */
+  --color-hue-blue: #1f4fd6;
+  --color-hue-violet: #6d28d9;
+  --color-hue-teal: #0f766e;
+  --color-hue-orange: #c2410c;
+  --color-hue-rose: #be123c;
+  --color-hue-green: #15803d;
   /* Color: semánticos (no son acento) */
-  --color-live: #c4242b; /* En vivo / Último momento */
-  --color-success: #1f7a4a;
+  --color-live: #d92d20; /* En vivo / Último momento */
+  --color-success: #15803d;
   --color-warning: #9a6200;
   --color-danger: #b42318;
   /* Estados editoriales en admin */
-  --color-status-draft: #5f6b75;
+  --color-status-draft: #5a677c;
   --color-status-scheduled: #9a6200;
-  --color-status-published: #1f7a4a;
-  --color-status-archived: #4a5762;
+  --color-status-published: #15803d;
+  --color-status-archived: #44516a;
+
+  /* Sombras */
+  --shadow-card: 0 1px 2px rgb(11 18 32 / 0.05), 0 2px 8px rgb(11 18 32 / 0.04);
+  --shadow-raised: 0 2px 4px rgb(11 18 32 / 0.06), 0 12px 32px rgb(11 18 32 / 0.1);
 
   /* Tipografía */
-  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Newsreader", "Iowan Old Style", Georgia, serif;
-  --font-ui: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  --font-ui: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
 
   /* Escala tipográfica (razón ~1.25, base 16px) */
   --text-xs: 0.75rem; /* 12  kicker, créditos */
@@ -58,53 +77,76 @@
 
   /* Layout */
   --measure: 40rem; /* ~68 caracteres para el cuerpo de la nota */
-  --container: 76rem;
-  --radius-sm: 2px; /* imágenes y botones: casi rectos */
-  --radius-md: 4px; /* inputs y paneles de admin */
+  --container: 80rem;
+  --radius-sm: 6px; /* botones, inputs, imágenes chicas */
+  --radius-md: 10px; /* paneles de admin */
+  --radius-lg: 16px; /* tarjetas y paneles de portada */
 
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-paper: #0e1419;
-    --color-surface: #151d24;
-    --color-ink: #e7ecef;
-    --color-ink-muted: #a7b3bc;
-    --color-ink-subtle: #8a96a0;
-    --color-rule: #26323b;
-    --color-accent: #5fb7c7;
-    --color-accent-strong: #8fd0dc;
-    --color-accent-soft: #16303a;
+    --color-paper: #080d17;
+    --color-surface: #101827;
+    --color-surface-muted: #19233a;
+    --color-ink: #e8edf5;
+    --color-ink-muted: #a9b4c6;
+    --color-ink-subtle: #8c98ab;
+    --color-rule: #222d42;
+    --color-night: #050911;
+    --color-night-raised: #121b2e;
+    --color-accent: #7aa2ff;
+    --color-accent-strong: #a9c2ff;
+    --color-accent-soft: #16213d;
+    --color-hue-blue: #7aa2ff;
+    --color-hue-violet: #b79cff;
+    --color-hue-teal: #4fd1c5;
+    --color-hue-orange: #fb923c;
+    --color-hue-rose: #fb7185;
+    --color-hue-green: #4ade80;
     --color-live: #ff5a5f;
-    --color-success: #4cc38a;
+    --color-success: #4ade80;
     --color-warning: #f0b44c;
     --color-danger: #ff6b5e;
-    --color-status-draft: #8a96a0;
+    --color-status-draft: #8c98ab;
     --color-status-scheduled: #f0b44c;
-    --color-status-published: #4cc38a;
-    --color-status-archived: #a7b3bc;
+    --color-status-published: #4ade80;
+    --color-status-archived: #a9b4c6;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --color-paper: #0e1419;
-  --color-surface: #151d24;
-  --color-ink: #e7ecef;
-  --color-ink-muted: #a7b3bc;
-  --color-ink-subtle: #8a96a0;
-  --color-rule: #26323b;
-  --color-accent: #5fb7c7;
-  --color-accent-strong: #8fd0dc;
-  --color-accent-soft: #16303a;
+  --color-paper: #080d17;
+  --color-surface: #101827;
+  --color-surface-muted: #19233a;
+  --color-ink: #e8edf5;
+  --color-ink-muted: #a9b4c6;
+  --color-ink-subtle: #8c98ab;
+  --color-rule: #222d42;
+  --color-night: #050911;
+  --color-night-raised: #121b2e;
+  --color-accent: #7aa2ff;
+  --color-accent-strong: #a9c2ff;
+  --color-accent-soft: #16213d;
+  --color-hue-blue: #7aa2ff;
+  --color-hue-violet: #b79cff;
+  --color-hue-teal: #4fd1c5;
+  --color-hue-orange: #fb923c;
+  --color-hue-rose: #fb7185;
+  --color-hue-green: #4ade80;
   --color-live: #ff5a5f;
-  --color-success: #4cc38a;
+  --color-success: #4ade80;
   --color-warning: #f0b44c;
   --color-danger: #ff6b5e;
-  --color-status-draft: #8a96a0;
+  --color-status-draft: #8c98ab;
   --color-status-scheduled: #f0b44c;
-  --color-status-published: #4cc38a;
-  --color-status-archived: #a7b3bc;
+  --color-status-published: #4ade80;
+  --color-status-archived: #a9b4c6;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
   color-scheme: dark;
 }

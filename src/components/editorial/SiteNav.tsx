@@ -4,24 +4,26 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CategoryLink } from "@/types/public";
 
-/** Fila de secciones. En mobile se desliza de costado; la sección activa lleva subrayado. */
+/** Fila de secciones en píldoras. En mobile se desliza de costado; la activa va rellena. */
 export function SiteNav({ categories }: { categories: CategoryLink[] }) {
   const pathname = usePathname();
   if (categories.length === 0) return null;
+  const links = [{ name: "Portada", href: "/" }].concat(
+    categories.map((category) => ({ name: category.name, href: `/categoria/${category.slug}` })),
+  );
   return (
-    <nav aria-label="Secciones" className="border-b border-rule">
-      <ul className="mx-auto flex max-w-site [scrollbar-width:none] gap-5 overflow-x-auto px-4 text-sm font-medium whitespace-nowrap md:px-8">
-        {categories.map((category) => {
-          const href = `/categoria/${category.slug}`;
+    <nav aria-label="Secciones">
+      <ul className="mx-auto flex max-w-site [scrollbar-width:none] gap-1.5 overflow-x-auto px-4 pb-2.5 text-sm font-semibold whitespace-nowrap md:px-8">
+        {links.map(({ name, href }) => {
           const active = pathname === href;
           return (
-            <li key={category.slug}>
+            <li key={href}>
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`inline-block border-b-2 py-3 ${active ? "border-accent text-ink" : "border-transparent text-ink-muted hover:text-ink"}`}
+                className={`inline-block rounded-full px-3 py-1.5 transition-colors ${active ? "bg-ink text-paper" : "text-ink-muted hover:bg-surface-muted hover:text-ink"}`}
               >
-                {category.name}
+                {name}
               </Link>
             </li>
           );

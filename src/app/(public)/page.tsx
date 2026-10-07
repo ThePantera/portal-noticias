@@ -1,66 +1,67 @@
 import { ArticleCard } from "@/components/editorial/ArticleCard";
+import { DollarPanel } from "@/components/editorial/DollarPanel";
 import { JsonLd } from "@/components/editorial/JsonLd";
+import { LatestTimeline } from "@/components/editorial/LatestTimeline";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
+import { isFeaturedSection, sectionTone } from "@/lib/sections";
 import { websiteJsonLd } from "@/lib/seo";
 import { env } from "@/server/env";
+import { getDollarRates } from "@/server/services/exchange-rates";
 import { getHomepage } from "@/server/services/public-content";
 
+/**
+ * Portada en forma de panel: arriba la nota principal y, al costado, el dólar en vivo y el
+ * minuto a minuto. Después las secundarias, las últimas y un bloque por sección; Gaming va
+ * destacado sobre fondo oscuro.
+ */
 export default async function HomePage() {
-  const { lead, secondary, latest: recent, sections } = await getHomepage();
-  const underLead = recent.slice(0, 2);
-  const latest = recent.slice(2);
+  const [{ lead, secondary, latest, sections }, rates] = await Promise.all([getHomepage(), getDollarRates()]);
 
   // El sitio y su buscador se describen aunque todavía no haya notas.
   const siteLd = <JsonLd data={websiteJsonLd(env.SITE_URL, env.SITE_NAME)} />;
 
   if (!lead) {
     return (
-      <section className="mx-auto max-w-site px-4 py-16 md:px-8">
+      <div className="mx-auto grid max-w-site gap-8 px-4 py-10 md:px-8 lg:grid-cols-12 lg:py-16">
         {siteLd}
-        <p className="kicker">Portada</p>
-        <h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight font-semibold md:text-5xl">
-          Todavía no hay noticias publicadas
-        </h1>
-        <p className="mt-4 max-w-measure font-body text-md text-ink-muted">
-          Cuando se publique la primera nota desde el panel de administración, va a aparecer acá.
-        </p>
-      </section>
+        <section className="lg:col-span-8">
+          <p className="kicker">Portada</p>
+          <h1 className="mt-3 max-w-3xl font-display text-4xl leading-tight font-extrabold tracking-tight md:text-5xl">
+            Todavía no hay noticias publicadas
+          </h1>
+          <p className="mt-4 max-w-measure font-body text-md text-ink-muted">
+            Cuando se publique la primera nota desde el panel de administración, va a aparecer acá.
+          </p>
+        </section>
+        <div className="lg:col-span-4">
+          <DollarPanel initial={rates} />
+        </div>
+      </div>
     );
   }
 
+  const timeline = [lead, ...secondary, ...latest]
+    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+    .slice(0, 6);
+
   return (
-    <div className="mx-auto grid max-w-site gap-12 px-4 py-8 md:px-8 md:py-10">
+    <div className="mx-auto grid max-w-site gap-12 px-4 py-6 md:px-8 md:py-8">
       {siteLd}
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
 
-      <section
-        aria-label="Principales"
-        className="grid gap-8 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8"
-      >
+      <section aria-label="Principales" className="grid gap-6 lg:grid-cols-12 lg:gap-8">
         <div className="lg:col-span-8">
           <ArticleCard article={lead} variant="lead" headingLevel="h2" priority />
         </div>
+        <div className="grid content-start gap-6 md:grid-cols-2 lg:col-span-4 lg:grid-cols-1">
+          <DollarPanel initial={rates} />
+          <LatestTimeline articles={timeline} />
+        </div>
         {secondary.length > 0 ? (
-          <ul className="grid content-start gap-6 border-t border-rule pt-6 md:grid-cols-3 lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1 lg:grid-cols-1 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
-            {secondary.map((article, i) => (
-              <li
-                key={article.id}
-                className={
-                  i > 0 ? "border-t border-rule pt-6 md:border-t-0 md:pt-0 lg:border-t lg:pt-6" : undefined
-                }
-              >
-                <ArticleCard article={article} variant="secondary" headingLevel="h2" />
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {/* En escritorio, las dos más recientes van debajo de la principal. La segunda fila es 1fr
-            para que el alto de la columna de secundarias no abra un hueco debajo de la principal. */}
-        {underLead.length > 0 ? (
-          <ul className="grid content-start gap-6 border-t border-rule pt-6 md:grid-cols-2 md:gap-8 lg:col-span-8 lg:row-start-2">
-            {underLead.map((article) => (
+          <ul className="grid gap-6 md:grid-cols-3 lg:col-span-12">
+            {secondary.map((article) => (
               <li key={article.id}>
-                <ArticleCard article={article} variant="compact" headingLevel="h2" />
+                <ArticleCard article={article} variant="secondary" headingLevel="h2" />
               </li>
             ))}
           </ul>
@@ -70,32 +71,41 @@ export default async function HomePage() {
       {latest.length > 0 ? (
         <section aria-labelledby="ultimas" className="grid gap-6">
           <SectionHeader id="ultimas" title="Últimas noticias" />
-          <ul className="grid gap-x-8 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {latest.map((article) => (
               <li key={article.id}>
-                <ArticleCard article={article} variant="list" />
+                <ArticleCard article={article} variant="secondary" />
               </li>
             ))}
           </ul>
         </section>
       ) : null}
 
-      {sections.map(({ category, articles }) => (
-        <section key={category.slug} aria-labelledby={`seccion-${category.slug}`} className="grid gap-6">
-          <SectionHeader
-            id={`seccion-${category.slug}`}
-            title={category.name}
-            href={`/categoria/${category.slug}`}
-          />
-          <ul className="grid gap-x-8 gap-y-6 md:grid-cols-3">
-            {articles.map((article) => (
-              <li key={article.id}>
-                <ArticleCard article={article} variant="compact" showCategory={false} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {sections.map(({ category, articles }) => {
+        const featured = isFeaturedSection(category.slug);
+        return (
+          <section
+            key={category.slug}
+            aria-labelledby={`seccion-${category.slug}`}
+            style={sectionTone(category.slug)}
+            className={featured ? "grid gap-6 rounded-card bg-night p-5 shadow-raised md:p-8" : "grid gap-6"}
+          >
+            <SectionHeader
+              id={`seccion-${category.slug}`}
+              title={category.name}
+              href={`/categoria/${category.slug}`}
+              inverse={featured}
+            />
+            <ul className="grid gap-6 md:grid-cols-3">
+              {articles.map((article) => (
+                <li key={article.id}>
+                  <ArticleCard article={article} variant="list" showCategory={false} inverse={featured} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }

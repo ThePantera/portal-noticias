@@ -14,4 +14,11 @@ export const INITIAL_CATEGORIES = [
   { name: "Cultura", slug: "cultura", description: "Libros, cine, música, teatro y arte." },
   { name: "Ciencia", slug: "ciencia", description: "Investigación, ambiente y espacio." },
   { name: "Tendencias", slug: "tendencias", description: "Lo que se habla en redes y en la calle." },
+  // Agregada después del lanzamiento: en las bases que ya estaban en uso la crea la migración
+  // 20261007010000_gaming_category.
+  {
+    name: "Gaming",
+    slug: "gaming",
+    description: "Videojuegos, consolas, esports y la industria del juego.",
+  },
 ] as const;

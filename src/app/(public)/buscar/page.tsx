@@ -26,9 +26,9 @@ async function Results({ searchParams }: PageProps<"/buscar">) {
           defaultValue={result.query}
           maxLength={200}
           placeholder="Buscar noticias"
-          className="min-w-0 flex-1 rounded-md border border-rule bg-surface px-3 py-2 text-base text-ink placeholder:text-ink-subtle"
+          className="min-w-0 flex-1 rounded-full border border-rule bg-surface px-4 py-2 text-base text-ink shadow-card placeholder:text-ink-subtle"
         />
-        <button type="submit" className="rounded-sm bg-ink px-4 py-2 text-sm font-semibold text-paper">
+        <button type="submit" className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-surface">
           Buscar
         </button>
       </form>
@@ -62,7 +62,7 @@ async function Results({ searchParams }: PageProps<"/buscar">) {
 export default function SearchPage(props: PageProps<"/buscar">) {
   return (
     <div className="mx-auto grid max-w-site gap-8 px-4 py-8 md:px-8 md:py-10">
-      <h1 className="font-display text-3xl font-semibold md:text-4xl">Buscar</h1>
+      <h1 className="font-display text-3xl font-extrabold tracking-tight md:text-5xl">Buscar</h1>
       <Suspense fallback={<p className="text-sm text-ink-subtle">Buscando…</p>}>
         <Results {...props} />
       </Suspense>

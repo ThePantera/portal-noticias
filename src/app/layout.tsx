@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Libre_Franklin, Newsreader } from "next/font/google";
+import { Inter_Tight, Newsreader } from "next/font/google";
 import { FEED_ALTERNATE_TYPES } from "@/lib/seo";
 import { env } from "@/server/env";
 import "@/styles/globals.css";
@@ -12,9 +12,9 @@ const newsreader = Newsreader({
   display: "swap",
 });
 
-const franklin = Libre_Franklin({
+const interTight = Inter_Tight({
   subsets: ["latin"],
-  variable: "--font-franklin",
+  variable: "--font-inter-tight",
   display: "swap",
 });
 
@@ -29,14 +29,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f7f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e1419" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f5f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#080d17" },
   ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${newsreader.variable} ${franklin.variable}`}>
+    <html lang="es" className={`${newsreader.variable} ${interTight.variable}`}>
       <body className="flex min-h-dvh flex-col">{children}</body>
     </html>
   );
