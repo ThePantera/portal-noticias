@@ -61,26 +61,29 @@ export function listNavCategories(): Promise<CategoryLink[]> {
   });
 }
 
+/** Notas que rotan en el carrusel de la portada. */
+const HERO_SIZE = 5;
+
 /**
- * Portada: la nota principal y hasta tres secundarias salen del orden de destacadas
- * (1 = principal); si faltan, se completan con las más recientes. Debajo, las últimas
- * y un bloque por sección, sin repetir lo que ya está arriba.
+ * Portada: las cinco notas del carrusel (la principal y cuatro secundarias) salen del orden
+ * de destacadas (1 = principal); si faltan, se completan con las más recientes. Debajo, las
+ * últimas y un carril por sección, sin repetir lo que ya está arriba.
  */
 export async function getHomepage(): Promise<HomepageData> {
   const [featured, recent, categories] = await Promise.all([
     db.article.findMany({
       where: { ...PUBLISHED, featuredRank: { not: null } },
       orderBy: [{ featuredRank: "asc" }, ...newestFirst],
-      take: 4,
+      take: HERO_SIZE,
       select: cardSelect,
     }),
-    db.article.findMany({ where: PUBLISHED, orderBy: newestFirst, take: 16, select: cardSelect }),
+    db.article.findMany({ where: PUBLISHED, orderBy: newestFirst, take: HERO_SIZE + 8, select: cardSelect }),
     listNavCategories(),
   ]);
 
   const top: ArticleCardData[] = [];
   for (const row of [...featured, ...recent]) {
-    if (top.length === 4) break;
+    if (top.length === HERO_SIZE) break;
     if (!top.some((a) => a.id === row.id)) top.push(toCard(row));
   }
   const shown = new Set(top.map((a) => a.id));
@@ -95,7 +98,7 @@ export async function getHomepage(): Promise<HomepageData> {
       db.article.findMany({
         where: { ...PUBLISHED, category: { slug: category.slug }, id: { notIn: [...shown] } },
         orderBy: newestFirst,
-        take: 3,
+        take: 6,
         select: cardSelect,
       }),
     ),

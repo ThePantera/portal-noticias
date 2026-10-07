@@ -79,7 +79,7 @@ export function ArticleCard({
           aria-hidden="true"
           className="absolute inset-0 bg-linear-to-t from-night via-night/60 to-transparent"
         />
-        <div className="absolute inset-x-0 bottom-0 p-5 md:p-8">
+        <div className="lead-caption absolute inset-x-0 bottom-0 p-5 md:p-8">
           {showCategory ? (
             <Link
               href={`/categoria/${article.category.slug}`}
@@ -134,7 +134,7 @@ export function ArticleCard({
   return (
     <article
       style={sectionTone(article.category.slug)}
-      className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-card border transition-shadow ${
+      className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-card border transition duration-300 hover:-translate-y-1 ${
         inverse
           ? "border-on-night/10 bg-night-raised"
           : "border-rule bg-surface shadow-card hover:shadow-raised"
