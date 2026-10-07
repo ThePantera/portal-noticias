@@ -271,3 +271,68 @@
     margin: 2em 0;
   }
 }
+
+/*
+ * Dado de la suerte (sección Mercados): un cubo en 3D que gira con transform. Con "reducir
+ * movimiento" la transición se apaga (regla de @layer base) y la cara aparece de una.
+ */
+@layer components {
+  .dice-scene {
+    width: 6rem;
+    height: 6rem;
+    perspective: 40rem;
+  }
+  .dice {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.15, 1);
+  }
+  .dice-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    padding: 0.75rem;
+    border-radius: 1.1rem;
+    background: var(--color-on-night);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--color-night) 8%, transparent),
+      inset 0 -6px 12px color-mix(in oklab, var(--color-night) 14%, transparent);
+    backface-visibility: hidden;
+  }
+  .dice-face[data-face="1"] {
+    transform: translateZ(3rem);
+  }
+  .dice-face[data-face="6"] {
+    transform: rotateY(180deg) translateZ(3rem);
+  }
+  .dice-face[data-face="3"] {
+    transform: rotateY(90deg) translateZ(3rem);
+  }
+  .dice-face[data-face="4"] {
+    transform: rotateY(-90deg) translateZ(3rem);
+  }
+  .dice-face[data-face="5"] {
+    transform: rotateX(90deg) translateZ(3rem);
+  }
+  .dice-face[data-face="2"] {
+    transform: rotateX(-90deg) translateZ(3rem);
+  }
+  .dice-pip {
+    width: 0.95rem;
+    height: 0.95rem;
+    place-self: center;
+    border-radius: 999px;
+    background: var(--color-night);
+  }
+  .dice-face[data-face="1"] .dice-pip {
+    width: 1.35rem;
+    height: 1.35rem;
+    background: var(--color-live);
+  }
+  .dice-result {
+    animation: rise-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}

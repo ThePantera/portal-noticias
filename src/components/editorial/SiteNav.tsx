@@ -8,9 +8,10 @@ import type { CategoryLink } from "@/types/public";
 export function SiteNav({ categories }: { categories: CategoryLink[] }) {
   const pathname = usePathname();
   if (categories.length === 0) return null;
-  const links = [{ name: "Portada", href: "/" }].concat(
-    categories.map((category) => ({ name: category.name, href: `/categoria/${category.slug}` })),
-  );
+  const links = [
+    { name: "Portada", href: "/" },
+    { name: "Mercados", href: "/mercados" },
+  ].concat(categories.map((category) => ({ name: category.name, href: `/categoria/${category.slug}` })));
   return (
     <nav aria-label="Secciones">
       <ul className="mx-auto flex max-w-site [scrollbar-width:none] gap-1.5 overflow-x-auto px-4 pb-2.5 text-sm font-semibold whitespace-nowrap md:px-8">

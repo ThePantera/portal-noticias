@@ -198,7 +198,13 @@ test("buscadores: robots, sitemaps, RSS y datos estructurados", async ({ page, r
 });
 
 test("las páginas públicas no desbordan a lo ancho", async ({ page }) => {
-  for (const path of ["/", "/categoria/economia", "/buscar?q=economia", "/noticias/esta-nota-no-existe"]) {
+  for (const path of [
+    "/",
+    "/categoria/economia",
+    "/buscar?q=economia",
+    "/mercados",
+    "/noticias/esta-nota-no-existe",
+  ]) {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
     const { scroll, client, culprits } = await page.evaluate(() => {
@@ -223,4 +229,19 @@ test("las páginas públicas no desbordan a lo ancho", async ({ page }) => {
     });
     expect(scroll, `${path}: ${culprits.slice(0, 15).join(" | ")}`).toBeLessThanOrEqual(client);
   }
+});
+
+test("mercados: la sección está en el menú y el dado dice si sube o baja", async ({ page }) => {
+  await page.goto("/");
+  await page
+    .getByRole("navigation", { name: "Secciones", exact: true })
+    .getByRole("link", { name: "Mercados" })
+    .click();
+  await expect(page).toHaveURL(/\/mercados$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Mercados" })).toBeVisible();
+  await expect(page.getByText("no es un consejo de inversión")).toBeVisible();
+
+  await page.getByLabel("Qué querés que prediga el dado").selectOption({ label: "Merval" });
+  await page.getByRole("button", { name: "Tirar el dado" }).click();
+  await expect(page.getByText(/Salió [1-6]: Merval (sube|baja)/)).toBeVisible();
 });
