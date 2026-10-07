@@ -59,11 +59,11 @@ export default async function HomePage() {
   const featured = sections.filter(({ category }) => isFeaturedSection(category.slug));
 
   return (
-    <div className="mx-auto grid max-w-site gap-10 px-4 py-6 md:gap-12 md:px-8 md:py-8">
+    <div className="mx-auto grid max-w-site grid-cols-1 gap-10 px-4 py-6 md:gap-12 md:px-8 md:py-8">
       {siteLd}
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
 
-      <div className="grid gap-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-10">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-10">
         <div className="min-w-0 lg:col-span-8">
           <HeroCarousel articles={[lead, ...secondary]} />
         </div>
@@ -74,7 +74,7 @@ export default async function HomePage() {
         {latest.length > 0 ? (
           <section
             aria-labelledby="ultimas"
-            className="reveal grid min-w-0 content-start gap-3 lg:col-span-8"
+            className="reveal grid min-w-0 grid-cols-1 content-start gap-3 lg:col-span-8"
           >
             <SectionHeader id="ultimas" title="Últimas noticias" />
             <CardRail label="Últimas noticias">
@@ -89,13 +89,13 @@ export default async function HomePage() {
       </div>
 
       {regular.length > 0 ? (
-        <div className="grid gap-10 md:gap-12 lg:grid-cols-2 lg:gap-x-8">
+        <div className="grid grid-cols-1 gap-10 md:gap-12 lg:grid-cols-2 lg:gap-x-8">
           {regular.map(({ category, articles }) => (
             <section
               key={category.slug}
               aria-labelledby={`seccion-${category.slug}`}
               style={sectionTone(category.slug)}
-              className="reveal grid min-w-0 content-start gap-3"
+              className="reveal grid min-w-0 grid-cols-1 content-start gap-3"
             >
               <SectionHeader
                 id={`seccion-${category.slug}`}
@@ -119,7 +119,7 @@ export default async function HomePage() {
           key={category.slug}
           aria-labelledby={`seccion-${category.slug}`}
           style={sectionTone(category.slug)}
-          className="reveal grid gap-3 rounded-card bg-night p-5 shadow-raised md:p-8"
+          className="reveal grid grid-cols-1 gap-3 rounded-card bg-night p-5 shadow-raised md:p-8"
         >
           <SectionHeader
             id={`seccion-${category.slug}`}
