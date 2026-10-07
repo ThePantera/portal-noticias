@@ -56,7 +56,7 @@ export function CardRail({ label, inverse = false, children }: CardRailProps) {
       <ul
         ref={listRef}
         aria-label={label}
-        className="no-scrollbar -mx-1 flex snap-x snap-mandatory scroll-px-1 gap-4 overflow-x-auto overscroll-x-contain px-1 py-3 sm:gap-6"
+        className="-mx-1 no-scrollbar flex snap-x snap-mandatory scroll-px-1 gap-4 overflow-x-auto overscroll-x-contain px-1 py-3 sm:gap-6"
       >
         {children}
       </ul>
