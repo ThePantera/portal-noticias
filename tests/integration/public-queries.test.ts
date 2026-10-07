@@ -100,9 +100,9 @@ describe("sitio público", () => {
     for (let i = 0; i < 15; i++) await publish({}, i);
     const home = await getHomepage();
     const top = [home.lead, ...home.secondary, ...home.latest].map((a) => a?.id);
-    expect(top).toHaveLength(12);
+    expect(top).toHaveLength(13);
     const inSections = home.sections.flatMap((s) => s.articles.map((a) => a.id));
-    expect(inSections).toHaveLength(3);
+    expect(inSections).toHaveLength(2);
     expect(inSections.some((id) => top.includes(id))).toBe(false);
   });
 

@@ -122,6 +122,74 @@
   }
 }
 
+/* Carriles y carrusel: se desplazan con el dedo o las flechas, sin barra de desplazamiento. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+ * Movimiento de la portada. Todo se apaga con "reducir movimiento" (regla de @layer base):
+ * sin la animación de la barra, el carrusel tampoco pasa solo.
+ */
+@layer components {
+  /* Barra de progreso de la nota activa del carrusel; al terminar pasa a la siguiente. */
+  .hero-progress {
+    transform: scaleX(0);
+    animation-name: hero-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+
+  /* La foto de la nota activa se acerca de a poco y el texto entra desde abajo. */
+  .hero-slide[data-active="true"] img {
+    animation: hero-zoom 9s ease-out both;
+  }
+  .hero-slide[data-active="true"] .lead-caption {
+    animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  /* Los bloques aparecen al entrar en pantalla, donde el navegador lo permite sin JavaScript. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /*
  * Cuerpo de nota. Lo usan el render público (ArticleBody) y el editor, así lo que se
  * escribe en el panel se ve igual que en el portal.

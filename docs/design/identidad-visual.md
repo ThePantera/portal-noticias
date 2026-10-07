@@ -5,7 +5,8 @@
 > - **Concepto:** portal tipo panel. Fondo frío (`paper`), tarjetas blancas (`surface`) con radio de 16 px y sombra suave, azul eléctrico como acento (`#1f4fd6` / `#7aa2ff` en oscuro) y un color por sección (`--color-hue-*`, asignados en `src/lib/sections.ts`). El rojo sigue reservado para "En vivo".
 > - **Tipografía:** Inter Tight (titulares, navegación y panel, en negrita y con interletra apretada) y Newsreader sólo para bajadas y cuerpo de nota.
 > - **Superficie oscura** (`night`): barra del dólar, nota principal sobre su foto, bloque destacado de Gaming y pie.
-> - **Portada:** nota principal grande con el título sobre la foto; al costado, el panel del dólar en vivo y el minuto a minuto; debajo, tres secundarias, últimas noticias en cuatro columnas y un bloque por sección.
+> - **Portada (desde el 7 oct, segunda vuelta):** Manu la encontró demasiado larga y pidió carrusel y más movimiento. Arriba, un carrusel con las cinco destacadas (título sobre la foto) que pasa solo cada 7 s, con barra de progreso, flechas y botón de pausa; se detiene con el mouse encima, con el foco adentro o en otra pestaña. Al costado, el dólar en vivo y el minuto a minuto; debajo del carrusel, las últimas en un carril horizontal. Cada sección es un carril (de a dos secciones por fila en la computadora) y Gaming cierra sobre fondo oscuro.
+> - **Movimiento:** la foto activa del carrusel se acerca de a poco, su texto entra desde abajo, las tarjetas suben un poco al pasar el mouse y los bloques aparecen al bajar (CSS `animation-timeline: view()`, donde el navegador lo soporta). Con "reducir movimiento" no hay animaciones y el carrusel no pasa solo.
 > - **Navegación:** cabecera fija con marca, búsqueda redondeada y secciones en píldoras (la activa, rellena).
 > - **Cotizaciones:** ver ADR 0009.
 
