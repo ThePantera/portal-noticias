@@ -87,6 +87,10 @@ GitHub Actions (`.github/workflows/ci.yml`) corre en cada PR, sobre un PostgreSQ
 
 Páginas, panel y API → servicios (validación, permisos, transiciones, eventos) → Prisma → PostgreSQL, con un outbox de eventos (`domain_events`) que la automatización futura consume sin tocar el núcleo. Ver [ADR 0002](docs/adr/0002-capas.md) y [ADR 0006](docs/adr/0006-eventos.md).
 
+## Reacciones
+
+Debajo de cada nota los lectores reaccionan con cualquier emoji, sin cuenta. El navegador se identifica con una cookie propia (en la base sólo queda su hash) y hay topes por persona, por nota y por IP. Ver [ADR 0010](docs/adr/0010-reacciones.md).
+
 ## Asistente de redacción
 
 Desde la segunda etapa, el asistente de redacción (Claude) publica por su cuenta por `/api/assistant/articles`, con `Authorization: Bearer $ASSISTANT_API_KEY`. Usa los mismos servicios que el panel, así que valida igual, respeta los estados y deja sus eventos. Firma como "Redacción", cita sus fuentes al final de cada nota y en el editor sus notas llevan un aviso. Las fotos pueden venir en base64 o como `image: { commons: "File:…", alt }`: el sitio la descarga de Wikimedia Commons, verifica la licencia y arma el crédito ([ADR 0009](docs/adr/0009-fotos-commons.md)). Ver [ADR 0008](docs/adr/0008-asistente.md) y el paso 11 de la [guía de deploy](docs/deploy-vercel.md).
