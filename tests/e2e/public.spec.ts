@@ -180,19 +180,24 @@ test("las páginas públicas no desbordan a lo ancho", async ({ page }) => {
     await page.waitForLoadState("networkidle");
     const { scroll, client, culprits } = await page.evaluate(() => {
       const client = document.documentElement.clientWidth;
-      // Si desborda, el mensaje dice qué elementos se pasan del borde derecho.
-      const culprits = [...document.querySelectorAll("body *")]
-        .filter((el) => el.getBoundingClientRect().right > client + 1)
-        .filter((el) => {
-          // Lo que queda adentro de algo con scroll o recorte propio no desborda la página.
-          for (let p = el.parentElement; p && p !== document.body; p = p.parentElement)
-            if (getComputedStyle(p).overflowX !== "visible") return false;
-          return true;
-        })
-        .slice(0, 5)
-        .map((el) => `${el.tagName.toLowerCase()}.${[...el.classList].join(".")}`);
+      // Si desborda, el mensaje dice qué elementos (o sus ::before/::after) se pasan del borde derecho
+      // o tienen contenido más ancho que ellos sin recortarlo.
+      const describe = (el: Element) => `${el.tagName.toLowerCase()}.${[...el.classList].join(".")}`;
+      const culprits: string[] = [];
+      for (const el of document.querySelectorAll("body *")) {
+        const rect = el.getBoundingClientRect();
+        const style = getComputedStyle(el);
+        if (rect.right > client + 1) culprits.push(`${describe(el)} right=${Math.round(rect.right)}`);
+        else if (style.overflowX === "visible" && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0)
+          culprits.push(`${describe(el)} scroll=${el.scrollWidth}/${el.clientWidth}`);
+        for (const pseudo of ["::before", "::after"]) {
+          const ps = getComputedStyle(el, pseudo);
+          if (ps.content !== "none" && parseFloat(ps.width) > client)
+            culprits.push(`${describe(el)}${pseudo} w=${ps.width}`);
+        }
+      }
       return { scroll: document.documentElement.scrollWidth, client, culprits };
     });
-    expect(scroll, `${path}: ${culprits.join(" | ")}`).toBeLessThanOrEqual(client);
+    expect(scroll, `${path}: ${culprits.slice(0, 15).join(" | ")}`).toBeLessThanOrEqual(client);
   }
 });
