@@ -48,7 +48,7 @@ export function SiteHeader({ siteName, categories, rates }: SiteHeaderProps) {
                 id="site-search"
                 name="q"
                 type="search"
-                placeholder="grep noticias…"
+                placeholder="Buscar noticias"
                 className="w-full rounded-full border border-rule bg-surface py-2 pr-4 pl-9 text-base text-ink shadow-card placeholder:text-ink-subtle"
               />
             </div>
