@@ -1,13 +1,7 @@
 /** Cotizaciones del dólar frente al peso. Las fechas viajan como texto ISO: las lee también el navegador. */
 
 export type DollarKind =
-  | "oficial"
-  | "blue"
-  | "bolsa"
-  | "contadoconliqui"
-  | "tarjeta"
-  | "mayorista"
-  | "cripto";
+  "oficial" | "blue" | "bolsa" | "contadoconliqui" | "tarjeta" | "mayorista" | "cripto";
 
 export type DollarQuote = {
   kind: DollarKind;
