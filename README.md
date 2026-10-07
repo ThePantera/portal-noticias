@@ -89,7 +89,7 @@ Páginas, panel y API → servicios (validación, permisos, transiciones, evento
 
 ## Asistente de redacción
 
-Desde la segunda etapa, el asistente de redacción (Claude) publica por su cuenta por `/api/assistant/articles`, con `Authorization: Bearer $ASSISTANT_API_KEY`. Usa los mismos servicios que el panel, así que valida igual, respeta los estados y deja sus eventos. Firma como "Redacción", cita sus fuentes al final de cada nota y en el editor sus notas llevan un aviso. Ver [ADR 0008](docs/adr/0008-asistente.md) y el paso 11 de la [guía de deploy](docs/deploy-vercel.md).
+Desde la segunda etapa, el asistente de redacción (Claude) publica por su cuenta por `/api/assistant/articles`, con `Authorization: Bearer $ASSISTANT_API_KEY`. Usa los mismos servicios que el panel, así que valida igual, respeta los estados y deja sus eventos. Firma como "Redacción", cita sus fuentes al final de cada nota y en el editor sus notas llevan un aviso. Las fotos pueden venir en base64 o como `image: { commons: "File:…", alt }`: el sitio la descarga de Wikimedia Commons, verifica la licencia y arma el crédito ([ADR 0009](docs/adr/0009-fotos-commons.md)). Ver [ADR 0008](docs/adr/0008-asistente.md) y el paso 11 de la [guía de deploy](docs/deploy-vercel.md).
 
 | Método   | Ruta                          | Qué hace                                                                                         |
 | -------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -98,6 +98,7 @@ Desde la segunda etapa, el asistente de redacción (Claude) publica por su cuent
 | `GET`    | `/api/assistant/articles/:id` | La nota completa                                                                                 |
 | `PATCH`  | `/api/assistant/articles/:id` | Corrige los campos que vengan; `action` también acepta `"unpublish"` y `"archive"`               |
 | `DELETE` | `/api/assistant/articles/:id` | La elimina (si está publicada o programada, la archiva antes)                                    |
+| `GET`    | `/api/assistant/photos?q=`    | Fotos de Wikimedia Commons con licencia libre, para usar con `image: { commons, alt }`           |
 
 ## Futuras automatizaciones
 

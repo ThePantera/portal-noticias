@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import sharp from "sharp";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { localDriver, setStorageDriverForTests } from "@/server/media/storage";
 import {
   ASSISTANT_EMAIL,
@@ -254,5 +254,85 @@ describe("API del asistente", () => {
     await createAssistantArticle(draft(category.slug));
     const list = await listLatestArticles();
     expect(list.map((a) => a.origin).sort()).toEqual(["AI_ASSISTED", "MANUAL"]);
+  });
+});
+
+describe("fotos de Wikimedia Commons", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function stubCommons(license: string, photo: Buffer) {
+    const calls: string[] = [];
+    vi.stubGlobal("fetch", async (input: string | URL) => {
+      const url = String(input);
+      calls.push(url);
+      if (url.startsWith("https://commons.wikimedia.org/")) {
+        return Response.json({
+          query: {
+            pages: [
+              {
+                index: 1,
+                title: "File:Obelisco.jpg",
+                imageinfo: [
+                  {
+                    thumburl:
+                      "https://upload.wikimedia.org/wikipedia/commons/thumb/o/ob/Obelisco.jpg/1600px-Obelisco.jpg",
+                    descriptionurl: "https://commons.wikimedia.org/wiki/File:Obelisco.jpg",
+                    mime: "image/jpeg",
+                    extmetadata: { LicenseShortName: { value: license }, Artist: { value: "Ana Pérez" } },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      }
+      if (url.startsWith("https://upload.wikimedia.org/")) return new Response(new Uint8Array(photo));
+      throw new Error(`fetch inesperado: ${url}`);
+    });
+    return calls;
+  }
+
+  it("descarga la foto, la sube y arma el crédito con autor y licencia", async () => {
+    const { category } = await setup();
+    const calls = stubCommons("CC BY-SA 4.0", Buffer.from(await photoBase64(), "base64"));
+    const created = await createAssistantArticle(
+      draft(category.slug, { image: { commons: "File:Obelisco.jpg", alt: "El Obelisco" } }),
+    );
+    const article = await getAssistantArticle(created.id);
+    expect(article?.mainImage).toMatchObject({
+      alt: "El Obelisco",
+      credit: "Ana Pérez / Wikimedia Commons, CC BY-SA 4.0",
+    });
+    expect(calls.some((url) => url.includes("titles=File%3AObelisco.jpg"))).toBe(true);
+  });
+
+  it("cambia sólo la foto de una nota existente", async () => {
+    const { category } = await setup();
+    const created = await createAssistantArticle(draft(category.slug));
+    stubCommons("CC0", Buffer.from(await photoBase64(), "base64"));
+    await updateAssistantArticle(created.id, { image: { commons: "File:Obelisco.jpg", alt: "El Obelisco" } });
+    const article = await getAssistantArticle(created.id);
+    expect(article?.title).toBe(created.title);
+    expect(article?.mainImage?.credit).toBe("Ana Pérez / Wikimedia Commons, CC0");
+  });
+
+  it("rechaza una foto con licencia no comercial y no guarda la nota", async () => {
+    const { category } = await setup();
+    stubCommons("CC BY-NC 2.0", Buffer.from(await photoBase64(), "base64"));
+    await expect(
+      createAssistantArticle(draft(category.slug, { image: { commons: "File:Obelisco.jpg", alt: "x" } })),
+    ).rejects.toMatchObject({ code: "invalid", fieldErrors: { "image.commons": expect.any(String) } });
+    expect(await testDb.article.count()).toBe(0);
+  });
+
+  it("pide una sola forma de imagen", async () => {
+    const { category } = await setup();
+    await expect(
+      createAssistantArticle(
+        draft(category.slug, {
+          image: { data: await photoBase64(), commons: "File:X.jpg", alt: "x", credit: "y" },
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid" });
   });
 });
