@@ -10,8 +10,8 @@ import { getDollarRates } from "@/server/services/exchange-rates";
 import { getHomepage } from "@/server/services/public-content";
 
 /**
- * Portada en forma de panel: arriba la nota principal y, al costado, el dólar en vivo y el
- * minuto a minuto. Después las secundarias, las últimas y un bloque por sección; Gaming va
+ * Portada en forma de panel: la nota principal con las secundarias debajo y, al costado, el
+ * dólar en vivo y el minuto a minuto. Después las últimas y un bloque por sección; Gaming va
  * destacado sobre fondo oscuro.
  */
 export default async function HomePage() {
@@ -49,16 +49,19 @@ export default async function HomePage() {
       {siteLd}
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
 
-      <section aria-label="Principales" className="grid gap-6 lg:grid-cols-12 lg:gap-8">
+      <section
+        aria-label="Principales"
+        className="grid gap-6 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-8"
+      >
         <div className="lg:col-span-8">
           <ArticleCard article={lead} variant="lead" headingLevel="h2" priority />
         </div>
-        <div className="grid content-start gap-6 md:grid-cols-2 lg:col-span-4 lg:grid-cols-1">
+        <div className="grid content-start gap-6 md:grid-cols-2 lg:col-span-4 lg:row-span-2 lg:grid-cols-1">
           <DollarPanel initial={rates} />
           <LatestTimeline articles={timeline} />
         </div>
         {secondary.length > 0 ? (
-          <ul className="grid gap-6 md:grid-cols-3 lg:col-span-12">
+          <ul className="grid content-start gap-6 md:grid-cols-3 lg:col-span-8">
             {secondary.map((article) => (
               <li key={article.id}>
                 <ArticleCard article={article} variant="secondary" headingLevel="h2" />
