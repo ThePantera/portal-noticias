@@ -53,6 +53,29 @@ test("lo que se publica aparece en el sitio y lo que se despublica desaparece", 
   );
   expect(await (await page.request.get("/feed.xml")).text()).toContain(title);
 
+  // Reacciones anónimas: se ponen, sobreviven a la recarga y se sacan con otro toque.
+  const reactions = page.getByRole("region", { name: "¿Qué te pareció?" });
+  await expect(reactions.getByText("Todavía no hay reacciones")).toBeVisible();
+  const fire = reactions.getByRole("button", { name: /^🔥/ });
+  await fire.click();
+  await expect(fire).toHaveAttribute("aria-pressed", "true");
+  await expect(reactions.getByText("1 reacción", { exact: true })).toBeVisible();
+  await reactions.getByRole("button", { name: "Otro emoji" }).click();
+  await reactions.getByLabel("Cualquier otro emoji").fill("🦀");
+  await reactions.getByRole("button", { name: "Listo" }).click();
+  await expect(reactions.getByRole("button", { name: /^🦀 1 reacción, la tuya/ })).toBeVisible();
+  await page.reload();
+  await expect(reactions.getByText("2 reacciones", { exact: true })).toBeVisible();
+  await expect(fire).toHaveAttribute("aria-pressed", "true");
+  await fire.click();
+  await expect(fire).toHaveAttribute("aria-pressed", "false");
+  await expect(reactions.getByText("1 reacción", { exact: true })).toBeVisible();
+  const foreign = await page.request.post(`/api/reacciones/x`, {
+    data: { emoji: "🔥" },
+    headers: { Origin: "https://otro-sitio.example" },
+  });
+  expect(foreign.status()).toBe(403);
+
   // Sección y etiqueta enlazadas desde la nota.
   await page.getByRole("navigation", { name: "Ruta" }).getByRole("link", { name: "Economía" }).click();
   await expect(page).toHaveURL("/categoria/economia");

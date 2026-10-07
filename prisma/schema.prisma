@@ -38,6 +38,7 @@ model User {
   sessions      Session[]
   articles      Article[]
   uploadedMedia Media[]
+  reactions     ArticleReaction[]
 
   @@map("users")
 }
@@ -163,6 +164,7 @@ model Article {
   tags        ArticleTag[]
   gallery     ArticleMedia[]
   slugHistory ArticleSlugHistory[]
+  reactions   ArticleReaction[]
 
   @@index([status, publishedAt(sort: Desc)])
   @@index([categoryId, status, publishedAt(sort: Desc)])
@@ -194,6 +196,34 @@ model ArticleSlugHistory {
 
   @@index([articleId])
   @@map("article_slug_history")
+}
+
+// ─────────────────────────────── Reacciones ───────────────────────────────
+
+/// Reacción de un lector a una nota con un emoji (ADR 0010). Por ahora es anónima: el
+/// navegador se identifica con una cookie propia y se guarda sólo su SHA-256. `userId`
+/// queda listo para cuando exista el login de lectores.
+model ArticleReaction {
+  id          String   @id @default(cuid())
+  articleId   String   @map("article_id")
+  /// Un solo emoji (secuencia RGI de Unicode), validado en src/lib/reactions.ts.
+  emoji       String
+  /// SHA-256 del identificador anónimo del navegador (cookie `portal_lector`).
+  visitorHash String   @map("visitor_hash")
+  userId      String?  @map("user_id")
+  /// SHA-256 de la IP, sólo para limitar abusos. Nunca se guarda la IP.
+  ipHash      String?  @map("ip_hash")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([articleId, visitorHash, emoji])
+  @@unique([articleId, userId, emoji])
+  @@index([articleId, emoji])
+  @@index([ipHash, createdAt])
+  @@index([userId])
+  @@map("article_reactions")
 }
 
 // ─────────────────────────────── Media ───────────────────────────────

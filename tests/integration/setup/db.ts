@@ -7,7 +7,7 @@ export const testDb = new PrismaClient({ adapter: new PrismaPg({ connectionStrin
 /** Vacía todas las tablas del modelo entre tests. */
 export async function resetDatabase() {
   await testDb.$executeRawUnsafe(`
-    TRUNCATE TABLE article_tags, article_media, article_slug_history, articles, media, tags,
+    TRUNCATE TABLE article_reactions, article_tags, article_media, article_slug_history, articles, media, tags,
       categories, sessions, login_attempts, domain_events, users RESTART IDENTITY CASCADE;
   `);
 }

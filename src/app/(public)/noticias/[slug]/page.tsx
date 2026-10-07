@@ -5,6 +5,7 @@ import { ArticleBody } from "@/components/editorial/ArticleBody";
 import { ArticleCard } from "@/components/editorial/ArticleCard";
 import { ArticleFigure } from "@/components/editorial/ArticleImage";
 import { ArticleMeta } from "@/components/editorial/ArticleMeta";
+import { ArticleReactions } from "@/components/editorial/ArticleReactions";
 import { JsonLd } from "@/components/editorial/JsonLd";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { ShareButtons } from "@/components/editorial/ShareButtons";
@@ -127,6 +128,7 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
           />
         ) : null}
         <ArticleBody content={article.content} className="mt-8" />
+        <ArticleReactions articleId={article.id} />
         {article.tags.length > 0 ? (
           <div className="mt-10 border-t border-rule pt-6">
             <h2 className="sr-only">Etiquetas</h2>
