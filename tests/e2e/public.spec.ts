@@ -210,7 +210,10 @@ test("las páginas públicas no desbordan a lo ancho", async ({ page }) => {
 
 test("mercados: la sección está en el menú y el dado dice si sube o baja", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Secciones" }).getByRole("link", { name: "Mercados" }).click();
+  await page
+    .getByRole("navigation", { name: "Secciones", exact: true })
+    .getByRole("link", { name: "Mercados" })
+    .click();
   await expect(page).toHaveURL(/\/mercados$/);
   await expect(page.getByRole("heading", { level: 1, name: "Mercados" })).toBeVisible();
   await expect(page.getByText("no es un consejo de inversión")).toBeVisible();
