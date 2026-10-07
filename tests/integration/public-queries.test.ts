@@ -171,13 +171,19 @@ describe("sitio público", () => {
     expect(related.some((a) => a.id === id)).toBe(false);
   });
 
-  it("una sección desactivada no se navega ni se muestra", async () => {
+  it("una sección desactivada sale del menú y de la portada, pero su página y sus notas siguen", async () => {
     const { category, publish } = await setup();
-    await publish();
+    await publish({ title: "Nota de la sección oculta" });
     expect((await listNavCategories()).map((c) => c.slug)).toContain(category.slug);
     await testDb.category.update({ where: { id: category.id }, data: { isActive: false } });
     expect(await listNavCategories()).toEqual([]);
-    expect(await getCategoryPage(category.slug)).toBeNull();
+    const home = await getHomepage();
+    expect(home.lead).toBeNull();
+    expect(home.sections).toEqual([]);
+    const section = await getCategoryPage(category.slug);
+    expect(section?.category.isActive).toBe(false);
+    expect(section?.articles.map((a) => a.title)).toEqual(["Nota de la sección oculta"]);
+    expect(await getCategoryPage("no-existe")).toBeNull();
   });
 
   it("sitemaps y RSS sólo listan lo publicado; el de noticias, las últimas 48 horas", async () => {

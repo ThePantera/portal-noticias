@@ -21,14 +21,14 @@ export function DollarTicker({ initial }: { initial: DollarRates | null }) {
             {rates.quotes.map((quote) => (
               <li key={quote.kind} className="flex items-baseline gap-1.5 whitespace-nowrap">
                 <span className="text-on-night-muted">{quote.name}</span>
-                <span className="font-semibold tabular-nums">{formatArs(quote.sell)}</span>
+                <span className="font-mono font-semibold tabular-nums">{formatArs(quote.sell)}</span>
                 <span className="sr-only">(venta)</span>
               </li>
             ))}
             {gap !== null ? (
               <li className="flex items-baseline gap-1.5 whitespace-nowrap">
                 <span className="text-on-night-muted">Brecha</span>
-                <span className="font-semibold tabular-nums">{formatPercent(gap)}</span>
+                <span className="font-mono font-semibold tabular-nums">{formatPercent(gap)}</span>
               </li>
             ) : null}
           </ul>
