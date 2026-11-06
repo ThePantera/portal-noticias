@@ -63,16 +63,18 @@ function subscribe(listener: () => void) {
   };
 }
 
-let view = { snapshot: latest, status };
-function getView() {
+type FlightsView = { snapshot: FlightsSnapshot | null; status: "loading" | "ok" | "error" };
+
+let view: FlightsView = { snapshot: latest, status };
+function getView(): FlightsView {
   if (view.snapshot !== latest || view.status !== status) view = { snapshot: latest, status };
   return view;
 }
-const SERVER_VIEW = { snapshot: null, status: "loading" as const };
+const SERVER_VIEW: FlightsView = { snapshot: null, status: "loading" };
 
 /** Vuelos en vivo: se piden al abrir la página y después cada 15 segundos. */
-export function useFlights(): { snapshot: FlightsSnapshot | null; status: "loading" | "ok" | "error" } {
-  const current = useSyncExternalStore(subscribe, getView, () => SERVER_VIEW);
+export function useFlights(): FlightsView {
+  const current = useSyncExternalStore<FlightsView>(subscribe, getView, () => SERVER_VIEW);
   useEffect(() => {
     void refresh();
   }, []);
