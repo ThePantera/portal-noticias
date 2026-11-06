@@ -90,3 +90,11 @@ describe("texto de una nota", () => {
     });
   });
 });
+
+describe("entidades con nombre", () => {
+  it("decodifica tildes, eñes y comillas", () => {
+    expect(
+      cleanText("Le&oacute;n XIV lleg&oacute; a &ldquo;Montevideo&rdquo; &mdash; Espa&ntilde;a &Aacute;"),
+    ).toBe("León XIV llegó a “Montevideo” — España Á");
+  });
+});

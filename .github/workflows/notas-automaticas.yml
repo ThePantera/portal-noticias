@@ -1,0 +1,43 @@
+name: Notas automáticas de tendencia
+
+# Publicador automático (docs/adr/0012-publicador-automatico.md). Cada 15 minutos entre las
+# 7 y las 23:59 de Buenos Aires (10 a 02:59 UTC) le pide al sitio hasta dos notas nuevas.
+# GitHub puede demorar o saltear ejecuciones programadas: por eso pide dos por vez.
+on:
+  schedule:
+    - cron: "*/15 0-2,10-23 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: notas-automaticas
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Pedir notas al publicador
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$CRON_SECRET" ] || [ -z "$SITE_URL" ]; then
+            echo "Falta CRON_SECRET o SITE_URL: el publicador no está configurado todavía."
+            exit 0
+          fi
+          for i in 1 2; do
+            body=$(curl --silent --show-error --max-time 150 -w '\n%{http_code}' \
+              -X POST -H "Authorization: Bearer $CRON_SECRET" \
+              "$SITE_URL/api/cron/autopublish")
+            code=$(echo "$body" | tail -n1)
+            echo "$body" | head -n -1
+            if [ "$code" = "503" ]; then
+              echo "El publicador no está configurado (falta ANTHROPIC_API_KEY en Vercel)."
+              exit 0
+            fi
+            if [ "$code" != "200" ]; then exit 1; fi
+            echo "$body" | grep -q '"status":"published"' || break
+          done

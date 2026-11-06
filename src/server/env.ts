@@ -33,6 +33,18 @@ const schema = z.object({
     .optional()
     .transform((v) => v || undefined)
     .refine((v) => v === undefined || v.length >= 32, "Tiene que tener al menos 32 caracteres."),
+  /**
+   * Llave de la API de Claude para el publicador automático (ADR 0012). Vacío: el publicador
+   * responde 503 y no publica nada.
+   */
+  ANTHROPIC_API_KEY: z
+    .string()
+    .optional()
+    .transform((v) => v || undefined),
+  /** Modelo que redacta las notas automáticas. */
+  AUTOPUBLISH_MODEL: z.string().min(1).default("claude-haiku-5-5"),
+  /** Tope de notas automáticas (y del asistente) por 24 horas. */
+  AUTOPUBLISH_MAX_PER_DAY: z.coerce.number().int().min(1).max(300).default(100),
   /** Código de Google Search Console (método "Etiqueta HTML"). Opcional. */
   GOOGLE_SITE_VERIFICATION: z.string().optional().transform(parseGoogleVerification),
   /**
