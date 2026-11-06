@@ -28,7 +28,7 @@ export const TREND_SOURCES: Source[] = [
     name: "La Nación",
     url: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml",
   },
-  { id: "pagina12", name: "Página/12", url: "https://www.pagina12.com.ar/rss/portada" },
+  { id: "pagina12", name: "Página/12", url: "https://www.pagina12.com.ar/arc/outboundfeeds/rss/" },
   { id: "ambito", name: "Ámbito", url: "https://www.ambito.com/rss/pages/home.xml" },
   { id: "perfil", name: "Perfil", url: "https://www.perfil.com/feed" },
   { id: "tn", name: "TN", url: "https://tn.com.ar/arc/outboundfeeds/rss/?outputType=xml" },
@@ -37,18 +37,18 @@ export const TREND_SOURCES: Source[] = [
   { id: "bbc-mundo", name: "BBC Mundo", url: "https://feeds.bbci.co.uk/mundo/rss.xml" },
 ];
 
-/** Medios cuyas notas se pueden leer con readSourceArticle. */
+/** Medios cuyas notas se pueden leer con readSourceArticle (con o sin "www."). */
 const READABLE_HOSTS = new Set([
-  "www.infobae.com",
-  "www.clarin.com",
-  "www.lanacion.com.ar",
-  "www.pagina12.com.ar",
-  "www.ambito.com",
-  "www.perfil.com",
+  "infobae.com",
+  "clarin.com",
+  "lanacion.com.ar",
+  "pagina12.com.ar",
+  "ambito.com",
+  "perfil.com",
   "tn.com.ar",
-  "www.ole.com.ar",
-  "www.cronista.com",
-  "www.bbc.com",
+  "ole.com.ar",
+  "cronista.com",
+  "bbc.com",
 ]);
 
 const USER_AGENT = "MeContaron/1.0 (+https://portal-noticias-zeta.vercel.app)";
@@ -135,7 +135,7 @@ export async function readSourceArticle(url: string): Promise<{ url: string; tit
     throw new TrendsError("invalid", "La dirección no es válida.");
   }
   for (let hop = 0; hop < 4; hop++) {
-    if (current.protocol !== "https:" || !READABLE_HOSTS.has(current.hostname)) {
+    if (current.protocol !== "https:" || !READABLE_HOSTS.has(current.hostname.replace(/^www\./, ""))) {
       throw new TrendsError("invalid", `Sólo se pueden leer notas de: ${[...READABLE_HOSTS].join(", ")}.`);
     }
     let response: Response;
