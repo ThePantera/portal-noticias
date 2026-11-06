@@ -11,6 +11,7 @@ import {
   formatHeading,
   formatSpeed,
   sortFlights,
+  type Airport,
 } from "@/lib/flights";
 import type { Flight, FlightsSnapshot } from "@/types/flights";
 import { useFlights } from "./useFlights";
@@ -95,6 +96,19 @@ function planeIcon(leaflet: Leaflet, flight: Flight, selected: boolean): Leaflet
     html: `<span class="flight-icon" data-state="${state}" style="transform:rotate(${rotation}deg)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${PLANE_PATH}"/></svg></span>`,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
+  });
+}
+
+const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const TILE_CREDIT =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Vuelos: <a href="https://adsb.lol">adsb.lol</a> (ODbL)';
+
+function airportIcon(leaflet: Leaflet, airport: Airport): LeafletIcon {
+  return leaflet.divIcon({
+    className: "airport-marker",
+    html: `<span class="airport-label" title="${airport.name}">${airport.code}</span>`,
+    iconSize: [36, 18],
+    iconAnchor: [18, 9],
   });
 }
 
@@ -191,7 +205,8 @@ export function FlightsTracker() {
       const position: LatLng = [flight.lat, flight.lon];
       const marker = markers.current.get(flight.id);
       if (marker) {
-        marker.setLatLng(position).setIcon(icon).setZIndexOffset(isSelected ? 1000 : 0);
+        const zIndex = isSelected ? 1000 : 0;
+        marker.setLatLng(position).setIcon(icon).setZIndexOffset(zIndex);
       } else {
         const created = leaflet
           .marker(position, { icon, keyboard: false, zIndexOffset: isSelected ? 1000 : 0 })
@@ -221,27 +236,10 @@ export function FlightsTracker() {
           maxZoom: 13,
           zoomSnap: 0.5,
         });
-        leaflet
-          .tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-            attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · Vuelos: <a href="https://adsb.lol">adsb.lol</a> (ODbL)',
-          })
-          .addTo(map);
+        leaflet.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_CREDIT }).addTo(map);
         for (const airport of AIRPORTS) {
-          leaflet
-            .marker([airport.lat, airport.lon], {
-              icon: leaflet.divIcon({
-                className: "airport-marker",
-                html: `<span class="airport-label" title="${airport.name}">${airport.code}</span>`,
-                iconSize: [36, 18],
-                iconAnchor: [18, 9],
-              }),
-              keyboard: false,
-              interactive: false,
-              zIndexOffset: -1000,
-            })
-            .addTo(map);
+          const options = { icon: airportIcon(leaflet, airport), keyboard: false, interactive: false };
+          leaflet.marker([airport.lat, airport.lon], { ...options, zIndexOffset: -1000 }).addTo(map);
         }
         leafletRef.current = leaflet;
         mapRef.current = map;
