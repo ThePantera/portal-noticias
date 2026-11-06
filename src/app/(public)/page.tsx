@@ -12,20 +12,17 @@ import { getDollarRates } from "@/server/services/exchange-rates";
 import { getHomepage } from "@/server/services/public-content";
 
 /*
- * Ancho de las tarjetas en los carriles: en el celular una entera y la punta de la siguiente,
- * para que se note que se desliza. En la computadora, cuatro a lo ancho de la página, tres
- * debajo de las principales y dos en las secciones, que van de a dos por fila.
+ * Ancho de las tarjetas del carril destacado: en el celular una entera y la punta de la
+ * siguiente, para que se note que se desliza; en la computadora, cuatro a lo ancho.
  */
 const WIDE_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-4.5rem)/4)]";
-const LATEST_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]";
-const HALF_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)]";
 
 /**
  * Portada de diario, por jerarquía: arriba la cinta de "Último momento"; después la nota
  * principal grande y, debajo, las secundarias (el orden lo fija "Destacada" en el panel). Al
- * costado, el dólar en vivo y el minuto a minuto; debajo, las últimas. Después, cada sección en
- * un carril horizontal (de a dos por fila en la computadora), así la página no se hace eterna.
- * Los bloques aparecen con un leve movimiento al bajar.
+ * costado, el dólar en vivo y el minuto a minuto; debajo, las últimas. Después, cada sección
+ * como en el papel: una nota con foto y hasta tres titulares debajo, en columnas (tres por
+ * fila en la computadora). Los bloques aparecen con un leve movimiento al bajar.
  */
 export default async function HomePage() {
   const [{ lead, secondary, latest, sections }, rates] = await Promise.all([getHomepage(), getDollarRates()]);
@@ -92,19 +89,19 @@ export default async function HomePage() {
             className="reveal grid min-w-0 grid-cols-1 content-start gap-3 lg:col-span-8"
           >
             <SectionHeader id="ultimas" title="Últimas noticias" />
-            <CardRail label="Últimas noticias">
-              {latest.map((article) => (
-                <li key={article.id} className={LATEST_ITEM}>
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {latest.slice(0, 6).map((article) => (
+                <li key={article.id} className="min-w-0">
                   <ArticleCard article={article} variant="secondary" />
                 </li>
               ))}
-            </CardRail>
+            </ul>
           </section>
         ) : null}
       </div>
 
       {regular.length > 0 ? (
-        <div className="grid grid-cols-1 gap-10 md:gap-12 lg:grid-cols-2 lg:gap-x-8">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:grid-cols-3">
           {regular.map(({ category, articles }) => (
             <section
               key={category.slug}
@@ -117,13 +114,16 @@ export default async function HomePage() {
                 title={category.name}
                 href={`/categoria/${category.slug}`}
               />
-              <CardRail label={`Notas de ${category.name}`}>
-                {articles.map((article) => (
-                  <li key={article.id} className={HALF_ITEM}>
-                    <ArticleCard article={article} variant="secondary" showCategory={false} />
-                  </li>
-                ))}
-              </CardRail>
+              <ArticleCard article={articles[0]} variant="secondary" showCategory={false} />
+              {articles.length > 1 ? (
+                <ul className="grid divide-y divide-rule border-t border-rule">
+                  {articles.slice(1, 4).map((article) => (
+                    <li key={article.id} className="py-3">
+                      <ArticleCard article={article} variant="compact" showCategory={false} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </section>
           ))}
         </div>

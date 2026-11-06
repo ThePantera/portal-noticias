@@ -1,31 +1,30 @@
 /*
  * Tokens de diseño del portal. Fuente única para colores, tipografía y espaciado.
  * Se exponen a Tailwind v4 mediante @theme (ver globals.css y docs/design/identidad-visual.md).
- * Concepto (rediseño 2026-10): portal moderno tipo panel. Fondo frío, tarjetas con radio y
- * sombra suave, azul eléctrico como acento y un color propio por sección. El rojo sigue
- * reservado para "En vivo"/"Último momento".
+ * Concepto (MeContaron, 2026-11): diario nacional. Fondo blanco, notas sin caja separadas por
+ * filetes finos, rojo de marca como acento y un color propio por sección.
  * MeContaron, diario nacional (2026-11): claro por defecto (data-theme="light" en <html>, el
  * lector puede pasar a oscuro). Volantas en mayúsculas con la fuente de interfaz; la
  * monoespaciada queda sólo para cifras.
  */
 :root {
   /* Color: superficies */
-  --color-paper: #f3f5f9; /* fondo general */
+  --color-paper: #ffffff; /* fondo general */
   --color-surface: #ffffff; /* tarjetas, paneles, menús */
-  --color-surface-muted: #e9edf4; /* chips, fondos de bloque, hover */
+  --color-surface-muted: #f1f2f4; /* chips, fondos de bloque, hover */
   --color-ink: #0b1220; /* texto principal (AAA) */
   --color-ink-muted: #44516a; /* bajadas, metadatos (AA) */
   --color-ink-subtle: #5a677c; /* fechas, créditos (AA) */
-  --color-rule: #dce2eb; /* bordes y divisores */
+  --color-rule: #e2e4e8; /* bordes y divisores */
   /* Superficie siempre oscura: barra de cotizaciones, portada sobre foto, bloque Gaming */
   --color-night: #0b1220;
   --color-night-raised: #162036;
   --color-on-night: #f3f6fb;
   --color-on-night-muted: #b4c0d3;
   /* Color: acento */
-  --color-accent: #1f4fd6; /* azul eléctrico: enlaces, foco, sección activa */
-  --color-accent-strong: #163ba6;
-  --color-accent-soft: #e3ebff;
+  --color-accent: #c8102e; /* rojo MeContaron: marca, enlaces, foco, sección activa */
+  --color-accent-strong: #9e0c24;
+  --color-accent-soft: #fde8eb;
   /* Color por sección (texto AA sobre surface y paper) */
   --color-hue-blue: #1f4fd6;
   --color-hue-violet: #6d28d9;
@@ -100,9 +99,9 @@
     --color-rule: #222d42;
     --color-night: #050911;
     --color-night-raised: #121b2e;
-    --color-accent: #7aa2ff;
-    --color-accent-strong: #a9c2ff;
-    --color-accent-soft: #16213d;
+    --color-accent: #ff6b7a;
+    --color-accent-strong: #ff9aa5;
+    --color-accent-soft: #3a1219;
     --color-hue-blue: #7aa2ff;
     --color-hue-violet: #b79cff;
     --color-hue-teal: #4fd1c5;
@@ -133,9 +132,9 @@
   --color-rule: #222d42;
   --color-night: #050911;
   --color-night-raised: #121b2e;
-  --color-accent: #7aa2ff;
-  --color-accent-strong: #a9c2ff;
-  --color-accent-soft: #16213d;
+  --color-accent: #ff6b7a;
+  --color-accent-strong: #ff9aa5;
+  --color-accent-soft: #3a1219;
   --color-hue-blue: #7aa2ff;
   --color-hue-violet: #b79cff;
   --color-hue-teal: #4fd1c5;
