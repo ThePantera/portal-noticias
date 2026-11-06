@@ -7,7 +7,7 @@ import { ArticleMeta } from "./ArticleMeta";
 type Variant = "lead" | "secondary" | "list" | "compact";
 
 const titleClass: Record<Variant, string> = {
-  lead: "text-2xl leading-tight md:text-3xl lg:text-4xl",
+  lead: "text-2xl leading-tight md:text-3xl",
   secondary: "text-lg leading-snug",
   list: "text-lg leading-snug md:text-xl",
   compact: "text-base leading-snug",
@@ -61,51 +61,6 @@ export function ArticleCard({
     </Heading>
   );
 
-  // Principal con foto: el título va sobre la imagen, con un degradé para que se lea.
-  if (variant === "lead" && article.image) {
-    return (
-      <article
-        style={sectionTone(article.category.slug)}
-        className="group relative isolate overflow-hidden rounded-card bg-night shadow-raised"
-      >
-        <ArticleImage
-          image={article.image}
-          sizes={imageSizes.lead}
-          priority={priority}
-          aspect="aspect-[4/5] sm:aspect-[16/10]"
-          className="transition-transform duration-500 group-hover:scale-[1.03]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-linear-to-t from-night via-night/60 to-transparent"
-        />
-        <div className="lead-caption absolute inset-x-0 bottom-0 p-5 md:p-8">
-          {showCategory ? (
-            <Link
-              href={`/categoria/${article.category.slug}`}
-              className="relative z-10 inline-flex rounded-full bg-on-night px-2.5 py-1 text-xs font-bold tracking-wide text-night uppercase hover:underline"
-            >
-              {article.category.name}
-            </Link>
-          ) : null}
-          {title("mt-3 text-on-night")}
-          {article.excerpt ? (
-            <p className="mt-3 hidden max-w-2xl text-base text-on-night-muted sm:block md:text-lg">
-              {article.excerpt}
-            </p>
-          ) : null}
-          <ArticleMeta
-            tone="inverse"
-            className="mt-4"
-            authorName={article.authorName}
-            publishedAt={article.publishedAt}
-            readingTimeMinutes={article.readingTimeMinutes}
-          />
-        </div>
-      </article>
-    );
-  }
-
   if (variant === "compact") {
     return (
       <article
@@ -114,7 +69,7 @@ export function ArticleCard({
       >
         <div className="min-w-0 flex-1">
           {category}
-          {title(`mt-1.5 ${inverse ? "text-on-night" : "text-ink group-hover:text-accent"}`)}
+          {title(`mt-1.5 ${inverse ? "text-on-night" : "text-ink decoration-1 underline-offset-4 group-hover:underline"}`)}
           <ArticleMeta
             tone={inverse ? "inverse" : "default"}
             className="mt-2"
@@ -122,7 +77,7 @@ export function ArticleCard({
           />
         </div>
         {article.image ? (
-          <div className="w-20 shrink-0 overflow-hidden rounded-xl md:w-24">
+          <div className="w-20 shrink-0 overflow-hidden rounded-card md:w-24">
             <ArticleImage image={article.image} sizes={imageSizes.compact} aspect="aspect-square" />
           </div>
         ) : null}
@@ -130,6 +85,7 @@ export function ArticleCard({
     );
   }
 
+  // La principal es la misma tarjeta en grande: foto arriba, título en serif y bajada abajo.
   const showExcerpt = (variant === "list" || variant === "lead") && article.excerpt;
   return (
     <article
@@ -137,7 +93,7 @@ export function ArticleCard({
       className="group relative flex h-full min-w-0 flex-col"
     >
       {article.image ? (
-        <div className="overflow-hidden rounded-xl">
+        <div className="overflow-hidden rounded-card">
           <ArticleImage
             image={article.image}
             sizes={imageSizes[variant]}
@@ -149,9 +105,9 @@ export function ArticleCard({
       ) : (
         <div aria-hidden="true" className="h-1 rounded-full bg-section" />
       )}
-      <div className="flex flex-1 flex-col pt-3">
+      <div className={`flex flex-1 flex-col ${variant === "lead" ? "pt-4" : "pt-3"}`}>
         <div>{category}</div>
-        {title(`mt-2 ${inverse ? "text-on-night" : "text-ink group-hover:text-accent"}`)}
+        {title(`mt-2 ${inverse ? "text-on-night" : "text-ink decoration-1 underline-offset-4 group-hover:underline"}`)}
         {showExcerpt ? (
           <p
             className={`mt-2 line-clamp-3 font-body text-base ${inverse ? "text-on-night-muted" : "text-ink-muted"}`}

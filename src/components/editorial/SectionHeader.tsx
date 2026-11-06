@@ -9,7 +9,7 @@ type SectionHeaderProps = {
   inverse?: boolean;
 };
 
-/** Encabezado de bloque como en un diario: filete grueso con el color de la sección, título y "Ver todas". */
+/** Encabezado de bloque como en un diario: filete negro, título en versalitas espaciadas y "Ver todas". */
 export function SectionHeader({
   id,
   title,
@@ -18,17 +18,17 @@ export function SectionHeader({
   inverse = false,
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-center justify-between gap-4 border-t-4 border-section pt-2">
+    <div className="flex items-center justify-between gap-4 border-t-2 border-ink pt-2">
       <h2
         id={id}
-        className={`font-display text-xl font-black tracking-tight uppercase md:text-2xl ${inverse ? "text-on-night" : "text-ink"}`}
+        className={`font-display text-base font-bold tracking-widest uppercase md:text-lg ${inverse ? "text-on-night" : "text-ink"}`}
       >
         {title}
       </h2>
       {href ? (
         <Link
           href={href}
-          className={`text-sm font-bold whitespace-nowrap transition-colors ${inverse ? "text-on-night hover:underline" : "text-section hover:underline"}`}
+          className={`text-sm font-bold whitespace-nowrap transition-colors ${inverse ? "text-on-night hover:underline" : "text-ink-muted hover:text-ink hover:underline"}`}
         >
           {linkLabel}
           <span className="sr-only"> de {title}</span>

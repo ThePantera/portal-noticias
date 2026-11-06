@@ -3,7 +3,7 @@
 > **Rediseño (7 oct 2026).** Manu pidió un sitio más moderno, "con dashboard". Lo que sigue en esta sección manda sobre la propuesta original de la Fase 1, que queda debajo como historia.
 >
 > - **Concepto:** portal tipo panel. Fondo frío (`paper`), tarjetas blancas (`surface`) con radio de 16 px y sombra suave, azul eléctrico como acento (`#1f4fd6` / `#7aa2ff` en oscuro) y un color por sección (`--color-hue-*`, asignados en `src/lib/sections.ts`). El rojo sigue reservado para "En vivo".
-> - **Tipografía:** Inter Tight (titulares, navegación y panel, en negrita y con interletra apretada) y Newsreader sólo para bajadas y cuerpo de nota.
+> - **Tipografía (2026-11):** Source Serif 4 para la marca, títulos, volantas y cuerpo; Inter Tight sólo para la interfaz (cotizaciones, buscador, panel). Papel crema, tinta negra, filetes finos y un único color: amarillo de señal #ffc500.
 > - **Superficie oscura** (`night`): barra del dólar, nota principal sobre su foto, bloque destacado de Gaming y pie.
 > - **Portada (desde el 7 oct, segunda vuelta):** Manu la encontró demasiado larga y pidió carrusel y más movimiento. Arriba, un carrusel con las cinco destacadas (título sobre la foto) que pasa solo cada 7 s, con barra de progreso, flechas y botón de pausa; se detiene con el mouse encima, con el foco adentro o en otra pestaña. Al costado, el dólar en vivo y el minuto a minuto; debajo del carrusel, las últimas en un carril horizontal. Cada sección es un carril (de a dos secciones por fila en la computadora) y Gaming cierra sobre fondo oscuro.
 > - **Movimiento:** la foto activa del carrusel se acerca de a poco, su texto entra desde abajo, las tarjetas suben un poco al pasar el mouse y los bloques aparecen al bajar (CSS `animation-timeline: view()`, donde el navegador lo soporta). Con "reducir movimiento" no hay animaciones y el carrusel no pasa solo.
@@ -35,7 +35,7 @@ Los estados del panel (borrador, programada, publicada, archivada) usan colores 
 
 ## Tipografía
 
-- **Newsreader** (serif de Production Type, diseñada para noticias en pantalla, con eje óptico): titulares y cuerpo de nota.
+- **Source Serif 4** (serif de Adobe, libre, con eje óptico): marca, titulares, volantas y cuerpo de nota.
 - **Libre Franklin** (heredera de la Franklin Gothic de los diarios): navegación, volantas, metadatos, botones y panel.
 - Se sirven con `next/font` desde el propio dominio: sin pedidos a Google en producción y sin saltos de diseño por la carga de fuentes.
 

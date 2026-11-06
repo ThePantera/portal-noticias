@@ -15,17 +15,17 @@ export function SiteHeader({ siteName, categories, rates }: SiteHeaderProps) {
   return (
     <>
       <DollarTicker initial={rates} />
-      <header className="sticky top-0 z-30 border-b border-rule bg-paper/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-site items-center justify-between gap-4 px-4 pt-3 pb-2 md:px-8 md:pt-4">
+      <header className="sticky top-0 z-30 border-b border-rule bg-paper/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-site items-center justify-between gap-4 px-4 pt-3 pb-3 md:px-8 md:pt-5 md:pb-4">
           <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            {/* Marca: la inicial en un globo de diálogo ("me contaron") y el nombre del diario. */}
+            {/* Marca: la inicial sobre el amarillo de señal y el nombre del diario en serif. */}
             <span
               aria-hidden="true"
-              className="grid size-9 shrink-0 place-items-center rounded-xl rounded-bl-sm bg-live font-display text-lg font-black text-surface md:size-10 md:text-xl"
+              className="grid size-9 shrink-0 place-items-center bg-signal font-display text-xl font-bold text-on-signal md:size-11 md:text-2xl"
             >
               {siteName.charAt(0)}
             </span>
-            <span className="truncate font-display text-xl font-black tracking-tight md:text-3xl">
+            <span className="truncate font-display text-2xl font-bold tracking-tight md:text-4xl">
               {siteName}
             </span>
           </Link>
@@ -47,7 +47,7 @@ export function SiteHeader({ siteName, categories, rates }: SiteHeaderProps) {
                 name="q"
                 type="search"
                 placeholder="Buscar noticias"
-                className="w-full rounded-full border border-rule bg-surface py-2 pr-4 pl-9 text-base text-ink shadow-card placeholder:text-ink-subtle"
+                className="w-full border border-rule bg-surface py-2 pr-4 pl-9 text-base text-ink placeholder:text-ink-subtle"
               />
             </div>
             <ThemeToggle />

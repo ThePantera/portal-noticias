@@ -15,9 +15,9 @@ export function BreakingBar({ articles }: { articles: ArticleCardData[] }) {
     >
       <h2
         id="ultimo-momento"
-        className="flex shrink-0 items-center gap-2 bg-live px-3 py-2 text-xs font-extrabold tracking-wide text-surface uppercase md:px-4"
+        className="flex shrink-0 items-center gap-2 bg-signal px-3 py-2 text-xs font-extrabold tracking-wide text-on-signal uppercase md:px-4"
       >
-        <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-surface" />
+        <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-on-signal" />
         Último momento
       </h2>
       <ul className="flex min-w-0 flex-1 items-center divide-x divide-rule">

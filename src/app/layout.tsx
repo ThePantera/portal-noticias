@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter_Tight, JetBrains_Mono, Newsreader } from "next/font/google";
+import { Inter_Tight, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 import { FEED_ALTERNATE_TYPES } from "@/lib/seo";
 import { env } from "@/server/env";
 import "@/styles/globals.css";
 
-const newsreader = Newsreader({
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   axes: ["opsz"],
   style: ["normal", "italic"],
-  variable: "--font-newsreader",
+  variable: "--font-source-serif",
   display: "swap",
 });
 
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f3f5f9",
+  themeColor: "#fdfcf3",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       data-theme="light"
       suppressHydrationWarning
-      className={`${newsreader.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
+      className={`${sourceSerif.variable} ${interTight.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
