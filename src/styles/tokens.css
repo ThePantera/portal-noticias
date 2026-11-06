@@ -1,30 +1,30 @@
 /*
  * Tokens de diseño del portal. Fuente única para colores, tipografía y espaciado.
  * Se exponen a Tailwind v4 mediante @theme (ver globals.css y docs/design/identidad-visual.md).
- * Concepto (MeContaron, 2026-11): diario nacional. Fondo blanco, notas sin caja separadas por
- * filetes finos, rojo de marca como acento y un color propio por sección.
- * MeContaron, diario nacional (2026-11): claro por defecto (data-theme="light" en <html>, el
- * lector puede pasar a oscuro). Volantas en mayúsculas con la fuente de interfaz; la
- * monoespaciada queda sólo para cifras.
+ * Concepto (MeContaron, 2026-11): diario de calidad sobre papel crema. Todo en tinta negra con
+ * filetes finos, sin sombras y con radios mínimos; serif editorial para títulos y cuerpo, sans
+ * sólo para la interfaz. El único color es el amarillo de señal (--color-signal), reservado
+ * para la marca, "Último momento" y la sección activa. Claro por defecto (data-theme="light");
+ * el lector puede pasar a oscuro. La monoespaciada queda sólo para cifras.
  */
 :root {
   /* Color: superficies */
-  --color-paper: #ffffff; /* fondo general */
+  --color-paper: #fdfcf3; /* fondo general */
   --color-surface: #ffffff; /* tarjetas, paneles, menús */
-  --color-surface-muted: #f1f2f4; /* chips, fondos de bloque, hover */
-  --color-ink: #0b1220; /* texto principal (AAA) */
-  --color-ink-muted: #44516a; /* bajadas, metadatos (AA) */
-  --color-ink-subtle: #5a677c; /* fechas, créditos (AA) */
-  --color-rule: #e2e4e8; /* bordes y divisores */
+  --color-surface-muted: #f4f2e6; /* chips, fondos de bloque, hover */
+  --color-ink: #000000; /* texto principal (AAA) */
+  --color-ink-muted: #3d3a36; /* bajadas, metadatos (AA) */
+  --color-ink-subtle: #6e6e6e; /* fechas, créditos (AA) */
+  --color-rule: #d9d9d9; /* bordes y divisores */
   /* Superficie siempre oscura: barra de cotizaciones, portada sobre foto, bloque Gaming */
-  --color-night: #0b1220;
-  --color-night-raised: #162036;
-  --color-on-night: #f3f6fb;
-  --color-on-night-muted: #b4c0d3;
+  --color-night: #211d1c;
+  --color-night-raised: #2e2927;
+  --color-on-night: #fdfcf3;
+  --color-on-night-muted: #c9c4b8;
   /* Color: acento */
-  --color-accent: #c8102e; /* rojo MeContaron: marca, enlaces, foco, sección activa */
-  --color-accent-strong: #9e0c24;
-  --color-accent-soft: #fde8eb;
+  --color-accent: #000000; /* tinta: enlaces, foco */
+  --color-accent-strong: #211d1c;
+  --color-accent-soft: #fdfbe4;
   /* Color por sección (texto AA sobre surface y paper) */
   --color-hue-blue: #1f4fd6;
   --color-hue-violet: #6d28d9;
@@ -33,7 +33,10 @@
   --color-hue-rose: #be123c;
   --color-hue-green: #15803d;
   /* Color: semánticos (no son acento) */
-  --color-live: #d92d20; /* En vivo / Último momento */
+  --color-live: #d92d20; /* punto de "En vivo" */
+  /* Único color de la página: marca, "Último momento", sección activa */
+  --color-signal: #ffc500;
+  --color-on-signal: #000000;
   --color-success: #15803d;
   --color-warning: #9a6200;
   --color-danger: #b42318;
@@ -44,12 +47,12 @@
   --color-status-archived: #44516a;
 
   /* Sombras */
-  --shadow-card: 0 1px 2px rgb(11 18 32 / 0.05), 0 2px 8px rgb(11 18 32 / 0.04);
-  --shadow-raised: 0 2px 4px rgb(11 18 32 / 0.06), 0 12px 32px rgb(11 18 32 / 0.1);
+  --shadow-card: none;
+  --shadow-raised: none;
 
   /* Tipografía */
-  --font-display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-display: "Source Serif 4", Georgia, serif;
+  --font-body: "Source Serif 4", Georgia, serif;
   --font-ui: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace; /* cifras (cotizaciones, mercados) */
 
@@ -81,27 +84,27 @@
   /* Layout */
   --measure: 40rem; /* ~68 caracteres para el cuerpo de la nota */
   --container: 80rem;
-  --radius-sm: 6px; /* botones, inputs, imágenes chicas */
+  --radius-sm: 0px; /* botones, inputs, imágenes chicas */
   --radius-md: 10px; /* paneles de admin */
-  --radius-lg: 16px; /* tarjetas y paneles de portada */
+  --radius-lg: 8px; /* tarjetas y paneles de portada */
 
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-paper: #080d17;
-    --color-surface: #101827;
-    --color-surface-muted: #19233a;
-    --color-ink: #e8edf5;
-    --color-ink-muted: #a9b4c6;
-    --color-ink-subtle: #8c98ab;
-    --color-rule: #222d42;
-    --color-night: #050911;
-    --color-night-raised: #121b2e;
-    --color-accent: #ff6b7a;
-    --color-accent-strong: #ff9aa5;
-    --color-accent-soft: #3a1219;
+    --color-paper: #14120f;
+    --color-surface: #1d1a16;
+    --color-surface-muted: #26221d;
+    --color-ink: #f3efe3;
+    --color-ink-muted: #c6bfae;
+    --color-ink-subtle: #9c9585;
+    --color-rule: #35302a;
+    --color-night: #0d0b09;
+    --color-night-raised: #1d1a16;
+    --color-accent: #f3efe3;
+    --color-accent-strong: #ffffff;
+    --color-accent-soft: #2a2618;
     --color-hue-blue: #7aa2ff;
     --color-hue-violet: #b79cff;
     --color-hue-teal: #4fd1c5;
@@ -116,25 +119,25 @@
     --color-status-scheduled: #f0b44c;
     --color-status-published: #4ade80;
     --color-status-archived: #a9b4c6;
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+    --shadow-card: none;
+    --shadow-raised: none;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --color-paper: #080d17;
-  --color-surface: #101827;
-  --color-surface-muted: #19233a;
-  --color-ink: #e8edf5;
-  --color-ink-muted: #a9b4c6;
-  --color-ink-subtle: #8c98ab;
-  --color-rule: #222d42;
-  --color-night: #050911;
-  --color-night-raised: #121b2e;
-  --color-accent: #ff6b7a;
-  --color-accent-strong: #ff9aa5;
-  --color-accent-soft: #3a1219;
+  --color-paper: #14120f;
+  --color-surface: #1d1a16;
+  --color-surface-muted: #26221d;
+  --color-ink: #f3efe3;
+  --color-ink-muted: #c6bfae;
+  --color-ink-subtle: #9c9585;
+  --color-rule: #35302a;
+  --color-night: #0d0b09;
+  --color-night-raised: #1d1a16;
+  --color-accent: #f3efe3;
+  --color-accent-strong: #ffffff;
+  --color-accent-soft: #2a2618;
   --color-hue-blue: #7aa2ff;
   --color-hue-violet: #b79cff;
   --color-hue-teal: #4fd1c5;
@@ -149,7 +152,7 @@
   --color-status-scheduled: #f0b44c;
   --color-status-published: #4ade80;
   --color-status-archived: #a9b4c6;
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-raised: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+  --shadow-card: none;
+  --shadow-raised: none;
   color-scheme: dark;
 }

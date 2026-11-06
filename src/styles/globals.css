@@ -18,14 +18,16 @@
   --color-accent-strong: var(--color-accent-strong);
   --color-accent-soft: var(--color-accent-soft);
   --color-live: var(--color-live);
+  --color-signal: var(--color-signal);
+  --color-on-signal: var(--color-on-signal);
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
-  /* Color de la sección de cada tarjeta o bloque: lo fija SectionTone con --section. */
-  --color-section: var(--section, var(--color-accent));
+  /* Estilo monocromo: las secciones van en tinta (SectionTone sigue fijando --section). */
+  --color-section: var(--color-ink);
 
-  --font-display: var(--font-inter-tight), "Helvetica Neue", Arial, sans-serif;
-  --font-body: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
+  --font-display: var(--font-source-serif), Georgia, serif;
+  --font-body: var(--font-source-serif), Georgia, serif;
   --font-ui: var(--font-inter-tight), "Helvetica Neue", Arial, sans-serif;
   --font-sans: var(--font-inter-tight), "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -70,29 +72,26 @@
   }
 }
 
-/* Volanta: etiqueta chica en mayúsculas arriba de un título, con el color de la sección. */
+/* Volanta: etiqueta chica en serif, mayúsculas y espaciada, en tinta. */
 @utility kicker {
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: var(--text-xs);
   font-weight: 700;
   letter-spacing: var(--tracking-kicker);
   text-transform: uppercase;
-  color: var(--section, var(--color-accent));
+  color: var(--color-ink);
 }
 
-/* Etiqueta de sección sobre las tarjetas, con el color de la sección. */
+/* Sección sobre las tarjetas: texto chico en serif, mayúsculas y espaciado, sin fondo. */
 @utility section-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: var(--radius-sm);
-  padding: 0.2rem 0.5rem;
-  font-family: var(--font-ui);
+  font-family: var(--font-display);
   font-size: var(--text-xs);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-kicker);
   text-transform: uppercase;
-  color: var(--section, var(--color-accent));
-  background: color-mix(in oklab, var(--section, var(--color-accent)) 12%, transparent);
+  color: var(--color-ink);
 }
 
 /* Punto que late: indica datos en vivo (cotizaciones). */
