@@ -279,16 +279,26 @@ export function getAssistantArticle(id: string) {
   return getArticleForEdit(id);
 }
 
-/** Crea una nota (AI_ASSISTED) y, si se pide, la publica o la programa. */
-export async function createAssistantArticle(raw: unknown) {
-  const input = parse(createSchema, raw);
+/** Notas que firmó el asistente en las últimas 24 horas. */
+export async function assistantArticlesLastDay(): Promise<number> {
   const actor = await assistantActor();
-
-  const recent = await db.article.count({
+  return db.article.count({
     where: { authorId: actor.id, createdAt: { gte: new Date(Date.now() - 24 * 60 * 60_000) } },
   });
-  if (recent >= MAX_ARTICLES_PER_DAY) {
-    throw new AssistantError("rate-limited", `Se alcanzó el tope de ${MAX_ARTICLES_PER_DAY} notas por día.`);
+}
+
+/**
+ * Crea una nota (AI_ASSISTED) y, si se pide, la publica o la programa. `maxPerDay` cambia el
+ * tope diario: el publicador automático (ADR 0012) usa uno propio, más alto que el de la API.
+ */
+export async function createAssistantArticle(raw: unknown, options: { maxPerDay?: number } = {}) {
+  const input = parse(createSchema, raw);
+  const actor = await assistantActor();
+  const maxPerDay = options.maxPerDay ?? MAX_ARTICLES_PER_DAY;
+
+  const recent = await assistantArticlesLastDay();
+  if (recent >= maxPerDay) {
+    throw new AssistantError("rate-limited", `Se alcanzó el tope de ${maxPerDay} notas por día.`);
   }
 
   const article: ArticleInput = {

@@ -34,13 +34,46 @@ const ENTITIES: Record<string, string> = {
   quot: '"',
   apos: "'",
   nbsp: " ",
+  aacute: "á",
+  eacute: "é",
+  iacute: "í",
+  oacute: "ó",
+  uacute: "ú",
+  ntilde: "ñ",
+  uuml: "ü",
+  Aacute: "Á",
+  Eacute: "É",
+  Iacute: "Í",
+  Oacute: "Ó",
+  Uacute: "Ú",
+  Ntilde: "Ñ",
+  Uuml: "Ü",
+  ccedil: "ç",
+  iexcl: "¡",
+  iquest: "¿",
+  ordm: "º",
+  ordf: "ª",
+  deg: "°",
+  laquo: "«",
+  raquo: "»",
+  ldquo: "“",
+  rdquo: "”",
+  lsquo: "‘",
+  rsquo: "’",
+  hellip: "…",
+  ndash: "–",
+  mdash: "—",
+  euro: "€",
 };
 
 function decodeEntities(value: string): string {
   return value
     .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)))
     .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => String.fromCodePoint(parseInt(code, 16)))
-    .replace(/&([a-z]+);/gi, (match, name: string) => ENTITIES[name.toLowerCase()] ?? match);
+    .replace(
+      /&([a-z]+);/gi,
+      (match, name: string) => ENTITIES[name] ?? ENTITIES[name.toLowerCase()] ?? match,
+    );
 }
 
 /**
