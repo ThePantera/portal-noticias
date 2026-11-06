@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Flight } from "@/types/flights";
 
 /*
- * Vuelos en vivo (ADR 0012). Los datos salen de adsb.lol, una red abierta de receptores ADS-B
+ * Vuelos en vivo (ADR 0013). Los datos salen de adsb.lol, una red abierta de receptores ADS-B
  * con licencia ODbL: se pueden mostrar gratis citando la fuente. Acá sólo hay funciones puras
  * (lectura de la respuesta y formatos); el pedido lo hace src/server/services/flights.ts.
  */
