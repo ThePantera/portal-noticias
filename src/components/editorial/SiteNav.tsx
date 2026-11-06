@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CategoryLink } from "@/types/public";
 
-/** Fila de secciones en serif, mayúsculas y separadas por filetes. En mobile se desliza de costado; la activa va en amarillo. */
+/**
+ * Fila de secciones en serif, mayúsculas y separadas por filetes. Si entran todas quedan centradas
+ * (márgenes automáticos en la primera y la última); si no, se desliza de costado desde Portada.
+ * La activa va en amarillo.
+ */
 export function SiteNav({ categories }: { categories: CategoryLink[] }) {
   const pathname = usePathname();
   if (categories.length === 0) return null;
@@ -15,11 +19,11 @@ export function SiteNav({ categories }: { categories: CategoryLink[] }) {
   ].concat(categories.map((category) => ({ name: category.name, href: `/categoria/${category.slug}` })));
   return (
     <nav aria-label="Secciones" className="border-t border-rule">
-      <ul className="mx-auto flex max-w-site [scrollbar-width:none] divide-x divide-rule overflow-x-auto px-4 py-1.5 font-display text-sm tracking-widest whitespace-nowrap uppercase md:px-8 lg:justify-center">
+      <ul className="mx-auto flex max-w-site [scrollbar-width:none] divide-x divide-rule overflow-x-auto px-4 py-1.5 font-display text-sm tracking-widest whitespace-nowrap uppercase md:px-8">
         {links.map(({ name, href }) => {
           const active = pathname === href;
           return (
-            <li key={href}>
+            <li key={href} className="first:ms-auto last:me-auto">
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
