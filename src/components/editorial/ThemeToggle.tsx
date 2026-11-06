@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
 type Theme = "dark" | "light";
 
 function readTheme(): Theme {
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
 /** Avisa cuando cambia data-theme en <html> (lo cambia este botón o el script del layout). */
@@ -15,9 +15,9 @@ function subscribe(onChange: () => void) {
   return () => observer.disconnect();
 }
 
-/** Botón para pasar del tema oscuro (el de siempre) al claro y volver. Recuerda la elección. */
+/** Botón para pasar del tema claro (el de siempre) al oscuro y volver. Recuerda la elección. */
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, readTheme, () => "dark" as Theme);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => "light" as Theme);
   const next: Theme = theme === "dark" ? "light" : "dark";
 
   function toggle() {

@@ -39,7 +39,7 @@ export default defineConfig({
       DATABASE_URL: process.env.E2E_DATABASE_URL ?? "",
       DATABASE_URL_UNPOOLED: process.env.E2E_DATABASE_URL ?? "",
       SITE_URL: baseURL,
-      SITE_NAME: "Portal Noticias",
+      SITE_NAME: "MeContaron",
       CRON_SECRET: E2E_CRON_SECRET,
       ASSISTANT_API_KEY: E2E_ASSISTANT_KEY,
       // Las imágenes van a disco, dentro de test-results (no se sube al repo).

@@ -9,7 +9,15 @@ import { parseGoogleVerification } from "@/lib/seo";
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   SITE_URL: z.url().default("http://localhost:3000"),
-  SITE_NAME: z.string().min(1).default("Portal Noticias"),
+  /**
+   * Nombre del diario. "Portal Noticias" era el provisorio de los primeros deploys: si todavía
+   * está cargado en el hosting, se usa el nombre definitivo.
+   */
+  SITE_NAME: z
+    .string()
+    .min(1)
+    .default("MeContaron")
+    .transform((v) => (v === "Portal Noticias" ? "MeContaron" : v)),
   /** Secreto del publicador de programadas. Vacío: el endpoint responde 503. */
   CRON_SECRET: z
     .string()

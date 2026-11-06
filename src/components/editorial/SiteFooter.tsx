@@ -10,8 +10,7 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
         <div>
           <p className="font-display text-xl font-extrabold tracking-tight text-on-night">{siteName}</p>
           <p className="mt-2 max-w-xs">
-            Noticias de tecnología para la comunidad IT: IA, código, ciberseguridad, hardware, gaming y
-            laburo.
+            Noticias de la Argentina y el mundo, al instante. Se leen sin registrarse.
           </p>
         </div>
         {categories.length > 0 ? (

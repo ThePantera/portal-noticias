@@ -1,7 +1,7 @@
 import { ArticleCard } from "@/components/editorial/ArticleCard";
+import { BreakingBar } from "@/components/editorial/BreakingBar";
 import { CardRail } from "@/components/editorial/CardRail";
 import { DollarPanel } from "@/components/editorial/DollarPanel";
-import { HeroCarousel } from "@/components/editorial/HeroCarousel";
 import { JsonLd } from "@/components/editorial/JsonLd";
 import { LatestTimeline } from "@/components/editorial/LatestTimeline";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
@@ -14,17 +14,18 @@ import { getHomepage } from "@/server/services/public-content";
 /*
  * Ancho de las tarjetas en los carriles: en el celular una entera y la punta de la siguiente,
  * para que se note que se desliza. En la computadora, cuatro a lo ancho de la página, tres
- * debajo del carrusel y dos en las secciones, que van de a dos por fila.
+ * debajo de las principales y dos en las secciones, que van de a dos por fila.
  */
 const WIDE_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-4.5rem)/4)]";
 const LATEST_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]";
 const HALF_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)]";
 
 /**
- * Portada en forma de panel: el carrusel de destacadas que pasa solo y, al costado, el dólar
- * en vivo y el minuto a minuto; debajo del carrusel, las últimas. Después, cada sección en un
- * carril horizontal (de a dos por fila en la computadora), así la página no se hace eterna;
- * Gaming cierra destacado sobre fondo oscuro. Los bloques aparecen con un leve movimiento al bajar.
+ * Portada de diario, por jerarquía: arriba la cinta de "Último momento"; después la nota
+ * principal grande y, debajo, las secundarias (el orden lo fija "Destacada" en el panel). Al
+ * costado, el dólar en vivo y el minuto a minuto; debajo, las últimas. Después, cada sección en
+ * un carril horizontal (de a dos por fila en la computadora), así la página no se hace eterna.
+ * Los bloques aparecen con un leve movimiento al bajar.
  */
 export default async function HomePage() {
   const [{ lead, secondary, latest, sections }, rates] = await Promise.all([getHomepage(), getDollarRates()]);
@@ -55,6 +56,7 @@ export default async function HomePage() {
   const timeline = [lead, ...secondary, ...latest]
     .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
     .slice(0, 5);
+  const breaking = timeline.slice(0, 3);
   const regular = sections.filter(({ category }) => !isFeaturedSection(category.slug));
   const featured = sections.filter(({ category }) => isFeaturedSection(category.slug));
 
@@ -62,11 +64,24 @@ export default async function HomePage() {
     <div className="mx-auto grid max-w-site grid-cols-1 gap-10 px-4 py-6 md:gap-12 md:px-8 md:py-8">
       {siteLd}
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
+      <BreakingBar articles={breaking} />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-10">
-        <div className="min-w-0 lg:col-span-8">
-          <HeroCarousel articles={[lead, ...secondary]} />
-        </div>
+        <section aria-labelledby="principales" className="grid min-w-0 grid-cols-1 gap-6 lg:col-span-8">
+          <h2 id="principales" className="sr-only">
+            Principales
+          </h2>
+          <ArticleCard article={lead} variant="lead" headingLevel="h3" priority />
+          {secondary.length > 0 ? (
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {secondary.map((article) => (
+                <li key={article.id} className="min-w-0">
+                  <ArticleCard article={article} variant="list" />
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
         <div className="grid content-start gap-6 md:grid-cols-2 lg:col-span-4 lg:row-span-2 lg:grid-cols-1">
           <DollarPanel initial={rates} />
           <LatestTimeline articles={timeline} />
