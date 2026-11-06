@@ -28,12 +28,12 @@ type ArticleCardProps = {
   headingLevel?: "h2" | "h3";
   /** La foto se pide primero: sólo para la nota principal de la página. */
   priority?: boolean;
-  /** Sobre fondo oscuro (bloque Gaming): la tarjeta toma colores claros. */
+  /** Sobre fondo oscuro: la tarjeta toma colores claros. */
   inverse?: boolean;
 };
 
 /**
- * Tarjeta de nota con radio y sombra suave. El título es el único enlace a la nota y se
+ * Tarjeta de nota al estilo diario: foto con radio y texto abajo, sin caja. El título es el único enlace a la nota y se
  * estira sobre toda la tarjeta (`after:inset-0`), así se puede tocar en cualquier parte sin
  * anidar enlaces; la sección queda encima, con su propio enlace. El color de la volanta
  * sale de la sección (ver src/lib/sections.ts).
@@ -134,14 +134,10 @@ export function ArticleCard({
   return (
     <article
       style={sectionTone(article.category.slug)}
-      className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-card border transition duration-300 hover:-translate-y-1 ${
-        inverse
-          ? "border-on-night/10 bg-night-raised"
-          : "border-rule bg-surface shadow-card hover:shadow-raised"
-      }`}
+      className="group relative flex h-full min-w-0 flex-col"
     >
       {article.image ? (
-        <div className="overflow-hidden">
+        <div className="overflow-hidden rounded-xl">
           <ArticleImage
             image={article.image}
             sizes={imageSizes[variant]}
@@ -151,9 +147,9 @@ export function ArticleCard({
           />
         </div>
       ) : (
-        <div aria-hidden="true" className="h-1.5 bg-section" />
+        <div aria-hidden="true" className="h-1 rounded-full bg-section" />
       )}
-      <div className="flex flex-1 flex-col p-4 md:p-5">
+      <div className="flex flex-1 flex-col pt-3">
         <div>{category}</div>
         {title(`mt-2 ${inverse ? "text-on-night" : "text-ink group-hover:text-accent"}`)}
         {showExcerpt ? (
@@ -165,7 +161,7 @@ export function ArticleCard({
         ) : null}
         <ArticleMeta
           tone={inverse ? "inverse" : "default"}
-          className="mt-auto pt-4"
+          className="mt-auto pt-3"
           authorName={variant === "lead" ? article.authorName : undefined}
           publishedAt={article.publishedAt}
           readingTimeMinutes={
