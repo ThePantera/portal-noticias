@@ -67,12 +67,13 @@ export function parseAdsbLol(json: unknown): Flight[] | null {
   for (const raw of parsed.data.ac) {
     const ac = aircraftSchema.safeParse(raw);
     if (!ac.success) continue;
-    const { hex, lat, lon, alt_baro } = ac.data;
+    const { lat, lon, alt_baro } = ac.data;
+    const id = ac.data.hex.toLowerCase();
     // Los "~" son posiciones sin transpondedor identificable (TIS-B): no tienen identidad estable.
-    if (lat === undefined || lon === undefined || hex.startsWith("~") || seen.has(hex)) continue;
-    seen.add(hex);
+    if (lat === undefined || lon === undefined || id.startsWith("~") || seen.has(id)) continue;
+    seen.add(id);
     flights.push({
-      id: hex.toLowerCase(),
+      id,
       callsign: text(ac.data.flight),
       registration: text(ac.data.r),
       model: text(ac.data.t),
