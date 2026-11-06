@@ -18,16 +18,14 @@ export function SiteHeader({ siteName, categories, rates }: SiteHeaderProps) {
       <header className="sticky top-0 z-30 border-b border-rule bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-site items-center justify-between gap-4 px-4 pt-3 pb-2 md:px-8 md:pt-4">
           <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            {/* Marca tipo prompt de terminal, con el cursor que titila. */}
+            {/* Marca: la inicial en un globo de diálogo ("me contaron") y el nombre del diario. */}
             <span
               aria-hidden="true"
-              className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent font-mono text-base font-bold text-surface md:size-10"
+              className="grid size-9 shrink-0 place-items-center rounded-xl rounded-bl-sm bg-live font-display text-lg font-black text-surface md:size-10 md:text-xl"
             >
-              <span>
-                &gt;<span className="terminal-cursor">_</span>
-              </span>
+              {siteName.charAt(0)}
             </span>
-            <span className="truncate font-display text-xl font-extrabold tracking-tight md:text-2xl">
+            <span className="truncate font-display text-xl font-black tracking-tight md:text-3xl">
               {siteName}
             </span>
           </Link>

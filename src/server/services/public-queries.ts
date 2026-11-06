@@ -61,11 +61,11 @@ export function listNavCategories(): Promise<CategoryLink[]> {
   });
 }
 
-/** Notas que rotan en el carrusel de la portada. */
+/** Notas de arriba de la portada: la principal y cuatro secundarias. */
 const HERO_SIZE = 5;
 
 /**
- * Portada: las cinco notas del carrusel (la principal y cuatro secundarias) salen del orden
+ * Portada: las cinco notas de arriba (la principal y cuatro secundarias) salen del orden
  * de destacadas (1 = principal); si faltan, se completan con las más recientes. Debajo, las
  * últimas y un carril por sección, sin repetir lo que ya está arriba.
  */
