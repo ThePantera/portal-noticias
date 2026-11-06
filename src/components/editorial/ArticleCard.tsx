@@ -69,7 +69,9 @@ export function ArticleCard({
       >
         <div className="min-w-0 flex-1">
           {category}
-          {title(`mt-1.5 ${inverse ? "text-on-night" : "text-ink decoration-1 underline-offset-4 group-hover:underline"}`)}
+          {title(
+            `mt-1.5 ${inverse ? "text-on-night" : "text-ink decoration-1 underline-offset-4 group-hover:underline"}`,
+          )}
           <ArticleMeta
             tone={inverse ? "inverse" : "default"}
             className="mt-2"
@@ -107,7 +109,9 @@ export function ArticleCard({
       )}
       <div className={`flex flex-1 flex-col ${variant === "lead" ? "pt-4" : "pt-3"}`}>
         <div>{category}</div>
-        {title(`mt-2 ${inverse ? "text-on-night" : "text-ink decoration-1 underline-offset-4 group-hover:underline"}`)}
+        {title(
+          `mt-2 ${inverse ? "text-on-night" : "text-ink decoration-1 underline-offset-4 group-hover:underline"}`,
+        )}
         {showExcerpt ? (
           <p
             className={`mt-2 line-clamp-3 font-body text-base ${inverse ? "text-on-night-muted" : "text-ink-muted"}`}
