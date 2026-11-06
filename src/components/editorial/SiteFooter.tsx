@@ -28,6 +28,11 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
                   Mercados
                 </Link>
               </li>
+              <li>
+                <Link href="/vuelos" className="hover:text-on-night">
+                  Vuelos en vivo
+                </Link>
+              </li>
             </ul>
           </nav>
         ) : null}

@@ -279,3 +279,81 @@
     animation: rise-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 }
+
+/*
+ * Mapa de /vuelos (Leaflet). Va fuera de las capas de Tailwind y con una clase más que la hoja
+ * de Leaflet, que llega después y sin capa: así estas reglas le ganan. Sin sombras ni radios,
+ * como el resto del diario; las teselas de OpenStreetMap se pasan a gris cálido.
+ */
+.flights-map.leaflet-container {
+  background: var(--color-surface-muted);
+  font-family: var(--font-ui);
+}
+.flights-map .leaflet-tile-pane {
+  filter: grayscale(1) sepia(0.15) contrast(0.92) brightness(1.03);
+}
+:root[data-theme="dark"] .flights-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) contrast(0.85) brightness(0.85);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .flights-map .leaflet-tile-pane {
+    filter: grayscale(1) invert(1) contrast(0.85) brightness(0.85);
+  }
+}
+.flights-map.leaflet-container .leaflet-bar {
+  border: 1px solid var(--color-ink);
+  border-radius: 0;
+  box-shadow: none;
+}
+.flights-map.leaflet-container .leaflet-bar a {
+  border-radius: 0;
+  border-bottom-color: var(--color-rule);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+.flights-map.leaflet-container .leaflet-bar a:hover {
+  background: var(--color-surface-muted);
+}
+.flights-map.leaflet-container .leaflet-control-attribution {
+  background: color-mix(in oklab, var(--color-surface) 85%, transparent);
+  color: var(--color-ink-subtle);
+}
+.flights-map.leaflet-container .leaflet-control-attribution a {
+  color: var(--color-ink);
+}
+.flights-map .flight-marker,
+.flights-map .airport-marker {
+  border: 0;
+  background: none;
+}
+.flights-map .flight-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.6s ease;
+}
+.flights-map .flight-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-ink);
+  stroke: var(--color-paper);
+  stroke-width: 1.2;
+  paint-order: stroke;
+}
+.flights-map .flight-icon[data-state="ground"] {
+  opacity: 0.45;
+}
+.flights-map .flight-icon[data-state="selected"] svg {
+  fill: var(--color-signal);
+  stroke: var(--color-ink);
+}
+.flights-map .airport-label {
+  display: block;
+  border: 1px solid var(--color-ink);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 10px/16px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
