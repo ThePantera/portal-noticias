@@ -43,7 +43,6 @@ describe("menú de secciones", () => {
       "/mercados",
       "/vuelos",
       "/feriados",
-      "/quiniela",
       "/horoscopo",
       "/clima",
     ]);

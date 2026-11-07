@@ -25,7 +25,6 @@ const ROW_SERVICES: NavLink[] = [
 
 /** Servicios que sólo entran en el panel "Secciones" (no hay lugar en la fila). */
 const PANEL_ONLY_SERVICES: NavLink[] = [
-  { name: "Quiniela", href: "/quiniela" },
   { name: "Horóscopo", href: "/horoscopo" },
   { name: "Clima", href: "/clima" },
 ];
