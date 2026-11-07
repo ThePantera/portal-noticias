@@ -22,6 +22,9 @@ async function AuthenticatedShell({ children }: { children: React.ReactNode }) {
               <Link href="/admin/notas" className="text-ink-muted hover:text-ink">
                 Notas
               </Link>
+              <Link href="/admin/mensajes" className="text-ink-muted hover:text-ink">
+                Mensajes
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4 text-sm">

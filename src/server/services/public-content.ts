@@ -23,6 +23,14 @@ export async function getHomepage() {
   return queries.getHomepage();
 }
 
+/** La ventana de 48 horas se calcula adentro de la caché, que se renueva cada hora o al publicar. */
+export async function getTrendingTopics() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(ARTICLES_TAG);
+  return queries.listTrendingTopics(new Date());
+}
+
 export async function getArticleBySlug(slug: string) {
   "use cache";
   cacheLife("hours");

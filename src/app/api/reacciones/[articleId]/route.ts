@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { normalizeEmoji } from "@/lib/reactions";
+import { clientIp, isSameOrigin } from "@/lib/request";
 import { getReactionSummary, hashIdentifier, toggleReaction } from "@/server/services/reactions";
 
 /**
@@ -20,23 +21,6 @@ const LIMIT_MESSAGES = {
   "article-limit": "Esta nota ya tiene demasiados emojis distintos. Probá con uno de los que están.",
   "ip-limit": "Demasiadas reacciones desde tu conexión. Probá de nuevo en un rato.",
 } as const;
-
-function clientIp(request: Request): string | null {
-  const h = request.headers;
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;
-}
-
-/** Sólo desde el propio sitio: frena formularios y scripts de otras páginas. */
-function isSameOrigin(request: Request): boolean {
-  if (request.headers.get("sec-fetch-site") === "cross-site") return false;
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-  try {
-    return new URL(origin).host === request.headers.get("host");
-  } catch {
-    return false;
-  }
-}
 
 export async function GET(_request: Request, { params }: Context) {
   await connection();

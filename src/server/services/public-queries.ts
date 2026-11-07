@@ -113,6 +113,36 @@ export async function getHomepage(): Promise<HomepageData> {
   return { lead: top[0] ?? null, secondary: top.slice(1), latest, sections };
 }
 
+/** Ventana de "Temas del día": las etiquetas de las notas publicadas en las últimas 48 horas. */
+const TOPICS_WINDOW_MS = 48 * 3_600_000;
+
+/**
+ * Temas del día: las etiquetas que más se repiten en las notas recientes (al menos dos notas
+ * cada una), de la más usada a la menos.
+ */
+export async function listTrendingTopics(now: Date, limit = 8): Promise<TagLink[]> {
+  const groups = await db.articleTag.groupBy({
+    by: ["tagId"],
+    where: { article: { ...PUBLISHED, publishedAt: { gte: new Date(now.getTime() - TOPICS_WINDOW_MS) } } },
+    _count: { articleId: true },
+    orderBy: { _count: { articleId: "desc" } },
+    take: limit * 2,
+  });
+  const ids = groups.filter((g) => g._count.articleId >= 2).map((g) => g.tagId);
+  if (ids.length === 0) return [];
+  const tags = await db.tag.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true, slug: true },
+  });
+  const byId = new Map(tags.map((t) => [t.id, t]));
+  return ids
+    .flatMap((id) => {
+      const tag = byId.get(id);
+      return tag ? [{ name: tag.name, slug: tag.slug }] : [];
+    })
+    .slice(0, limit);
+}
+
 /**
  * Una nota publicada por su dirección. Si la dirección es vieja (la nota cambió de
  * título y de slug), devuelve la nueva para redirigir con 308 y no perder los enlaces.
@@ -125,11 +155,12 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
       content: true,
       seoTitle: true,
       seoDescription: true,
+      origin: true,
       tags: { select: { tag: { select: { name: true, slug: true } } }, orderBy: { tag: { name: "asc" } } },
     },
   });
   if (article) {
-    const { content, seoTitle, seoDescription, tags, ...card } = article;
+    const { content, seoTitle, seoDescription, origin, tags, ...card } = article;
     return {
       kind: "article",
       article: {
@@ -137,6 +168,7 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
         content,
         seoTitle,
         seoDescription,
+        aiAssisted: origin === "AI_ASSISTED",
         updatedAt: card.updatedAt,
         tags: tags.map((t) => t.tag),
       },

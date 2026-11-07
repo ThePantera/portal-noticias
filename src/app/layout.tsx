@@ -37,6 +37,18 @@ export const metadata: Metadata = {
     "Noticias de la Argentina y el mundo, al instante: política, economía, sociedad, deportes, tecnología y más.",
   openGraph: { siteName: env.SITE_NAME, locale: "es_AR", type: "website" },
   alternates: { types: FEED_ALTERNATE_TYPES },
+  // Google Discover y las búsquedas sólo muestran la foto grande de una nota si el sitio lo permite.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   ...(env.GOOGLE_SITE_VERIFICATION ? { verification: { google: env.GOOGLE_SITE_VERIFICATION } } : {}),
 };
 
