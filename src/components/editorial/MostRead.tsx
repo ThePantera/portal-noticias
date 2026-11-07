@@ -35,9 +35,7 @@ export function MostRead({ articles, layout = "column", className = "" }: MostRe
             </span>
             <div className="min-w-0">
               <p className="kicker">{article.category.name}</p>
-              <h3
-                className="mt-1 font-display text-base leading-snug font-bold tracking-tight text-ink decoration-1 underline-offset-4 group-hover:underline"
-              >
+              <h3 className="mt-1 font-display text-base leading-snug font-bold tracking-tight text-ink decoration-1 underline-offset-4 group-hover:underline">
                 <Link href={`/noticias/${article.slug}`} className="after:absolute after:inset-0">
                   {article.title}
                 </Link>
