@@ -35,3 +35,17 @@ export function embedUrl(youtubeId: string): string {
 export function watchUrl(youtubeId: string): string {
   return `https://www.youtube.com/watch?v=${youtubeId}`;
 }
+
+export type StreamStatus = "live" | "down" | "unknown";
+
+/**
+ * Estado de una transmisión según la página del video en YouTube: en vivo ahora, caída
+ * (terminó, es privada o no se puede reproducir) o desconocido si la página cambió de forma.
+ */
+export function streamStatusFromWatchPage(html: string): StreamStatus {
+  if (html.includes('"isLiveNow":true')) return "live";
+  const playability = html.match(/"playabilityStatus":\{"status":"([A-Z_]+)"/)?.[1];
+  if (playability && playability !== "OK") return "down";
+  if (html.includes('"isLiveNow":false')) return "down";
+  return "unknown";
+}
