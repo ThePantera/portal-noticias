@@ -37,6 +37,7 @@ describe("estado de la transmisión", () => {
     expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"ERROR"')).toBe("down");
     // YouTube pide iniciar sesión a los servidores: no sirve para decidir.
     expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"LOGIN_REQUIRED"')).toBe("unknown");
+    expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"UNPLAYABLE"')).toBe("unknown");
     expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"OK"}')).toBe("unknown");
     expect(streamStatusFromWatchPage("<html></html>")).toBe("unknown");
   });

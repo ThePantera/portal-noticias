@@ -40,13 +40,15 @@ export type StreamStatus = "live" | "down" | "unknown";
 
 /**
  * Estado de una transmisión según la página del video en YouTube: en vivo ahora, caída (se
- * borró o no se puede reproducir) o desconocido. Una transmisión que terminó pero deja ver la
+ * borró) o desconocido. Una transmisión que terminó pero deja ver la
  * grabación cuenta como desconocida: se sigue mostrando. A los servidores (como Vercel)
  * YouTube a veces les pide iniciar sesión ("LOGIN_REQUIRED"): eso no dice nada del video.
+ * Tampoco "UNPLAYABLE": puede ser un bloqueo por país (Vercel consulta desde EE. UU.) en un
+ * video que en la Argentina se ve bien. Esos casos los resuelve el reproductor del navegador.
  */
 export function streamStatusFromWatchPage(html: string): StreamStatus {
   if (html.includes('"isLiveNow":true')) return "live";
   const playability = html.match(/"playabilityStatus":\{"status":"([A-Z_]+)"/)?.[1];
-  if (playability === "ERROR" || playability === "UNPLAYABLE") return "down";
+  if (playability === "ERROR") return "down";
   return "unknown";
 }
