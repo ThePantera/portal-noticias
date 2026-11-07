@@ -14,7 +14,9 @@ export function InfoPage({ kicker, title, intro, children }: InfoPageProps) {
           </h1>
           {intro ? <p className="mt-4 font-body text-xl leading-snug text-ink-muted">{intro}</p> : null}
         </header>
-        <div className="mt-6 article-body">{children}</div>
+        <div className="mt-6">
+          <div className="article-body">{children}</div>
+        </div>
       </article>
     </div>
   );
