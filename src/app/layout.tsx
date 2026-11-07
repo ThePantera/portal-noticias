@@ -32,7 +32,8 @@ const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="light"||t=
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.SITE_URL),
-  title: { default: env.SITE_NAME, template: `%s | ${env.SITE_NAME}` },
+  // La portada no define título propio: usa el default, que es el que muestra Google.
+  title: { default: `${env.SITE_NAME} | Noticias de Argentina hoy`, template: `%s | ${env.SITE_NAME}` },
   description:
     "Noticias de la Argentina y el mundo, al instante: política, economía, sociedad, deportes, tecnología y más.",
   openGraph: { siteName: env.SITE_NAME, locale: "es_AR", type: "website" },
