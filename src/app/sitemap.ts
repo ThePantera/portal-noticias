@@ -17,7 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: url("/mercados"), changeFrequency: "hourly" as const, priority: 0.6 },
     { url: url("/vuelos"), changeFrequency: "always" as const, priority: 0.5 },
-    { url: url("/en-vivo"), changeFrequency: "daily" as const, priority: 0.5 },
     { url: url("/feriados"), changeFrequency: "weekly" as const, priority: 0.6 },
     { url: url("/quienes-somos"), changeFrequency: "monthly" as const, priority: 0.3 },
     { url: url("/contacto"), changeFrequency: "yearly" as const, priority: 0.2 },
