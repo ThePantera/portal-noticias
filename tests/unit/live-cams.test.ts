@@ -23,6 +23,8 @@ describe("cámaras en vivo", () => {
   });
 
   it("inserta el reproductor sin cookies y en silencio", () => {
-    expect(embedUrl("teXukOT_AuA")).toMatch(/^https:\/\/www\.youtube-nocookie\.com\/embed\/teXukOT_AuA\?mute=1/);
+    const url = embedUrl("teXukOT_AuA");
+    expect(url.startsWith("https://www.youtube-nocookie.com/embed/teXukOT_AuA?")).toBe(true);
+    expect(url).toContain("mute=1");
   });
 });
