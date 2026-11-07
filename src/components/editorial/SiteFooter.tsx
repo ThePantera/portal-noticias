@@ -41,6 +41,11 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href="/en-vivo" className="hover:text-on-night">
+                  Cámaras en vivo
+                </Link>
+              </li>
+              <li>
                 <Link href="/feriados" className="hover:text-on-night">
                   Feriados
                 </Link>

@@ -31,7 +31,7 @@ const SECTIONS = [
   },
   {
     title: "Servicios de terceros",
-    text: "El sitio está alojado en Vercel y la base de datos, en Neon. El mapa de vuelos en vivo carga las imágenes del mapa desde OpenStreetMap y la biblioteca del mapa desde unpkg, así que tu navegador se conecta a esos servicios. Las cotizaciones, los mercados y los feriados los consulta nuestro servidor, no tu navegador.",
+    text: "El sitio está alojado en Vercel y la base de datos, en Neon. El mapa de vuelos en vivo carga las imágenes del mapa desde OpenStreetMap y la biblioteca del mapa desde unpkg, así que tu navegador se conecta a esos servicios. Las cámaras en vivo son reproductores de YouTube en su modo de privacidad mejorada (youtube-nocookie.com). Las cotizaciones, los mercados y los feriados los consulta nuestro servidor, no tu navegador.",
   },
   {
     title: "Tus derechos",

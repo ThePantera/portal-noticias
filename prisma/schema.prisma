@@ -240,6 +240,20 @@ model ArticleViewDaily {
   @@map("article_views_daily")
 }
 
+/// Cámaras en vivo de /en-vivo: transmisiones públicas de YouTube que se cargan desde el panel.
+model LiveCam {
+  id        String   @id @default(cuid())
+  title     String
+  place     String
+  /// Identificador del video de YouTube (11 caracteres).
+  youtubeId String   @unique @map("youtube_id")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([sortOrder])
+  @@map("live_cams")
+}
+
 /// Mensajes del formulario de contacto. Se leen en el panel (/admin/mensajes).
 model ContactMessage {
   id        String    @id @default(cuid())

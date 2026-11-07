@@ -16,6 +16,7 @@ export function SiteNav({ categories }: { categories: CategoryLink[] }) {
     { name: "Portada", href: "/" },
     { name: "Mercados", href: "/mercados" },
     { name: "Vuelos", href: "/vuelos" },
+    { name: "En vivo", href: "/en-vivo" },
   ].concat(categories.map((category) => ({ name: category.name, href: `/categoria/${category.slug}` })));
   return (
     <nav aria-label="Secciones" className="border-t border-rule">
