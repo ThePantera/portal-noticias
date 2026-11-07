@@ -6,11 +6,13 @@ import { JsonLd } from "@/components/editorial/JsonLd";
 import { LatestTimeline } from "@/components/editorial/LatestTimeline";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { TopicsBar } from "@/components/editorial/TopicsBar";
+import { WeatherPanel } from "@/components/editorial/WeatherPanel";
 import { isFeaturedSection, sectionTone } from "@/lib/sections";
 import { websiteJsonLd } from "@/lib/seo";
 import { env } from "@/server/env";
 import { getDollarRates } from "@/server/services/exchange-rates";
 import { getHomepage, getTrendingTopics } from "@/server/services/public-content";
+import { getWeather } from "@/server/services/weather";
 
 /*
  * Ancho de las tarjetas del carril destacado: en el celular una entera y la punta de la
@@ -26,10 +28,11 @@ const WIDE_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w
  * fila en la computadora). Los bloques aparecen con un leve movimiento al bajar.
  */
 export default async function HomePage() {
-  const [{ lead, secondary, latest, sections }, rates, topics] = await Promise.all([
+  const [{ lead, secondary, latest, sections }, rates, topics, weather] = await Promise.all([
     getHomepage(),
     getDollarRates(),
     getTrendingTopics(),
+    getWeather(),
   ]);
 
   // El sitio y su buscador se describen aunque todavía no haya notas.
@@ -48,8 +51,9 @@ export default async function HomePage() {
             Cuando se publique la primera nota desde el panel de administración, va a aparecer acá.
           </p>
         </section>
-        <div className="lg:col-span-4">
+        <div className="grid content-start gap-6 lg:col-span-4">
           <DollarPanel initial={rates} />
+          <WeatherPanel weather={weather} />
         </div>
       </div>
     );
@@ -87,6 +91,7 @@ export default async function HomePage() {
         </section>
         <div className="grid content-start gap-6 md:grid-cols-2 lg:col-span-4 lg:row-span-2 lg:grid-cols-1">
           <DollarPanel initial={rates} />
+          <WeatherPanel weather={weather} />
           <LatestTimeline articles={timeline} />
         </div>
         {latest.length > 0 ? (

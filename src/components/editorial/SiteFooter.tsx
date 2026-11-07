@@ -45,6 +45,11 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
                   Feriados
                 </Link>
               </li>
+              <li>
+                <Link href="/clima" className="hover:text-on-night">
+                  Clima
+                </Link>
+              </li>
             </ul>
           </nav>
         ) : null}
