@@ -45,6 +45,16 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
                   Feriados
                 </Link>
               </li>
+              <li>
+                <Link href="/quiniela" className="hover:text-on-night">
+                  Quiniela
+                </Link>
+              </li>
+              <li>
+                <Link href="/horoscopo" className="hover:text-on-night">
+                  Horóscopo
+                </Link>
+              </li>
             </ul>
           </nav>
         ) : null}
