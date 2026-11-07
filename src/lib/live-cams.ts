@@ -29,7 +29,7 @@ export function parseYouTubeId(input: string): string | null {
 
 /** Reproductor sin cookies de seguimiento hasta que el lector le da play. */
 export function embedUrl(youtubeId: string): string {
-  return `https://www.youtube-nocookie.com/embed/${youtubeId}?mute=1&rel=0&modestbranding=1`;
+  return `https://www.youtube-nocookie.com/embed/${youtubeId}?mute=1&rel=0&modestbranding=1&enablejsapi=1`;
 }
 
 export function watchUrl(youtubeId: string): string {
@@ -40,12 +40,13 @@ export type StreamStatus = "live" | "down" | "unknown";
 
 /**
  * Estado de una transmisión según la página del video en YouTube: en vivo ahora, caída
- * (terminó, es privada o no se puede reproducir) o desconocido si la página cambió de forma.
+ * (terminó, se borró o no se puede reproducir) o desconocido. A los servidores (como Vercel)
+ * YouTube a veces les pide iniciar sesión ("LOGIN_REQUIRED"): eso no dice nada del video.
  */
 export function streamStatusFromWatchPage(html: string): StreamStatus {
   if (html.includes('"isLiveNow":true')) return "live";
   const playability = html.match(/"playabilityStatus":\{"status":"([A-Z_]+)"/)?.[1];
-  if (playability && playability !== "OK") return "down";
-  if (html.includes('"isLiveNow":false')) return "down";
+  if (playability === "ERROR" || playability === "UNPLAYABLE") return "down";
+  if (playability === "OK" && html.includes('"isLiveNow":false')) return "down";
   return "unknown";
 }

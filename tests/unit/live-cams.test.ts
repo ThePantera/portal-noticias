@@ -32,8 +32,11 @@ describe("cámaras en vivo", () => {
 describe("estado de la transmisión", () => {
   it("distingue en vivo, caída y desconocido", () => {
     expect(streamStatusFromWatchPage('..."liveBroadcastDetails":{"isLiveNow":true,...')).toBe("live");
-    expect(streamStatusFromWatchPage('"isLiveNow":false,"startTimestamp"')).toBe("down");
-    expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"LOGIN_REQUIRED"')).toBe("down");
+    const ended = '"playabilityStatus":{"status":"OK"},"isLiveNow":false';
+    expect(streamStatusFromWatchPage(ended)).toBe("down");
+    expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"ERROR"')).toBe("down");
+    // YouTube pide iniciar sesión a los servidores: no sirve para decidir.
+    expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"LOGIN_REQUIRED"')).toBe("unknown");
     expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"OK"}')).toBe("unknown");
     expect(streamStatusFromWatchPage("<html></html>")).toBe("unknown");
   });
