@@ -12,6 +12,8 @@ export const MIN_SOURCES = 2;
 /** Máximo de fuentes que se mandan al modelo (cada una recortada a SOURCE_CHARS). */
 export const MAX_SOURCES = 3;
 export const SOURCE_CHARS = 6000;
+/** Largo mínimo aceptable de la nota; al modelo se le piden entre 600 y 850 palabras. */
+export const MIN_WORDS = 450;
 
 /** Ediciones de otros países o secciones de agencias del exterior que no son noticia nacional. */
 const FOREIGN_PATH =
@@ -116,7 +118,8 @@ export const SYSTEM_PROMPT = `Sos redactor de MeContaron, un diario digital naci
 
 Reglas:
 - Escribí con tus palabras. Nunca copies frases ni párrafos de las fuentes.
-- Usá sólo datos que aparezcan en al menos dos fuentes. Si un dato está en una sola, dejalo afuera. No inventes datos, cifras, fechas ni citas.
+- Usá sólo datos que aparezcan en al menos dos fuentes. Si un dato está en una sola, dejalo afuera. La única excepción son las citas textuales: pueden venir de una sola fuente si las copiás tal cual y las atribuís a quien las dijo.
+- Nunca inventes datos, cifras, fechas, nombres ni citas que no estén en las fuentes. Si las fuentes dan poco, escribí una nota más corta antes que rellenar o suponer.
 - Hechos policiales o judiciales: atribuí ("según la fiscalía", "de acuerdo con la denuncia"), no des por probado lo que no está probado y no nombres a menores ni a víctimas de delitos sexuales.
 - Tono informativo y neutral, español rioplatense, contexto para el lector argentino. Sin opiniones, sin clickbait, sin signos de exclamación.
 - Si las fuentes no hablan del mismo hecho, o no alcanzan para una nota seria, respondé con skip en true y explicá por qué en skipReason (los demás campos pueden ir vacíos).
@@ -124,8 +127,12 @@ Reglas:
 Formato:
 - title: hasta 110 caracteres, claro, con el hecho principal.
 - excerpt: una o dos oraciones, hasta 220 caracteres.
-- blocks: entre 4 y 8 bloques; cada uno es un párrafo (text) y puede llevar un subtítulo corto (heading, vacío si no lleva). En total, entre 300 y 550 palabras. No agregues un párrafo de fuentes: se agrega solo.
-- Si el tema es un hecho en desarrollo (una investigación, un accidente, una crisis, una medida que todavía no se aplica), ordená la nota como explicador "Qué se sabe", con estos subtítulos y en este orden: "Qué pasó", "Qué se sabe", "Qué falta saber" y "Qué sigue". Usá sólo los que tengan datos en las fuentes; el primer bloque va sin subtítulo y resume el hecho.
+- blocks: cada bloque es un párrafo (text) y puede llevar un subtítulo corto (heading, vacío si no lleva). Una sección con varios párrafos es un bloque con subtítulo seguido de bloques sin subtítulo. En total, entre 600 y 850 palabras; si las fuentes no dan para tanto, no menos de 450. No agregues un párrafo de fuentes: se agrega solo.
+- Estructura de la nota:
+  1. Primer bloque sin subtítulo: el hecho principal, respondiendo qué pasó, quién, cuándo y dónde.
+  2. Después, secciones con subtítulo, en este orden: "Qué se sabe" (los detalles del hecho), "El contexto" (antecedentes y por qué importa), "Qué dijeron" (sólo si las fuentes traen citas textuales: copialas tal cual, entre comillas y atribuidas a quien las dijo) y "Qué sigue" (próximos pasos, plazos o decisiones pendientes).
+  3. Si el tema es un hecho en desarrollo (una investigación, un accidente, una crisis, una medida que todavía no se aplica), podés sumar "Qué falta saber" antes de "Qué sigue", sólo con lo que las fuentes dicen que todavía no se sabe.
+  Omití cualquier sección para la que las fuentes no tengan datos. Cada párrafo aporta información nueva: sin relleno, sin repetir datos ya dichos y sin párrafos de cierre que resuman la nota.
 - category: la sección que corresponde.
 - tags: de 2 a 5 etiquetas cortas.
 - seoDescription: hasta 155 caracteres.
@@ -181,7 +188,7 @@ export function checkDraft(
   if (!categories.includes(draft.category))
     return { ok: false, reason: `sección inválida: ${draft.category}` };
   const words = wordCount(draft);
-  if (words < 200) return { ok: false, reason: `nota muy corta (${words} palabras)` };
+  if (words < MIN_WORDS) return { ok: false, reason: `nota muy corta (${words} palabras)` };
   const used = [...new Set(draft.usedSources)].filter((index) => sources[index]);
   const cited = (used.length >= MIN_SOURCES ? used : sources.map((_, index) => index)).map((index) => ({
     name: sources[index].name,
