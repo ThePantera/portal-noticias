@@ -1,6 +1,13 @@
 import Link from "next/link";
 import type { CategoryLink } from "@/types/public";
 
+const INSTITUTIONAL = [
+  { name: "Quiénes somos", href: "/quienes-somos" },
+  { name: "Cómo hacemos las notas", href: "/quienes-somos#como-trabajamos" },
+  { name: "Contacto", href: "/contacto" },
+  { name: "Privacidad", href: "/privacidad" },
+];
+
 type SiteFooterProps = { siteName: string; categories: CategoryLink[] };
 
 export function SiteFooter({ siteName, categories }: SiteFooterProps) {
@@ -33,10 +40,26 @@ export function SiteFooter({ siteName, categories }: SiteFooterProps) {
                   Vuelos en vivo
                 </Link>
               </li>
+              <li>
+                <Link href="/feriados" className="hover:text-on-night">
+                  Feriados
+                </Link>
+              </li>
             </ul>
           </nav>
         ) : null}
       </div>
+      <nav aria-label="El diario" className="border-t border-night-raised">
+        <ul className="mx-auto flex max-w-site flex-wrap gap-x-6 gap-y-2 px-4 py-4 text-sm md:px-8">
+          {INSTITUTIONAL.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href} className="hover:text-on-night">
+                {link.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </footer>
   );
 }

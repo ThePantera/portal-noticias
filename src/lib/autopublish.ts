@@ -125,6 +125,7 @@ Formato:
 - title: hasta 110 caracteres, claro, con el hecho principal.
 - excerpt: una o dos oraciones, hasta 220 caracteres.
 - blocks: entre 4 y 8 bloques; cada uno es un párrafo (text) y puede llevar un subtítulo corto (heading, vacío si no lleva). En total, entre 300 y 550 palabras. No agregues un párrafo de fuentes: se agrega solo.
+- Si el tema es un hecho en desarrollo (una investigación, un accidente, una crisis, una medida que todavía no se aplica), ordená la nota como explicador "Qué se sabe", con estos subtítulos y en este orden: "Qué pasó", "Qué se sabe", "Qué falta saber" y "Qué sigue". Usá sólo los que tengan datos en las fuentes; el primer bloque va sin subtítulo y resume el hecho.
 - category: la sección que corresponde.
 - tags: de 2 a 5 etiquetas cortas.
 - seoDescription: hasta 155 caracteres.

@@ -5,11 +5,12 @@ import { DollarPanel } from "@/components/editorial/DollarPanel";
 import { JsonLd } from "@/components/editorial/JsonLd";
 import { LatestTimeline } from "@/components/editorial/LatestTimeline";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
+import { TopicsBar } from "@/components/editorial/TopicsBar";
 import { isFeaturedSection, sectionTone } from "@/lib/sections";
 import { websiteJsonLd } from "@/lib/seo";
 import { env } from "@/server/env";
 import { getDollarRates } from "@/server/services/exchange-rates";
-import { getHomepage } from "@/server/services/public-content";
+import { getHomepage, getTrendingTopics } from "@/server/services/public-content";
 
 /*
  * Ancho de las tarjetas del carril destacado: en el celular una entera y la punta de la
@@ -25,7 +26,11 @@ const WIDE_ITEM = "w-[80%] shrink-0 snap-start sm:w-[calc((100%-1.5rem)/2)] lg:w
  * fila en la computadora). Los bloques aparecen con un leve movimiento al bajar.
  */
 export default async function HomePage() {
-  const [{ lead, secondary, latest, sections }, rates] = await Promise.all([getHomepage(), getDollarRates()]);
+  const [{ lead, secondary, latest, sections }, rates, topics] = await Promise.all([
+    getHomepage(),
+    getDollarRates(),
+    getTrendingTopics(),
+  ]);
 
   // El sitio y su buscador se describen aunque todavía no haya notas.
   const siteLd = <JsonLd data={websiteJsonLd(env.SITE_URL, env.SITE_NAME)} />;
@@ -62,6 +67,7 @@ export default async function HomePage() {
       {siteLd}
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
       <BreakingBar articles={breaking} />
+      <TopicsBar topics={topics} />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-10">
         <section aria-labelledby="principales" className="grid min-w-0 grid-cols-1 gap-6 lg:col-span-8">

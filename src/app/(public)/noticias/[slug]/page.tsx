@@ -9,6 +9,7 @@ import { ArticleReactions } from "@/components/editorial/ArticleReactions";
 import { JsonLd } from "@/components/editorial/JsonLd";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { ShareButtons } from "@/components/editorial/ShareButtons";
+import { ViewTracker } from "@/components/editorial/ViewTracker";
 import { FEED_ALTERNATE_TYPES, breadcrumbJsonLd, newsArticleJsonLd } from "@/lib/seo";
 import { sectionTone } from "@/lib/sections";
 import { env } from "@/server/env";
@@ -58,6 +59,8 @@ export async function generateMetadata({ params }: PageProps<"/noticias/[slug]">
       : { card: "summary", title, description },
   };
 }
+
+const AI_NOTICE = "Esta nota fue elaborada con inteligencia artificial a partir de las fuentes citadas.";
 
 /**
  * Sin Suspense alrededor de los parámetros: todo lo que lee está en caché y la ruta tiene
@@ -128,7 +131,13 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
           />
         ) : null}
         <ArticleBody content={article.content} className="mt-8" />
+        {article.aiAssisted ? (
+          <p className="mt-8 border-l-2 border-rule pl-3 font-ui text-sm text-ink-muted">
+            {AI_NOTICE} <Link href="/quienes-somos#como-trabajamos">Cómo hacemos las notas</Link>
+          </p>
+        ) : null}
         <ArticleReactions articleId={article.id} />
+        <ViewTracker articleId={article.id} />
         {article.tags.length > 0 ? (
           <div className="mt-10 border-t border-rule pt-6">
             <h2 className="sr-only">Etiquetas</h2>
