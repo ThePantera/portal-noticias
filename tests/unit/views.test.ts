@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buenosAiresDay, isArticleId, isLikelyBot } from "@/lib/views";
+import { buenosAiresDay, isArticleId, isLikelyBot, viewsWindowStart } from "@/lib/views";
 
 const IPHONE =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
@@ -8,6 +8,12 @@ describe("medición de lecturas", () => {
   it("cuenta los días con la hora de Buenos Aires", () => {
     expect(buenosAiresDay(new Date("2026-11-07T02:30:00Z"))).toBe("2026-11-06");
     expect(buenosAiresDay(new Date("2026-11-07T03:00:00Z"))).toBe("2026-11-07");
+  });
+
+  it("la ventana de días empieza a la medianoche de Buenos Aires", () => {
+    expect(viewsWindowStart(new Date("2026-11-07T15:00:00Z"), 3)).toBe("2026-11-05");
+    expect(viewsWindowStart(new Date("2026-11-07T02:30:00Z"), 3)).toBe("2026-11-04");
+    expect(viewsWindowStart(new Date("2026-11-07T15:00:00Z"), 1)).toBe("2026-11-07");
   });
 
   it("no cuenta buscadores, vistas previas ni pedidos sin navegador", () => {

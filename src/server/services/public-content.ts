@@ -1,7 +1,9 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { ARTICLES_TAG, CATEGORIES_TAG, articleTag } from "@/lib/cache-tags";
+import { MOST_READ_DAYS, viewsWindowStart } from "@/lib/views";
 import * as queries from "@/server/services/public-queries";
+import { listMostRead } from "@/server/services/views";
 
 /**
  * Lecturas del sitio público con caché. Cada cambio de una nota (guardar, publicar,
@@ -88,6 +90,18 @@ export async function getFeedArticles() {
   cacheLife("hours");
   cacheTag(ARTICLES_TAG);
   return queries.listFeedArticles();
+}
+
+/**
+ * "Lo más leído" de los últimos días. Las lecturas no invalidan la caché: el ranking se
+ * renueva cada diez minutos; ARTICLES_TAG saca enseguida una nota despublicada. Trae una de
+ * más para que cada nota pueda omitirse a sí misma y seguir mostrando cinco.
+ */
+export async function getMostRead() {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
+  cacheTag(ARTICLES_TAG);
+  return listMostRead(viewsWindowStart(new Date(), MOST_READ_DAYS), 6);
 }
 
 /** La búsqueda depende de lo que escribe cada lector: no se guarda en caché. */
