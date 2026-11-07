@@ -7,13 +7,19 @@ import { ArticleFigure } from "@/components/editorial/ArticleImage";
 import { ArticleMeta } from "@/components/editorial/ArticleMeta";
 import { ArticleReactions } from "@/components/editorial/ArticleReactions";
 import { JsonLd } from "@/components/editorial/JsonLd";
+import { MostRead } from "@/components/editorial/MostRead";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { ShareButtons } from "@/components/editorial/ShareButtons";
 import { ViewTracker } from "@/components/editorial/ViewTracker";
 import { FEED_ALTERNATE_TYPES, breadcrumbJsonLd, newsArticleJsonLd } from "@/lib/seo";
 import { sectionTone } from "@/lib/sections";
 import { env } from "@/server/env";
-import { getArticleBySlug, getRecentSlugs, getRelatedArticles } from "@/server/services/public-content";
+import {
+  getArticleBySlug,
+  getMostRead,
+  getRecentSlugs,
+  getRelatedArticles,
+} from "@/server/services/public-content";
 
 // Con cacheComponents hace falta al menos un parámetro. Con la base vacía se usa uno
 // que no existe: esa ruta da 404 y el resto se genera en la primera visita.
@@ -72,7 +78,9 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
   if (result.kind === "redirect") permanentRedirect(`/noticias/${result.slug}`);
   if (result.kind === "missing") notFound();
   const { article } = result;
-  const related = await getRelatedArticles(article.id);
+  const [related, mostRead] = await Promise.all([getRelatedArticles(article.id), getMostRead()]);
+  // La nota que se está leyendo no se recomienda a sí misma.
+  const mostReadOthers = mostRead.filter((item) => item.id !== article.id).slice(0, 5);
   const url = new URL(`/noticias/${article.slug}`, env.SITE_URL).toString();
 
   return (
@@ -169,6 +177,8 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
           </ul>
         </section>
       ) : null}
+
+      <MostRead articles={mostReadOthers} layout="row" className="mx-auto mt-16 w-full max-w-site" />
     </div>
   );
 }

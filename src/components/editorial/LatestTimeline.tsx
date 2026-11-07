@@ -3,13 +3,15 @@ import { formatDayMonth, formatTime, toIsoString } from "@/lib/dates";
 import { sectionTone } from "@/lib/sections";
 import type { ArticleCardData } from "@/types/public";
 
+type LatestTimelineProps = { articles: ArticleCardData[]; className?: string };
+
 /** "Minuto a minuto": las últimas notas con su hora, para el panel de la portada. */
-export function LatestTimeline({ articles }: { articles: ArticleCardData[] }) {
+export function LatestTimeline({ articles, className = "" }: LatestTimelineProps) {
   if (articles.length === 0) return null;
   return (
     <section
       aria-labelledby="minuto-a-minuto"
-      className="rounded-card border border-rule bg-surface p-5 shadow-card"
+      className={`rounded-card border border-rule bg-surface p-5 shadow-card ${className}`}
     >
       <h2 id="minuto-a-minuto" className="flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
         <span aria-hidden="true" className="size-2 rounded-full bg-live" />
