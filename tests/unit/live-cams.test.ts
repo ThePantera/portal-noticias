@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { embedUrl, parseYouTubeId } from "@/lib/live-cams";
+import { embedUrl, parseYouTubeId, streamStatusFromWatchPage } from "@/lib/live-cams";
 
 describe("cámaras en vivo", () => {
   it("saca el identificador de cualquier enlace de YouTube", () => {
@@ -26,5 +26,15 @@ describe("cámaras en vivo", () => {
     const url = embedUrl("teXukOT_AuA");
     expect(url.startsWith("https://www.youtube-nocookie.com/embed/teXukOT_AuA?")).toBe(true);
     expect(url).toContain("mute=1");
+  });
+});
+
+describe("estado de la transmisión", () => {
+  it("distingue en vivo, caída y desconocido", () => {
+    expect(streamStatusFromWatchPage('..."liveBroadcastDetails":{"isLiveNow":true,...')).toBe("live");
+    expect(streamStatusFromWatchPage('"isLiveNow":false,"startTimestamp"')).toBe("down");
+    expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"LOGIN_REQUIRED"')).toBe("down");
+    expect(streamStatusFromWatchPage('"playabilityStatus":{"status":"OK"}')).toBe("unknown");
+    expect(streamStatusFromWatchPage("<html></html>")).toBe("unknown");
   });
 });
