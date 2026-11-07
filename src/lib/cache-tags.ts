@@ -9,3 +9,6 @@ export const CATEGORIES_TAG = "categories";
 export function articleTag(id: string): string {
   return `article:${id}`;
 }
+
+/** Cámaras en vivo (/en-vivo): se invalida al agregar o sacar una desde el panel. */
+export const LIVE_CAMS_TAG = "live-cams";
