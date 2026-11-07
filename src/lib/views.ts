@@ -15,6 +15,14 @@ export function buenosAiresDay(value: Date): string {
   return dayFormat.format(value);
 }
 
+/** Días que cuenta "Lo más leído" del sitio público: hoy y los dos anteriores. */
+export const MOST_READ_DAYS = 3;
+
+/** Primer día (hora de Buenos Aires) de una ventana de `days` días que termina hoy. */
+export function viewsWindowStart(now: Date, days: number): string {
+  return buenosAiresDay(new Date(now.getTime() - (days - 1) * 86_400_000));
+}
+
 /** Buscadores, vistas previas de redes y herramientas automáticas: no son lectores. */
 const BOT_PATTERN =
   /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|headless|lighthouse|curl|wget|python|axios|node-fetch/i;

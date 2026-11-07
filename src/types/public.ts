@@ -18,6 +18,9 @@ export type ArticleCardData = {
   image: PublicImage | null;
 };
 
+/** Una nota de "Lo más leído": lo justo para el titular numerado. */
+export type MostReadArticle = { id: string; slug: string; title: string; category: CategoryLink };
+
 export type PublicArticle = ArticleCardData & {
   content: unknown;
   seoTitle: string | null;

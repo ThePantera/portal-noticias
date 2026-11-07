@@ -3,7 +3,10 @@ import { absoluteUrl } from "@/lib/seo";
 import { env } from "@/server/env";
 import { getSitemapEntries } from "@/server/services/public-content";
 
-/** sitemap.xml: portada, secciones, mercados, vuelos, feriados, páginas del diario, notas publicadas y etiquetas con notas. */
+/**
+ * sitemap.xml: portada, secciones, mercados, vuelos, feriados, clima, horóscopo, páginas del
+ * diario, notas publicadas y etiquetas con notas.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { articles, categories, tags } = await getSitemapEntries();
   const url = (path: string) => absoluteUrl(env.SITE_URL, path);
@@ -18,6 +21,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: url("/mercados"), changeFrequency: "hourly" as const, priority: 0.6 },
     { url: url("/vuelos"), changeFrequency: "always" as const, priority: 0.5 },
     { url: url("/feriados"), changeFrequency: "weekly" as const, priority: 0.6 },
+    { url: url("/clima"), changeFrequency: "hourly" as const, priority: 0.6 },
+    { url: url("/horoscopo"), changeFrequency: "daily" as const, priority: 0.5 },
     { url: url("/quienes-somos"), changeFrequency: "monthly" as const, priority: 0.3 },
     { url: url("/contacto"), changeFrequency: "yearly" as const, priority: 0.2 },
     { url: url("/privacidad"), changeFrequency: "yearly" as const, priority: 0.2 },
