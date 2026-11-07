@@ -19,9 +19,9 @@ un publicador propio con Claude Haiku.
      esfuerzo bajo) con salida estructurada: título, bajada, bloques, sección, etiquetas,
      búsquedas de foto. Las reglas editoriales van en el prompt de sistema
      (`src/lib/autopublish.ts`): datos en dos fuentes, palabras propias, atribución en policiales.
-  4. Valida la respuesta (sección existente, 200 palabras o más), busca foto en Commons y publica
-     por el mismo servicio que la API del asistente (ADR 0008), con las fuentes al pie. Si la foto
-     falla, la nota sale sin foto.
+  4. Valida la respuesta (sección existente, 450 palabras o más; se piden 600 a 850), busca foto
+     en Commons y publica por el mismo servicio que la API del asistente (ADR 0008), con las fuentes
+     al pie. Si la foto falla, la nota sale sin foto.
 - Tope: `AUTOPUBLISH_MAX_PER_DAY` (100) notas del asistente por 24 h. La API con llave sigue en 20.
 - Lo dispara `.github/workflows/notas-automaticas.yml` cada 15 minutos de 7 a 24 (hora argentina),
   hasta dos notas por vez.

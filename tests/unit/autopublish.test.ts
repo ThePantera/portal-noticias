@@ -5,6 +5,7 @@ import {
   draftSchema,
   draftToContent,
   isCovered,
+  MIN_WORDS,
   pickPhoto,
   pickTopics,
   readableItems,
@@ -39,8 +40,8 @@ const draft: Draft = {
   tags: ["Papa", "Uruguay", "Papa"],
   seoDescription: "",
   blocks: [
-    { heading: "", text: words(150) },
-    { heading: "Cuándo llega", text: words(120) },
+    { heading: "", text: words(260) },
+    { heading: "Cuándo llega", text: words(220) },
   ],
   photoQueries: ["Pope Leo XIV", " "],
   photoAlt: "El Papa saluda",
@@ -122,6 +123,9 @@ describe("respuesta del modelo", () => {
     expect(
       checkDraft({ ...draft, blocks: [{ heading: "", text: words(50) }] }, ["sociedad"], sources).ok,
     ).toBe(false);
+    const withWords = (count: number) => ({ ...draft, blocks: [{ heading: "", text: words(count) }] });
+    expect(checkDraft(withWords(MIN_WORDS - 1), ["sociedad"], sources).ok).toBe(false);
+    expect(checkDraft(withWords(MIN_WORDS), ["sociedad"], sources).ok).toBe(true);
   });
 
   it("no deja párrafos vacíos", () => {
