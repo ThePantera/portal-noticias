@@ -41,7 +41,7 @@ export function ArticleGallery({ images, className = "" }: Props) {
       <ul
         ref={listRef}
         onScroll={onScroll}
-        className="mt-3 flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none]"
+        className="mt-3 no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
       >
         {images.map((image, index) => (
           <li
