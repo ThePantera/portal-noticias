@@ -138,6 +138,8 @@ model Article {
   readingTimeMinutes Int           @default(1) @map("reading_time_minutes")
   /// null = no destacada; 1 = nota principal de portada; 2..n = secundarias.
   featuredRank       Int?          @map("featured_rank")
+  /// Cobertura en vivo: la nota muestra "En vivo" y sus actualizaciones se refrescan solas.
+  isLive             Boolean       @default(false) @map("is_live")
 
   seoTitle       String? @map("seo_title")
   seoDescription String? @map("seo_description")
@@ -166,6 +168,7 @@ model Article {
   slugHistory ArticleSlugHistory[]
   reactions   ArticleReaction[]
   dailyViews  ArticleViewDaily[]
+  liveUpdates ArticleLiveUpdate[]
 
   @@index([status, publishedAt(sort: Desc)])
   @@index([categoryId, status, publishedAt(sort: Desc)])
@@ -185,6 +188,19 @@ model ArticleTag {
   @@id([articleId, tagId])
   @@index([tagId])
   @@map("article_tags")
+}
+
+/// Actualización de una cobertura en vivo: texto corto con su hora, la más nueva arriba.
+model ArticleLiveUpdate {
+  id        String   @id @default(cuid())
+  articleId String   @map("article_id")
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId, createdAt(sort: Desc)])
+  @@map("article_live_updates")
 }
 
 /// Slugs anteriores de una nota publicada, para redirigir con 301 si cambia el título.

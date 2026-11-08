@@ -1,6 +1,7 @@
 import { ArticleCard } from "@/components/editorial/ArticleCard";
 import { BreakingBar } from "@/components/editorial/BreakingBar";
 import { CardRail } from "@/components/editorial/CardRail";
+import { DailyBriefing } from "@/components/editorial/DailyBriefing";
 import { DollarPanel } from "@/components/editorial/DollarPanel";
 import { JsonLd } from "@/components/editorial/JsonLd";
 import { LatestTimeline } from "@/components/editorial/LatestTimeline";
@@ -12,7 +13,12 @@ import { isFeaturedSection, sectionTone } from "@/lib/sections";
 import { websiteJsonLd } from "@/lib/seo";
 import { env } from "@/server/env";
 import { getDollarRates } from "@/server/services/exchange-rates";
-import { getHomepage, getMostRead, getTrendingTopics } from "@/server/services/public-content";
+import {
+  getDailyBriefing,
+  getHomepage,
+  getMostRead,
+  getTrendingTopics,
+} from "@/server/services/public-content";
 import { getWeather } from "@/server/services/weather";
 
 /*
@@ -39,13 +45,15 @@ const ROW_ITEM = "min-w-0 border-t border-rule py-3 lg:border-0 lg:py-0";
  * (que repite las mismas notas) se oculta. "Lo más leído" va en la columna lateral.
  */
 export default async function HomePage() {
-  const [{ lead, secondary, latest, sections }, rates, topics, weather, mostRead] = await Promise.all([
-    getHomepage(),
-    getDollarRates(),
-    getTrendingTopics(),
-    getWeather(),
-    getMostRead(),
-  ]);
+  const [{ lead, secondary, latest, sections }, rates, topics, weather, mostRead, briefing] =
+    await Promise.all([
+      getHomepage(),
+      getDollarRates(),
+      getTrendingTopics(),
+      getWeather(),
+      getMostRead(),
+      getDailyBriefing(),
+    ]);
 
   // El sitio y su buscador se describen aunque todavía no haya notas.
   const siteLd = <JsonLd data={websiteJsonLd(env.SITE_URL, env.SITE_NAME)} />;
@@ -84,6 +92,7 @@ export default async function HomePage() {
       <h1 className="sr-only">{env.SITE_NAME}: portada</h1>
       <BreakingBar articles={breaking} />
       <TopicsBar topics={topics} />
+      <DailyBriefing day={briefing.day} articles={briefing.articles} />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:gap-y-10">
         <section aria-labelledby="principales" className="grid min-w-0 grid-cols-1 gap-6 lg:col-span-8">

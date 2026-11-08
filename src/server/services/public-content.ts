@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { briefingDay, pickBriefing } from "@/lib/briefing";
 import { ARTICLES_TAG, CATEGORIES_TAG, articleTag } from "@/lib/cache-tags";
 import { MOST_READ_DAYS, viewsWindowStart } from "@/lib/views";
 import * as queries from "@/server/services/public-queries";
@@ -102,6 +103,26 @@ export async function getMostRead() {
   cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
   cacheTag(ARTICLES_TAG);
   return listMostRead(viewsWindowStart(new Date(), MOST_READ_DAYS), 6);
+}
+
+/**
+ * "Lo que tenés que saber hoy": las destacadas y las más nuevas de las últimas 24 horas, una
+ * por sección. Se arma con la portada y se renueva con ella (o cada hora).
+ */
+export async function getDailyBriefing() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(ARTICLES_TAG, CATEGORIES_TAG);
+  const now = new Date();
+  const { lead, secondary, latest, sections } = await queries.getHomepage();
+  const candidates = [
+    ...(lead ? [lead] : []),
+    ...secondary,
+    ...[...latest, ...sections.flatMap((s) => s.articles)].sort(
+      (a, b) => b.publishedAt.getTime() - a.publishedAt.getTime(),
+    ),
+  ];
+  return { day: briefingDay(now), articles: pickBriefing(candidates, now) };
 }
 
 /** La búsqueda depende de lo que escribe cada lector: no se guarda en caché. */

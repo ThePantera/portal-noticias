@@ -157,10 +157,18 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
       seoDescription: true,
       origin: true,
       tags: { select: { tag: { select: { name: true, slug: true } } }, orderBy: { tag: { name: "asc" } } },
+      isLive: true,
+      liveUpdates: {
+        orderBy: { createdAt: "desc" },
+        take: 200,
+        select: { id: true, body: true, createdAt: true },
+      },
+      gallery: { orderBy: { position: "asc" }, select: { media: { select: imageSelect } } },
     },
   });
   if (article) {
-    const { content, seoTitle, seoDescription, origin, tags, ...card } = article;
+    const { content, seoTitle, seoDescription, origin, tags, isLive, liveUpdates, gallery, ...card } =
+      article;
     return {
       kind: "article",
       article: {
@@ -171,6 +179,9 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
         aiAssisted: origin === "AI_ASSISTED",
         updatedAt: card.updatedAt,
         tags: tags.map((t) => t.tag),
+        isLive,
+        liveUpdates,
+        gallery: gallery.map((g) => toPublicImage(g.media)),
       },
     };
   }
