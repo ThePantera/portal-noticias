@@ -52,3 +52,6 @@ export type EditorFormState = {
   /** Cambia en cada guardado exitoso, para que el editor sepa que ya no hay cambios pendientes. */
   savedAt?: number;
 };
+
+/** Resultado de un cambio de la cobertura en vivo o de la galería de fotos. */
+export type ExtrasResult = { ok: true } | { ok: false; message: string };

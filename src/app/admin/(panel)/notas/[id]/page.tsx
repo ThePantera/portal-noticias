@@ -3,10 +3,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
+import { GalleryPanel } from "@/components/admin/GalleryPanel";
+import { LiveCoveragePanel } from "@/components/admin/LiveCoveragePanel";
+import { formatDateTime } from "@/lib/dates";
 import { requirePermission, requireUser } from "@/server/auth/current-user";
 import { MAX_FEATURED_RANK } from "@/server/services/article-commands";
+import { getLiveCoverage, listGallery } from "@/server/services/article-extras";
 import { getArticleForEdit, listCategoryOptions } from "@/server/services/articles";
 import { deleteArticleAction, saveArticleAction, uploadImageAction } from "../actions";
+import {
+  addGalleryImageAction,
+  addLiveUpdateAction,
+  deleteLiveUpdateAction,
+  moveGalleryImageAction,
+  removeGalleryImageAction,
+  setLiveAction,
+} from "../extras-actions";
 
 export const metadata: Metadata = { title: "Editar nota" };
 
@@ -51,7 +63,11 @@ async function EditArticle({ params, searchParams }: PageProps<"/admin/notas/[id
   const notice = missing
     ? `La nota se guardó como borrador. Para publicarla falta ${missing}.`
     : NOTICES[noticeKey];
-  const categories = await listCategoryOptions();
+  const [categories, live, gallery] = await Promise.all([
+    listCategoryOptions(),
+    getLiveCoverage(article.id),
+    listGallery(article.id),
+  ]);
 
   return (
     <div className="grid gap-6">
@@ -80,6 +96,26 @@ async function EditArticle({ params, searchParams }: PageProps<"/admin/notas/[id
         uploadAction={uploadImageAction}
         notice={notice}
         maxFeaturedRank={MAX_FEATURED_RANK}
+      />
+      <GalleryPanel
+        articleId={article.id}
+        images={gallery}
+        uploadAction={uploadImageAction}
+        addAction={addGalleryImageAction}
+        removeAction={removeGalleryImageAction}
+        moveAction={moveGalleryImageAction}
+      />
+      <LiveCoveragePanel
+        articleId={article.id}
+        isLive={live?.isLive ?? false}
+        updates={(live?.updates ?? []).map((u) => ({
+          id: u.id,
+          body: u.body,
+          when: formatDateTime(u.createdAt),
+        }))}
+        setLiveAction={setLiveAction}
+        addAction={addLiveUpdateAction}
+        deleteAction={deleteLiveUpdateAction}
       />
     </div>
   );

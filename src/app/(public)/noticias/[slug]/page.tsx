@@ -3,10 +3,13 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { ArticleBody } from "@/components/editorial/ArticleBody";
 import { ArticleCard } from "@/components/editorial/ArticleCard";
+import { ArticleGallery } from "@/components/editorial/ArticleGallery";
 import { ArticleFigure } from "@/components/editorial/ArticleImage";
 import { ArticleMeta } from "@/components/editorial/ArticleMeta";
 import { ArticleReactions } from "@/components/editorial/ArticleReactions";
 import { JsonLd } from "@/components/editorial/JsonLd";
+import { LiveRefresh } from "@/components/editorial/LiveRefresh";
+import { LiveUpdates } from "@/components/editorial/LiveUpdates";
 import { MostRead } from "@/components/editorial/MostRead";
 import { SectionHeader } from "@/components/editorial/SectionHeader";
 import { ShareButtons } from "@/components/editorial/ShareButtons";
@@ -110,10 +113,16 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
         ]}
       />
       <article className="mx-auto w-full max-w-measure" style={sectionTone(article.category.slug)}>
-        <nav aria-label="Ruta" className="text-sm">
+        <nav aria-label="Ruta" className="flex flex-wrap items-center gap-3 text-sm">
           <Link href={`/categoria/${article.category.slug}`} className="section-pill hover:underline">
             {article.category.name}
           </Link>
+          {article.isLive ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-live px-2.5 py-0.5 font-ui text-xs font-bold tracking-wide text-on-night uppercase">
+              <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-on-night" />
+              En vivo
+            </span>
+          ) : null}
         </nav>
         <h1 className="mt-4 font-display text-3xl leading-tight font-extrabold tracking-tight md:text-5xl">
           {article.title}
@@ -138,7 +147,10 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
             className="mt-8"
           />
         ) : null}
+        <LiveUpdates updates={article.liveUpdates} isLive={article.isLive} className="mt-8" />
+        {article.isLive ? <LiveRefresh /> : null}
         <ArticleBody content={article.content} className="mt-8" />
+        <ArticleGallery images={article.gallery} className="mt-10" />
         {article.aiAssisted ? (
           <p className="mt-8 border-l-2 border-rule pl-3 font-ui text-sm text-ink-muted">
             {AI_NOTICE} <Link href="/quienes-somos#como-trabajamos">Cómo hacemos las notas</Link>

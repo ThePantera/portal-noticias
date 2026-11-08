@@ -29,7 +29,15 @@ export type PublicArticle = ArticleCardData & {
   aiAssisted: boolean;
   updatedAt: Date;
   tags: TagLink[];
+  /** Cobertura en vivo activa: la nota se refresca sola. */
+  isLive: boolean;
+  /** Actualizaciones de la cobertura, la más nueva primero (puede tenerlas aunque ya terminó). */
+  liveUpdates: LiveUpdate[];
+  /** Fotos de la galería, en orden. */
+  gallery: PublicImage[];
 };
+
+export type LiveUpdate = { id: string; body: string; createdAt: Date };
 
 export type HomepageData = {
   lead: ArticleCardData | null;
