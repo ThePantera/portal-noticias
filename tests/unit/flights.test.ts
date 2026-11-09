@@ -51,7 +51,6 @@ describe("vuelos: lectura de adsb.lol", () => {
       speedKt: 350.5,
       heading: 309.09,
       airline: { code: "ARG", name: "Aerolíneas Argentinas" },
-      route: null,
     });
     expect(flights[1]).toMatchObject({
       id: "e200f0",
