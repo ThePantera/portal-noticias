@@ -14,8 +14,9 @@ bootstrap(db, {
   email: process.env.ADMIN_EMAIL,
   name: process.env.ADMIN_NAME,
   password: process.env.ADMIN_PASSWORD,
+  resetPassword: process.env.ADMIN_RESET_PASSWORD,
 })
-  .then(({ categoriesCreated, adminCreated }) => {
+  .then(({ categoriesCreated, adminCreated, passwordReset }) => {
     console.log(
       categoriesCreated === null
         ? "Categorías: ya había, no se tocaron."
@@ -26,6 +27,9 @@ bootstrap(db, {
         ? "Administrador: ya existe, no se crea otro."
         : `Administrador creado: ${adminCreated}. Ya podés borrar ADMIN_PASSWORD del entorno.`,
     );
+    if (passwordReset) {
+      console.log(`Clave cambiada para ${passwordReset}. Ya podés borrar ADMIN_RESET_PASSWORD del entorno.`);
+    }
   })
   .catch((error: Error) => {
     console.error(`Error: ${error.message}`);
