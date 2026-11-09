@@ -84,7 +84,6 @@ export function parseAdsbLol(json: unknown): Flight[] | null {
       speedKt: ac.data.gs ?? null,
       heading: ac.data.track ?? ac.data.true_heading ?? null,
       airline: airlineFromCallsign(text(ac.data.flight)),
-      route: null,
     });
   }
   return flights;

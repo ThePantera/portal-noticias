@@ -16,8 +16,9 @@ import {
   sortFlights,
   type Airport,
 } from "@/lib/flights";
-import type { Flight, FlightsSnapshot, RouteAirport } from "@/types/flights";
+import type { Flight, FlightsSnapshot } from "@/types/flights";
 import { useFlights } from "./useFlights";
+import { routeOf, useRoute, type RouteState } from "./useRoutes";
 
 /*
  * Mapa con Leaflet, cargado desde unpkg con versión fija y hash de integridad: sólo lo baja
@@ -124,8 +125,11 @@ function Detail({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RouteBlock({ route }: { route: RouteAirport[] | null }) {
-  if (!route) {
+function RouteBlock({ route }: { route: RouteState | undefined }) {
+  if (route === "loading" || route === undefined) {
+    return <p className="text-sm text-ink-muted">Buscando de dónde sale y adónde va…</p>;
+  }
+  if (route === "unknown") {
     return <p className="text-sm text-ink-muted">Sin datos de origen y destino para este vuelo.</p>;
   }
   const origin = route[0];
@@ -152,6 +156,7 @@ function RouteBlock({ route }: { route: RouteAirport[] | null }) {
 }
 
 function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () => void }) {
+  const route = useRoute(flight);
   if (!flight) {
     return (
       <p className="border border-rule bg-surface p-4 text-sm text-ink-muted">
@@ -178,7 +183,7 @@ function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () =>
           Cerrar
         </button>
       </div>
-      <RouteBlock route={flight.route} />
+      <RouteBlock route={route} />
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         <Detail label="Altura" value={formatAltitude(flight)} />
         <Detail label="Velocidad" value={formatSpeed(flight.speedKt)} />
@@ -201,7 +206,8 @@ function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () =>
 
 /** "BRC → AEP · 10.668 m": la ruta si se conoce, si no el modelo, y la altura. */
 function listDetail(flight: Flight): string {
-  const lead = flight.route ? routeCodes(flight.route) : flight.model;
+  const route = routeOf(flight);
+  const lead = Array.isArray(route) ? routeCodes(route) : flight.model;
   return lead ? `${lead} · ${formatAltitude(flight)}` : formatAltitude(flight);
 }
 

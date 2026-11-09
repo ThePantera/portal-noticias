@@ -1,6 +1,9 @@
 /** Vuelos en vivo de la página /vuelos. Las fechas viajan como texto ISO: las lee también el navegador. */
 
-/** Aeropuerto de una ruta, como lo informa la base de rutas de adsb.lol. */
+/**
+ * Aeropuerto de una ruta, como lo informa la base de rutas de adsb.lol. Una ruta es la lista de
+ * aeropuertos de origen a destino, con las escalas en el medio.
+ */
 export type RouteAirport = {
   /** Código IATA ("AEP"); algunos aeródromos chicos sólo tienen ICAO. */
   iata: string | null;
@@ -38,8 +41,6 @@ export type Flight = {
   heading: number | null;
   /** Aerolínea, deducida del indicativo; null en vuelos privados o militares sin código. */
   airline: Airline | null;
-  /** Aeropuertos del vuelo, de origen a destino (con escalas en el medio); null si no se conoce. */
-  route: RouteAirport[] | null;
 };
 
 export type FlightsSnapshot = {
