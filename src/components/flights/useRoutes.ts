@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { hasAirlineCallsign, parseRouteset } from "@/lib/flights";
+import { hasAirlineCallsign, isPlausibleRoute, parseAdsbdbRoute } from "@/lib/flights";
 import type { Flight, RouteAirport } from "@/types/flights";
 
 /*
- * Origen y destino de cada vuelo, de la base de rutas de adsb.lol (ODbL). Se piden desde el
- * navegador, sólo para el avión que el lector toca: la API acepta pedidos de cualquier sitio y
- * desde los servidores de Vercel no respondía. Cada indicativo se pide una sola vez por visita.
+ * Origen y destino de cada vuelo, de la base pública de rutas de adsbdb.com. Se piden desde el
+ * navegador, sólo para el avión que el lector toca: adsbdb acepta pedidos de cualquier sitio
+ * (adsb.lol no, y desde los servidores de Vercel no respondía). Cada indicativo se pide una vez
+ * por visita; si falla, la ficha ofrece reintentar.
  */
-const ROUTESET = "https://api.adsb.lol/api/0/routeset";
+const ROUTES_API = "https://api.adsbdb.com/v0/callsign/";
 
-export type RouteState = "loading" | "unknown" | RouteAirport[];
+/** "unknown": la base no tiene ruta (o no coincide con dónde está el avión). "error": no respondió. */
+export type RouteState = "loading" | "unknown" | "error" | RouteAirport[];
 
 const routes = new Map<string, RouteState>();
 const listeners = new Set<() => void>();
@@ -26,19 +28,15 @@ function set(callsign: string, state: RouteState) {
 async function load(flight: Flight & { callsign: string }) {
   set(flight.callsign, "loading");
   try {
-    const response = await fetch(ROUTESET, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planes: [{ callsign: flight.callsign, lat: flight.lat, lng: flight.lon }] }),
+    const response = await fetch(ROUTES_API + encodeURIComponent(flight.callsign), {
       signal: AbortSignal.timeout(8000),
     });
+    if (response.status === 404) return set(flight.callsign, "unknown");
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    set(flight.callsign, parseRouteset(await response.json()).get(flight.callsign) ?? "unknown");
+    const route = parseAdsbdbRoute(await response.json());
+    set(flight.callsign, route && isPlausibleRoute(route, flight) ? route : "unknown");
   } catch {
-    // Sin respuesta: se deja de nuevo sin pedir, para reintentar si el lector lo vuelve a tocar.
-    routes.delete(flight.callsign);
-    version += 1;
-    for (const listener of listeners) listener();
+    set(flight.callsign, "error");
   }
 }
 
@@ -52,6 +50,11 @@ export function routeOf(flight: Flight): RouteState | undefined {
   return flight.callsign ? routes.get(flight.callsign) : undefined;
 }
 
+/** Vuelve a pedir una ruta que no llegó. */
+export function retryRoute(flight: Flight) {
+  if (hasAirlineCallsign(flight.callsign)) void load({ ...flight, callsign: flight.callsign });
+}
+
 /** Pide la ruta del vuelo elegido y redibuja cuando llega cualquier ruta. Devuelve la del elegido. */
 export function useRoute(flight: Flight | null): RouteState | undefined {
   useSyncExternalStore(
@@ -61,9 +64,11 @@ export function useRoute(flight: Flight | null): RouteState | undefined {
   );
   const callsign = flight?.callsign ?? null;
   useEffect(() => {
-    if (!flight || !hasAirlineCallsign(callsign) || routes.has(callsign)) return;
+    if (!flight || !hasAirlineCallsign(callsign)) return;
+    const state = routes.get(callsign);
+    if (state !== undefined && state !== "error") return;
     void load({ ...flight, callsign });
-    // Se pide una vez por indicativo; la posición del momento alcanza para que adsb.lol la valide.
+    // Se pide una vez por indicativo (o de nuevo si falló); la posición del momento alcanza para validarla.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callsign]);
   if (!flight) return undefined;

@@ -3,13 +3,15 @@ import {
   airlineFromCallsign,
   airlineName,
   flightLabel,
+  distanceKm,
   formatAltitude,
   formatHeading,
   formatRouteAirport,
   formatSpeed,
   hasAirlineCallsign,
+  isPlausibleRoute,
+  parseAdsbdbRoute,
   parseAdsbLol,
-  parseRouteset,
   routeCodes,
   sortFlights,
 } from "@/lib/flights";
@@ -115,46 +117,51 @@ describe("vuelos: aerolínea y ruta", () => {
     expect(hasAirlineCallsign("LVCXS")).toBe(false);
   });
 
-  it("lee las rutas de adsb.lol y descarta las que no son plausibles", () => {
-    const routes = parseRouteset([
-      {
+  const airport = (iata: string | null, icao: string, municipality: string, lat: number, lon: number) => ({
+    iata_code: iata,
+    icao_code: icao,
+    municipality,
+    country_iso_name: "AR",
+    latitude: lat,
+    longitude: lon,
+  });
+  const brcAep = {
+    response: {
+      flightroute: {
         callsign: "ARG1665",
-        plausible: true,
-        _airports: [
-          { iata: "BRC", icao: "SAZS", location: "San Carlos de Bariloche", countryiso2: "AR" },
-          { iata: "AEP", icao: "SABE", location: "Buenos Aires", countryiso2: "AR" },
-        ],
+        origin: airport("BRC", "SAZS", "San Carlos de Bariloche", -41.1512, -71.1575),
+        destination: airport("AEP", "SABE", "Buenos Aires", -34.5592, -58.4156),
       },
-      {
-        callsign: "LAN800",
-        plausible: false,
-        _airports: [
-          { iata: "AKL", icao: "NZAA", location: "Auckland", countryiso2: "NZ" },
-          { iata: "SCL", icao: "SCEL", location: "Santiago", countryiso2: "CL" },
-        ],
-      },
-      { callsign: "FBZ1", plausible: true, _airports: [{ iata: "AEP", icao: "SABE" }] },
-      { nada: true },
-    ]);
-    expect([...routes.keys()]).toEqual(["ARG1665"]);
-    const route = routes.get("ARG1665")!;
+    },
+  };
+
+  it("lee la ruta de adsbdb y la muestra con códigos", () => {
+    const route = parseAdsbdbRoute(brcAep)!;
     expect(formatRouteAirport(route[0])).toBe("San Carlos de Bariloche (BRC)");
     expect(routeCodes(route)).toBe("BRC → AEP");
-    expect(parseRouteset({ error: "x" }).size).toBe(0);
+    expect(parseAdsbdbRoute({ response: "unknown callsign" })).toBeNull();
+    expect(parseAdsbdbRoute(null)).toBeNull();
   });
 
   it("usa el código ICAO cuando el aeropuerto no tiene IATA", () => {
-    const routes = parseRouteset([
-      {
-        callsign: "ANS100",
-        plausible: 1,
-        _airports: [
-          { iata: "", icao: "SADF", name: "San Fernando" },
-          { iata: "MDQ", icao: "SAZM", location: "Mar del Plata", countryiso2: "AR" },
-        ],
+    const route = parseAdsbdbRoute({
+      response: {
+        flightroute: {
+          origin: { ...airport(null, "SADF", "", -34.45, -58.59), municipality: null, name: "San Fernando" },
+          destination: airport("MDQ", "SAZM", "Mar del Plata", -37.93, -57.57),
+        },
       },
-    ]);
-    expect(routeCodes(routes.get("ANS100")!)).toBe("SADF → MDQ");
-    expect(formatRouteAirport(routes.get("ANS100")![0])).toBe("San Fernando (SADF)");
+    })!;
+    expect(routeCodes(route)).toBe("SADF → MDQ");
+    expect(formatRouteAirport(route[0])).toBe("San Fernando (SADF)");
+  });
+
+  it("descarta la ruta si el avión está lejos del camino entre origen y destino", () => {
+    const route = parseAdsbdbRoute(brcAep)!;
+    expect(isPlausibleRoute(route, { lat: -36.5, lon: -63 })).toBe(true);
+    expect(isPlausibleRoute(route, { lat: -34.6, lon: -58.4 })).toBe(true);
+    expect(isPlausibleRoute(route, { lat: -40.5, lon: -69 })).toBe(true);
+    expect(isPlausibleRoute(route, { lat: -23, lon: -46 })).toBe(false);
+    expect(Math.round(distanceKm(route[0], route[1]))).toBeGreaterThan(1300);
   });
 });
