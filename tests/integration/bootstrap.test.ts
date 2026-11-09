@@ -40,4 +40,25 @@ describe("bootstrap del deploy", () => {
     await expect(bootstrap(testDb, { ...admin, password: "corta" })).rejects.toThrow(/mínimo 12/);
     expect(await testDb.user.count()).toBe(0);
   });
+
+  it("ADMIN_RESET_PASSWORD cambia la clave del administrador y cierra sus sesiones, una sola vez", async () => {
+    await bootstrap(testDb, admin);
+    const user = await testDb.user.findUniqueOrThrow({ where: { email: "editora@portal.test" } });
+    await testDb.session.create({
+      data: { id: "x".repeat(64), userId: user.id, expiresAt: new Date(Date.now() + 3_600_000) },
+    });
+    const nueva = "otra-clave-bien-larga";
+    expect(await bootstrap(testDb, { resetPassword: nueva })).toMatchObject({
+      passwordReset: "editora@portal.test",
+    });
+    const updated = await testDb.user.findUniqueOrThrow({ where: { id: user.id } });
+    expect(await verifyPassword(updated.passwordHash, nueva)).toBe(true);
+    expect(await testDb.session.count()).toBe(0);
+    // En el próximo deploy, con la variable todavía puesta, no vuelve a tocar nada.
+    expect(await bootstrap(testDb, { resetPassword: nueva })).not.toHaveProperty("passwordReset");
+    await expect(bootstrap(testDb, { resetPassword: "corta" })).rejects.toThrow(/al menos 12/);
+    await expect(bootstrap(testDb, { email: "nadie@portal.test", resetPassword: nueva })).rejects.toThrow(
+      /no hay un administrador/,
+    );
+  });
 });
