@@ -9,6 +9,7 @@ const PAGE = `<!doctype html><html><head>
 <meta property="og:description" content="La bajada de la nota, con &quot;comillas&quot;.">
 <meta property="og:image" content="/fotos/principal.jpg">
 <meta property="og:site_name" content="Diario Ejemplo">
+<meta name="author" content="Ana Pérez">
 <script>var x = "<p>esto no es texto de la nota, es un script que no se tiene que leer</p>";</script>
 </head><body>
 <nav><p>Menú con un párrafo largo que no es parte de la nota y no se tiene que traer.</p></nav>
@@ -19,6 +20,12 @@ const PAGE = `<!doctype html><html><head>
 <h2>Un subtítulo</h2>
 <p>Segundo párrafo de la nota, también con texto suficiente para pasar el filtro de largo.</p>
 <p>Corto.</p>
+<figure><img src="/fotos/principal.jpg" alt="repetida"><figcaption>Epígrafe</figcaption></figure>
+<figure><img src="data:image/gif;base64,R0lGOD" data-src="/fotos/segunda.jpg?w=400" alt="Segunda &amp; foto"></figure>
+<img srcset="/fotos/tercera-320.jpg 320w, /fotos/tercera-1200.jpg 1200w" src="/fotos/tercera-320.jpg" alt="">
+<img src="/static/logo-diario.png" alt="Logo">
+<img src="/fotos/chiquita.jpg" width="40" height="40">
+<img src="/fotos/segunda.jpg?w=1200" alt="la misma foto en otro tamaño">
 <p>Seguí leyendo: otra nota que no tiene nada que ver con esta y no se tiene que traer.</p>
 <aside><p>Párrafo de una columna lateral que tampoco es parte de la nota que se importa.</p></aside>
 ${"<p>Relleno para que el artículo sea el contenedor principal de la página y se elija.</p>".repeat(20)}
@@ -41,6 +48,7 @@ describe("parseArticlePage", () => {
     expect(page.title).toBe("El título de la nota");
     expect(page.excerpt).toBe('La bajada de la nota, con "comillas".');
     expect(page.siteName).toBe("Diario Ejemplo");
+    expect(page.author).toBe("Ana Pérez");
     expect(page.imageUrl).toBe("https://www.ejemplo.com.ar/fotos/principal.jpg");
   });
 
@@ -61,11 +69,19 @@ describe("parseArticlePage", () => {
     expect(page.blocks.filter((block) => block.text.startsWith("Relleno"))).toHaveLength(1);
   });
 
+  it("trae las fotos del cuerpo sin la principal, logos, miniaturas ni repetidas", () => {
+    expect(page.images).toEqual([
+      { url: "https://www.ejemplo.com.ar/fotos/segunda.jpg?w=400", alt: "Segunda & foto" },
+      { url: "https://www.ejemplo.com.ar/fotos/tercera-1200.jpg", alt: "" },
+    ]);
+  });
+
   it("sin og:site_name usa el dominio", () => {
     const bare = parseArticlePage("<title>Algo</title><p>" + "texto ".repeat(20) + "</p>", URL_NOTA);
     expect(bare.siteName).toBe("ejemplo.com.ar");
     expect(bare.title).toBe("Algo");
     expect(bare.imageUrl).toBeNull();
+    expect(bare.author).toBe("");
   });
 
   it("si los párrafos son pocos, usa el articleBody de los datos estructurados", () => {
@@ -85,10 +101,14 @@ describe("importedDoc", () => {
   it("termina con «Gracias al aporte de» y el enlace a la nota original", () => {
     const doc = importedDoc(parseArticlePage(PAGE, URL_NOTA), URL_NOTA.toString());
     expect(doc.type).toBe("doc");
-    expect(doc.content?.at(-1)).toEqual(creditParagraph("Diario Ejemplo", URL_NOTA.toString()));
+    expect(doc.content?.at(-1)).toEqual(creditParagraph("Diario Ejemplo", URL_NOTA.toString(), "Ana Pérez"));
     const credit = doc.content?.at(-1)?.content ?? [];
-    expect(credit.map((node) => node.text).join("")).toBe("Gracias al aporte de Diario Ejemplo.");
+    expect(credit.map((node) => node.text).join("")).toBe(
+      "Nota original de Ana Pérez en Diario Ejemplo. Gracias al aporte de Diario Ejemplo.",
+    );
     expect(credit[1].marks).toContainEqual({ type: "link", attrs: { href: URL_NOTA.toString() } });
+    const sinAutor = creditParagraph("Diario Ejemplo", URL_NOTA.toString()).content ?? [];
+    expect(sinAutor.map((node) => node.text).join("")).toBe("Gracias al aporte de Diario Ejemplo.");
     expect(doc.content?.[1]).toEqual({
       type: "heading",
       attrs: { level: 2 },

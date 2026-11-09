@@ -29,9 +29,9 @@ export function ImportFromLink({ categories, importAction }: Props) {
           Traer nota desde un link
         </h2>
         <p className="mt-1 text-sm text-ink-subtle">
-          Pegá el link de una nota de otra página. Se trae el título, la bajada, el texto y la foto, y al
-          final dice «Gracias al aporte de» ese sitio. Queda como borrador para que la revises antes de
-          publicar.
+          Pegá el link de una nota de otra página. Se trae el título, la bajada, el texto, la foto principal y
+          las fotos de la nota (van a la galería), y al final dice «Gracias al aporte de» ese sitio. Queda
+          como borrador para que la revises antes de publicar.
         </p>
       </div>
       <form action={formAction} className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end">
