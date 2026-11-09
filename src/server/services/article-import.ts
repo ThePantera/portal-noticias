@@ -123,6 +123,7 @@ export async function importArticleFromUrl(
       categoryId,
       mainImageId: mainImageId ?? "",
       mainImageAlt: mainImageId ? page.title.slice(0, 200) : "",
+      videoUrl: page.videoUrl ?? "",
       mainImageCredit: mainImageId ? `Foto: ${page.siteName}`.slice(0, 120) : undefined,
     },
     { origin: "IMPORTED" },

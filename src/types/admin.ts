@@ -27,6 +27,7 @@ export type EditableArticle = {
   featuredRank: number | null;
   seoTitle: string | null;
   seoDescription: string | null;
+  videoUrl: string | null;
   categoryId: string;
   categoryName: string;
   categorySlug: string;

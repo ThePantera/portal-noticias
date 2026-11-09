@@ -48,6 +48,7 @@ export function ArticleEditor({
   const [slug, setSlug] = useState(article?.slug ?? "");
   const [seoTitle, setSeoTitle] = useState(article?.seoTitle ?? "");
   const [seoDescription, setSeoDescription] = useState(article?.seoDescription ?? "");
+  const [videoUrl, setVideoUrl] = useState(article?.videoUrl ?? "");
   // Todos los campos son controlados: React reinicia los no controlados después de cada
   // envío, y un error de validación no debe borrar lo que se escribió.
   const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
@@ -140,6 +141,30 @@ export function ArticleEditor({
           onChange={() => setDirty(true)}
           errors={errors}
         />
+
+        <Field
+          id="videoUrl"
+          label="Video"
+          error={errors.videoUrl}
+          hint="Link de YouTube (se ve dentro de la nota) o de la nota original con su video (aparece un botón). Vacío: sin video."
+        >
+          {(props) => (
+            <input
+              {...props}
+              name="videoUrl"
+              type="url"
+              inputMode="url"
+              maxLength={500}
+              placeholder="https://www.youtube.com/watch?v=…"
+              value={videoUrl}
+              onChange={(e) => {
+                setVideoUrl(e.target.value);
+                setDirty(true);
+              }}
+              className={field}
+            />
+          )}
+        </Field>
 
         <div className="grid gap-1.5">
           <span id="content-label" className={label}>

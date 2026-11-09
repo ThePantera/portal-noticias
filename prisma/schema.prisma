@@ -143,6 +143,8 @@ model Article {
 
   seoTitle       String? @map("seo_title")
   seoDescription String? @map("seo_description")
+  /// Link del video: YouTube (se ve en la nota) o la nota original con su video.
+  videoUrl       String? @map("video_url")
 
   categoryId  String  @map("category_id")
   authorId    String  @map("author_id")
