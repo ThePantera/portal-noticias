@@ -45,6 +45,7 @@ function readInput(formData: FormData): ArticleInput {
     slug: text("slug"),
     seoTitle: text("seoTitle"),
     seoDescription: text("seoDescription"),
+    videoUrl: text("videoUrl"),
     featuredRank: Number.isInteger(rank) && rank > 0 ? rank : null,
     mainImageId: text("mainImageId"),
     mainImageAlt: text("mainImageAlt"),

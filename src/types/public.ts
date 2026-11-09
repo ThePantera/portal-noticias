@@ -25,6 +25,7 @@ export type PublicArticle = ArticleCardData & {
   content: unknown;
   seoTitle: string | null;
   seoDescription: string | null;
+  videoUrl: string | null;
   /** Redactada con inteligencia artificial (asistente o publicador automático): lleva un aviso. */
   aiAssisted: boolean;
   updatedAt: Date;

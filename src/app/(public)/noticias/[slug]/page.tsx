@@ -5,6 +5,7 @@ import { ArticleBody } from "@/components/editorial/ArticleBody";
 import { ArticleCard } from "@/components/editorial/ArticleCard";
 import { ArticleGallery } from "@/components/editorial/ArticleGallery";
 import { ArticleFigure } from "@/components/editorial/ArticleImage";
+import { ArticleVideo } from "@/components/editorial/ArticleVideo";
 import { ArticleMeta } from "@/components/editorial/ArticleMeta";
 import { ArticleReactions } from "@/components/editorial/ArticleReactions";
 import { JsonLd } from "@/components/editorial/JsonLd";
@@ -147,6 +148,7 @@ export default async function ArticlePage({ params }: PageProps<"/noticias/[slug
             className="mt-8"
           />
         ) : null}
+        <ArticleVideo url={article.videoUrl} title={article.title} className="mt-8" />
         <LiveUpdates updates={article.liveUpdates} isLive={article.isLive} className="mt-8" />
         {article.isLive ? <LiveRefresh /> : null}
         <ArticleBody content={article.content} className="mt-8" />

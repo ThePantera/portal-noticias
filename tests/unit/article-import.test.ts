@@ -25,6 +25,7 @@ const PAGE = `<!doctype html><html><head>
 <img srcset="/fotos/tercera-320.jpg 320w, /fotos/tercera-1200.jpg 1200w" src="/fotos/tercera-320.jpg" alt="">
 <img src="/static/logo-diario.png" alt="Logo">
 <img src="/fotos/chiquita.jpg" width="40" height="40">
+<iframe data-src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0" title="video"></iframe>
 <img src="/fotos/segunda.jpg?w=1200" alt="la misma foto en otro tamaño">
 <p>Seguí leyendo: otra nota que no tiene nada que ver con esta y no se tiene que traer.</p>
 <aside><p>Párrafo de una columna lateral que tampoco es parte de la nota que se importa.</p></aside>
@@ -49,6 +50,7 @@ describe("parseArticlePage", () => {
     expect(page.excerpt).toBe('La bajada de la nota, con "comillas".');
     expect(page.siteName).toBe("Diario Ejemplo");
     expect(page.author).toBe("Ana Pérez");
+    expect(page.videoUrl).toBe("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     expect(page.imageUrl).toBe("https://www.ejemplo.com.ar/fotos/principal.jpg");
   });
 
@@ -82,6 +84,12 @@ describe("parseArticlePage", () => {
     expect(bare.title).toBe("Algo");
     expect(bare.imageUrl).toBeNull();
     expect(bare.author).toBe("");
+    expect(bare.videoUrl).toBeNull();
+    const ownVideo = parseArticlePage(
+      '<meta property="og:video" content="https://cdn.x/v.mp4"><title>A</title>',
+      URL_NOTA,
+    );
+    expect(ownVideo.videoUrl).toBe(URL_NOTA.toString());
   });
 
   it("si los párrafos son pocos, usa el articleBody de los datos estructurados", () => {

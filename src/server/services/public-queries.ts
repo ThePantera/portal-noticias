@@ -155,6 +155,7 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
       content: true,
       seoTitle: true,
       seoDescription: true,
+      videoUrl: true,
       origin: true,
       tags: { select: { tag: { select: { name: true, slug: true } } }, orderBy: { tag: { name: "asc" } } },
       isLive: true,
@@ -167,8 +168,18 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
     },
   });
   if (article) {
-    const { content, seoTitle, seoDescription, origin, tags, isLive, liveUpdates, gallery, ...card } =
-      article;
+    const {
+      content,
+      seoTitle,
+      seoDescription,
+      videoUrl,
+      origin,
+      tags,
+      isLive,
+      liveUpdates,
+      gallery,
+      ...card
+    } = article;
     return {
       kind: "article",
       article: {
@@ -176,6 +187,7 @@ export async function findPublishedArticle(slug: string): Promise<ArticleLookup>
         content,
         seoTitle,
         seoDescription,
+        videoUrl,
         aiAssisted: origin === "AI_ASSISTED",
         updatedAt: card.updatedAt,
         tags: tags.map((t) => t.tag),

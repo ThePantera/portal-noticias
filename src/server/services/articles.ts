@@ -111,6 +111,7 @@ export async function getArticleForEdit(id: string): Promise<EditableArticle | n
       featuredRank: true,
       seoTitle: true,
       seoDescription: true,
+      videoUrl: true,
       categoryId: true,
       authorId: true,
       publishedAt: true,

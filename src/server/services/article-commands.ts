@@ -2,7 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
 import { allowedFrom, canTransition, type ArticleTransition } from "@/lib/article-transitions";
-import { extractPlainText, readingTimeMinutes, sanitizeDoc } from "@/lib/content";
+import { extractPlainText, readingTimeMinutes, safeHref, sanitizeDoc } from "@/lib/content";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { db } from "@/server/db";
 import { recordArticleEvent, type ArticleEventType } from "@/server/events/outbox";
@@ -51,6 +51,14 @@ export const articleInputSchema = z.object({
   slug: z.string().trim().max(120).default(""),
   seoTitle: optionalText(70),
   seoDescription: optionalText(160),
+  /** Link del video. Sin el campo, no se toca; vacío, se saca. */
+  videoUrl: z
+    .string()
+    .trim()
+    .max(500, "Máximo 500 caracteres.")
+    .optional()
+    .refine((v) => !v || Boolean(safeHref(v)?.startsWith("http")), "Tiene que ser un link http o https.")
+    .transform((v) => (v === undefined ? undefined : v || null)),
   featuredRank: z.number().int().min(1).max(MAX_FEATURED_RANK).nullable().default(null),
   /** Imagen principal ya subida (tabla media) y sus textos. Vacío: sin imagen. */
   mainImageId: z
@@ -183,6 +191,7 @@ export async function createArticle(
         readingTimeMinutes: data.readingTimeMinutes,
         seoTitle: data.seoTitle,
         seoDescription: data.seoDescription,
+        videoUrl: data.videoUrl,
         categoryId: data.categoryId,
         authorId: actor.id,
         featuredRank: data.featuredRank,
@@ -247,6 +256,7 @@ export async function updateArticle(actor: Actor, id: string, input: ArticleInpu
         readingTimeMinutes: data.readingTimeMinutes,
         seoTitle: data.seoTitle,
         seoDescription: data.seoDescription,
+        videoUrl: data.videoUrl,
         categoryId: data.categoryId,
         featuredRank: data.featuredRank,
         mainImageId,

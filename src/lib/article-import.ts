@@ -1,5 +1,6 @@
 import type { EditorDoc, EditorNode } from "./content";
 import { cleanText } from "./trends";
+import { findYoutubeInHtml, hasOwnVideo } from "./video";
 
 /**
  * Importar una nota desde el link de otra página: lee los metadatos (Open Graph) y los
@@ -12,6 +13,8 @@ export type ImportedPage = {
   excerpt: string;
   imageUrl: string | null;
   siteName: string;
+  /** Video: link de YouTube si la nota lo trae, o el de la nota original si tiene video propio. */
+  videoUrl: string | null;
   /** Autor de la nota original, si la página lo dice. */
   author: string;
   /** Bloques del cuerpo, en orden. */
@@ -189,6 +192,19 @@ export function parseArticlePage(html: string, url: URL): ImportedPage {
   const excerpt = metaContent(html, ["og:description", "twitter:description", "description"]).slice(0, 400);
   const siteName = metaContent(html, ["og:site_name", "application-name"]) || hostname;
   const author = authorOf(html);
+  // Los iframes se buscan en la nota sin quitarlos (stripNoise los saca para leer el texto).
+  const youtube = findYoutubeInHtml(
+    mainContainer(
+      html
+        .replace(/<!--[\s\S]*?-->/g, " ")
+        .replace(/<(script|style|nav|header|footer|aside)\b[\s\S]*?<\/\1>/gi, " "),
+    ),
+  );
+  const videoUrl = youtube
+    ? `https://www.youtube.com/watch?v=${youtube}`
+    : hasOwnVideo(html)
+      ? url.toString()
+      : null;
 
   let imageUrl: string | null = null;
   const rawImage = metaContent(html, [
@@ -234,13 +250,23 @@ export function parseArticlePage(html: string, url: URL): ImportedPage {
       imageUrl,
       siteName,
       author,
+      videoUrl,
       images,
       blocks: splitIntoParagraphs(fromJsonLd)
         .slice(0, MAX_BLOCKS)
         .map((text) => ({ type: "paragraph", text })),
     };
   }
-  return { title, excerpt, imageUrl, siteName, author, images, blocks: blocks.slice(0, MAX_BLOCKS) };
+  return {
+    title,
+    excerpt,
+    imageUrl,
+    siteName,
+    author,
+    videoUrl,
+    images,
+    blocks: blocks.slice(0, MAX_BLOCKS),
+  };
 }
 
 /**
