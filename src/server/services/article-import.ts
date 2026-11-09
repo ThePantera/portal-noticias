@@ -1,8 +1,9 @@
 import "server-only";
 import { lookup } from "node:dns/promises";
-import { BlockList, isIP } from "node:net";
+import { isIP } from "node:net";
 import { importedDoc, parseArticlePage } from "@/lib/article-import";
 import { MAX_UPLOAD_BYTES } from "@/lib/media";
+import { isPrivateAddress } from "@/lib/private-address";
 import type { Actor } from "@/server/permissions";
 import { createArticle } from "./article-commands";
 import { MediaError, uploadImage } from "./media";
@@ -23,29 +24,6 @@ export class ImportError extends Error {
   }
 }
 
-/** Redes internas: el servidor del sitio no tiene que poder leerlas por este camino. */
-const PRIVATE = new BlockList();
-for (const [net, prefix] of [
-  ["0.0.0.0", 8],
-  ["10.0.0.0", 8],
-  ["100.64.0.0", 10],
-  ["127.0.0.0", 8],
-  ["169.254.0.0", 16],
-  ["172.16.0.0", 12],
-  ["192.168.0.0", 16],
-  ["224.0.0.0", 3],
-] as const) {
-  PRIVATE.addSubnet(net, prefix, "ipv4");
-}
-for (const [net, prefix] of [
-  ["::", 127],
-  ["fc00::", 7],
-  ["fe80::", 10],
-  ["::ffff:0:0", 96],
-] as const) {
-  PRIVATE.addSubnet(net, prefix, "ipv6");
-}
-
 async function assertPublicUrl(url: URL): Promise<void> {
   if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new ImportError("El link tiene que empezar con http:// o https://.");
@@ -57,8 +35,8 @@ async function assertPublicUrl(url: URL): Promise<void> {
   } catch {
     throw new ImportError("No se encontró esa página. Revisá el link.");
   }
-  for (const { address, family } of addresses) {
-    if (PRIVATE.check(address, family === 6 ? "ipv6" : "ipv4")) {
+  for (const { address } of addresses) {
+    if (isPrivateAddress(address)) {
       throw new ImportError("Ese link no apunta a una página pública.");
     }
   }
