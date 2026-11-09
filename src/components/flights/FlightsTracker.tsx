@@ -6,14 +6,17 @@ import {
   AIRPORTS,
   FLIGHTS_CENTER,
   FLIGHTS_SOURCE,
+  airlineName,
   flightLabel,
   formatAltitude,
   formatHeading,
+  formatRouteAirport,
   formatSpeed,
+  routeCodes,
   sortFlights,
   type Airport,
 } from "@/lib/flights";
-import type { Flight, FlightsSnapshot } from "@/types/flights";
+import type { Flight, FlightsSnapshot, RouteAirport } from "@/types/flights";
 import { useFlights } from "./useFlights";
 
 /*
@@ -121,11 +124,38 @@ function Detail({ label, value }: { label: string; value: string }) {
   );
 }
 
+function RouteBlock({ route }: { route: RouteAirport[] | null }) {
+  if (!route) {
+    return <p className="text-sm text-ink-muted">Sin datos de origen y destino para este vuelo.</p>;
+  }
+  const origin = route[0];
+  const destination = route[route.length - 1];
+  const stops = route.slice(1, -1);
+  return (
+    <dl className="grid grid-cols-2 gap-x-4 gap-y-3 border-y border-rule py-3">
+      <div className="grid gap-0.5">
+        <dt className="text-xs tracking-widest text-ink-subtle uppercase">Sale de</dt>
+        <dd className="font-display text-lg leading-tight font-bold">{formatRouteAirport(origin)}</dd>
+      </div>
+      <div className="grid gap-0.5">
+        <dt className="text-xs tracking-widest text-ink-subtle uppercase">Va a</dt>
+        <dd className="font-display text-lg leading-tight font-bold">{formatRouteAirport(destination)}</dd>
+      </div>
+      {stops.length > 0 ? (
+        <div className="col-span-2 grid gap-0.5">
+          <dt className="text-xs tracking-widest text-ink-subtle uppercase">Escalas</dt>
+          <dd className="text-sm text-ink">{stops.map(formatRouteAirport).join(", ")}</dd>
+        </div>
+      ) : null}
+    </dl>
+  );
+}
+
 function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () => void }) {
   if (!flight) {
     return (
       <p className="border border-rule bg-surface p-4 text-sm text-ink-muted">
-        Tocá un avión en el mapa o en la lista para ver su altura, su velocidad y hacia dónde va.
+        Tocá un avión en el mapa o en la lista para ver de dónde viene, adónde va y con qué aerolínea.
       </p>
     );
   }
@@ -138,6 +168,7 @@ function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () =>
         <div>
           <p className="text-xs tracking-widest text-ink-subtle uppercase">Vuelo seleccionado</p>
           <h2 className="font-display text-2xl font-extrabold">{flightLabel(flight)}</h2>
+          {flight.airline ? <p className="text-sm text-ink-muted">{airlineName(flight.airline)}</p> : null}
         </div>
         <button
           type="button"
@@ -147,6 +178,7 @@ function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () =>
           Cerrar
         </button>
       </div>
+      <RouteBlock route={flight.route} />
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         <Detail label="Altura" value={formatAltitude(flight)} />
         <Detail label="Velocidad" value={formatSpeed(flight.speedKt)} />
@@ -165,6 +197,12 @@ function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () =>
       </a>
     </section>
   );
+}
+
+/** "BRC → AEP · 10.668 m": la ruta si se conoce, si no el modelo, y la altura. */
+function listDetail(flight: Flight): string {
+  const lead = flight.route ? routeCodes(flight.route) : flight.model;
+  return lead ? `${lead} · ${formatAltitude(flight)}` : formatAltitude(flight);
 }
 
 function statusLine(status: "loading" | "ok" | "error", snapshot: FlightsSnapshot | null): string {
@@ -332,10 +370,7 @@ export function FlightsTracker() {
                   className={`flex w-full items-baseline justify-between gap-3 px-2 py-2 text-left text-sm ${flight.id === selectedId ? "bg-signal text-on-signal" : "hover:bg-surface-muted"}`}
                 >
                   <span className="font-semibold">{flightLabel(flight)}</span>
-                  <span className="font-mono text-xs tabular-nums">
-                    {flight.model ? `${flight.model} · ` : ""}
-                    {formatAltitude(flight)}
-                  </span>
+                  <span className="font-mono text-xs tabular-nums">{listDetail(flight)}</span>
                 </button>
               </li>
             ))}
