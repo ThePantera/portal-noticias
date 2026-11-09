@@ -18,7 +18,7 @@ import {
 } from "@/lib/flights";
 import type { Flight, FlightsSnapshot } from "@/types/flights";
 import { useFlights } from "./useFlights";
-import { routeOf, useRoute, type RouteState } from "./useRoutes";
+import { retryRoute, routeOf, useRoute, type RouteState } from "./useRoutes";
 
 /*
  * Mapa con Leaflet, cargado desde unpkg con versión fija y hash de integridad: sólo lo baja
@@ -125,9 +125,19 @@ function Detail({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RouteBlock({ route }: { route: RouteState | undefined }) {
+function RouteBlock({ route, onRetry }: { route: RouteState | undefined; onRetry: () => void }) {
   if (route === "loading" || route === undefined) {
     return <p className="text-sm text-ink-muted">Buscando de dónde sale y adónde va…</p>;
+  }
+  if (route === "error") {
+    return (
+      <p className="text-sm text-ink-muted">
+        No pudimos averiguar de dónde sale y adónde va.{" "}
+        <button type="button" onClick={onRetry} className="underline underline-offset-4">
+          Probar de nuevo
+        </button>
+      </p>
+    );
   }
   if (route === "unknown") {
     return <p className="text-sm text-ink-muted">Sin datos de origen y destino para este vuelo.</p>;
@@ -183,7 +193,7 @@ function FlightCard({ flight, onClose }: { flight: Flight | null; onClose: () =>
           Cerrar
         </button>
       </div>
-      <RouteBlock route={route} />
+      <RouteBlock route={route} onRetry={() => retryRoute(flight)} />
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         <Detail label="Altura" value={formatAltitude(flight)} />
         <Detail label="Velocidad" value={formatSpeed(flight.speedKt)} />
@@ -343,7 +353,8 @@ export function FlightsTracker() {
           <FlightCard flight={selected} onClose={() => setSelectedId(null)} />
           <p className="text-xs text-ink-subtle">
             Posiciones de la red abierta de receptores adsb.lol, con licencia ODbL, en un radio de 460 km.
-            Algunos aviones no transmiten su posición y no aparecen.
+            Algunos aviones no transmiten su posición y no aparecen. Origen y destino: base pública de rutas
+            de adsbdb.com.
           </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
             <a href={FLIGHTS_SOURCE.url} className="underline" target="_blank" rel="noopener noreferrer">

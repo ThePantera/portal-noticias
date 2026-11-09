@@ -189,39 +189,62 @@ export function hasAirlineCallsign(callsign: string | null): callsign is string 
 }
 
 const routeAirportSchema = z.object({
-  iata: z.string().nullish(),
-  icao: z.string().min(1),
-  location: z.string().nullish(),
+  iata_code: z.string().nullish(),
+  icao_code: z.string().min(1),
+  municipality: z.string().nullish(),
   name: z.string().nullish(),
-  countryiso2: z.string().nullish(),
+  country_iso_name: z.string().nullish(),
+  latitude: finite,
+  longitude: finite,
 });
 
-const routeSchema = z.object({
-  callsign: z.string().min(1),
-  plausible: z.union([z.boolean(), z.number()]).optional(),
-  _airports: z.array(routeAirportSchema).optional(),
+const adsbdbSchema = z.object({
+  response: z.object({
+    flightroute: z.object({ origin: routeAirportSchema, destination: routeAirportSchema }),
+  }),
 });
+
+function routeAirport(airport: z.infer<typeof routeAirportSchema>): RouteAirport {
+  return {
+    iata: airport.iata_code?.trim() || null,
+    icao: airport.icao_code,
+    city: airport.municipality?.trim() || airport.name?.trim() || airport.icao_code,
+    country: airport.country_iso_name?.trim() || "",
+    lat: airport.latitude,
+    lon: airport.longitude,
+  };
+}
 
 /**
- * Lee la respuesta de `POST /api/0/routeset` de adsb.lol: indicativo → aeropuertos. Descarta las
- * rutas que adsb.lol marca como no plausibles (no coinciden con dónde está el avión): mejor no
- * mostrar ruta que mostrar una equivocada.
+ * Lee la respuesta de `GET https://api.adsbdb.com/v0/callsign/{indicativo}`: origen y destino.
+ * Devuelve null si el indicativo no está en la base ("unknown callsign") o la respuesta cambió.
  */
-export function parseRouteset(json: unknown): Map<string, RouteAirport[]> {
-  const routes = new Map<string, RouteAirport[]>();
-  if (!Array.isArray(json)) return routes;
-  for (const raw of json) {
-    const parsed = routeSchema.safeParse(raw);
-    if (!parsed.success || !parsed.data.plausible) continue;
-    const airports = (parsed.data._airports ?? []).map((airport) => ({
-      iata: airport.iata?.trim() || null,
-      icao: airport.icao,
-      city: airport.location?.trim() || airport.name?.trim() || airport.icao,
-      country: airport.countryiso2?.trim() || "",
-    }));
-    if (airports.length >= 2) routes.set(parsed.data.callsign.trim(), airports);
-  }
-  return routes;
+export function parseAdsbdbRoute(json: unknown): RouteAirport[] | null {
+  const parsed = adsbdbSchema.safeParse(json);
+  if (!parsed.success) return null;
+  const { origin, destination } = parsed.data.response.flightroute;
+  return [routeAirport(origin), routeAirport(destination)];
+}
+
+/** Distancia en km sobre la superficie de la Tierra. */
+export function distanceKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
+  const rad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * rad;
+  const dLon = (b.lon - a.lon) * rad;
+  const across = Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+  const h = Math.sin(dLat / 2) ** 2 + across;
+  return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/**
+ * La base de rutas guarda la ruta programada de cada indicativo, que a veces cambia. Se acepta sólo
+ * si el avión está cerca del camino entre origen y destino: mejor no mostrar ruta que una equivocada.
+ */
+export function isPlausibleRoute(route: RouteAirport[], position: { lat: number; lon: number }): boolean {
+  let direct = 0;
+  for (let i = 1; i < route.length; i += 1) direct += distanceKm(route[i - 1], route[i]);
+  const viaPlane = distanceKm(route[0], position) + distanceKm(position, route[route.length - 1]);
+  return viaPlane <= direct * 1.25 + 150;
 }
 
 /** "Bariloche (BRC)". */
