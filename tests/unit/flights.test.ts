@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  airlineFromCallsign,
+  airlineName,
   flightLabel,
   formatAltitude,
   formatHeading,
+  formatRouteAirport,
   formatSpeed,
+  hasAirlineCallsign,
   parseAdsbLol,
+  parseRouteset,
+  routeCodes,
   sortFlights,
 } from "@/lib/flights";
 
@@ -44,6 +50,8 @@ describe("vuelos: lectura de adsb.lol", () => {
       onGround: false,
       speedKt: 350.5,
       heading: 309.09,
+      airline: { code: "ARG", name: "Aerolíneas Argentinas" },
+      route: null,
     });
     expect(flights[1]).toMatchObject({
       id: "e200f0",
@@ -51,6 +59,7 @@ describe("vuelos: lectura de adsb.lol", () => {
       onGround: true,
       altitudeFt: 0,
       model: null,
+      airline: null,
     });
   });
 
@@ -93,5 +102,60 @@ describe("vuelos: formatos", () => {
       ],
     })!;
     expect(sortFlights(flights).map((f) => f.id)).toEqual(["c", "b", "d", "a"]);
+  });
+});
+
+describe("vuelos: aerolínea y ruta", () => {
+  it("deduce la aerolínea del indicativo y deja sin aerolínea a las matrículas", () => {
+    expect(airlineFromCallsign("ARG1665")).toEqual({ code: "ARG", name: "Aerolíneas Argentinas" });
+    expect(airlineFromCallsign("XYZ123")).toEqual({ code: "XYZ", name: null });
+    expect(airlineName({ code: "XYZ", name: null })).toBe("Código XYZ");
+    expect(airlineFromCallsign("LVCXS")).toBeNull();
+    expect(airlineFromCallsign(null)).toBeNull();
+    expect(hasAirlineCallsign("FBZ5150")).toBe(true);
+    expect(hasAirlineCallsign("LVCXS")).toBe(false);
+  });
+
+  it("lee las rutas de adsb.lol y descarta las que no son plausibles", () => {
+    const routes = parseRouteset([
+      {
+        callsign: "ARG1665",
+        plausible: true,
+        _airports: [
+          { iata: "BRC", icao: "SAZS", location: "San Carlos de Bariloche", countryiso2: "AR" },
+          { iata: "AEP", icao: "SABE", location: "Buenos Aires", countryiso2: "AR" },
+        ],
+      },
+      {
+        callsign: "LAN800",
+        plausible: false,
+        _airports: [
+          { iata: "AKL", icao: "NZAA", location: "Auckland", countryiso2: "NZ" },
+          { iata: "SCL", icao: "SCEL", location: "Santiago", countryiso2: "CL" },
+        ],
+      },
+      { callsign: "FBZ1", plausible: true, _airports: [{ iata: "AEP", icao: "SABE" }] },
+      { nada: true },
+    ]);
+    expect([...routes.keys()]).toEqual(["ARG1665"]);
+    const route = routes.get("ARG1665")!;
+    expect(formatRouteAirport(route[0])).toBe("San Carlos de Bariloche (BRC)");
+    expect(routeCodes(route)).toBe("BRC → AEP");
+    expect(parseRouteset({ error: "x" }).size).toBe(0);
+  });
+
+  it("usa el código ICAO cuando el aeropuerto no tiene IATA", () => {
+    const routes = parseRouteset([
+      {
+        callsign: "ANS100",
+        plausible: 1,
+        _airports: [
+          { iata: "", icao: "SADF", name: "San Fernando" },
+          { iata: "MDQ", icao: "SAZM", location: "Mar del Plata", countryiso2: "AR" },
+        ],
+      },
+    ]);
+    expect(routeCodes(routes.get("ANS100")!)).toBe("SADF → MDQ");
+    expect(formatRouteAirport(routes.get("ANS100")![0])).toBe("San Fernando (SADF)");
   });
 });

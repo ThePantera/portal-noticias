@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Flight } from "@/types/flights";
+import type { Airline, Flight, RouteAirport } from "@/types/flights";
 
 /*
  * Vuelos en vivo (ADR 0013). Los datos salen de adsb.lol, una red abierta de receptores ADS-B
@@ -83,6 +83,8 @@ export function parseAdsbLol(json: unknown): Flight[] | null {
       onGround: alt_baro === "ground",
       speedKt: ac.data.gs ?? null,
       heading: ac.data.track ?? ac.data.true_heading ?? null,
+      airline: airlineFromCallsign(text(ac.data.flight)),
+      route: null,
     });
   }
   return flights;
@@ -122,4 +124,113 @@ export function sortFlights(flights: Flight[]): Flight[] {
     if (a.onGround !== b.onGround) return a.onGround ? 1 : -1;
     return (b.altitudeFt ?? -1) - (a.altitudeFt ?? -1);
   });
+}
+
+/** Aerolíneas que suelen volar sobre Buenos Aires, por código ICAO (las tres letras del indicativo). */
+export const AIRLINES: Record<string, string> = {
+  ARG: "Aerolíneas Argentinas",
+  AUT: "Austral",
+  FBZ: "Flybondi",
+  JES: "JetSMART",
+  JAT: "JetSMART",
+  ANS: "Andes Líneas Aéreas",
+  FAG: "Fuerza Aérea Argentina",
+  LAN: "LATAM",
+  LPE: "LATAM Perú",
+  LNE: "LATAM Ecuador",
+  ARE: "LATAM Colombia",
+  TAM: "LATAM Brasil",
+  GLO: "Gol",
+  AZU: "Azul",
+  SKU: "Sky Airline",
+  BOV: "Boliviana de Aviación",
+  AVA: "Avianca",
+  CMP: "Copa Airlines",
+  AMX: "Aeroméxico",
+  AAL: "American Airlines",
+  UAL: "United Airlines",
+  DAL: "Delta",
+  ACA: "Air Canada",
+  IBE: "Iberia",
+  AEA: "Air Europa",
+  LVL: "Level",
+  AFR: "Air France",
+  KLM: "KLM",
+  DLH: "Lufthansa",
+  ITY: "ITA Airways",
+  BAW: "British Airways",
+  SWR: "Swiss",
+  TAP: "TAP Air Portugal",
+  THY: "Turkish Airlines",
+  UAE: "Emirates",
+  QTR: "Qatar Airways",
+  ETH: "Ethiopian Airlines",
+  FDX: "FedEx",
+  UPS: "UPS",
+  GTI: "Atlas Air",
+  CKS: "Kalitta Air",
+};
+
+const AIRLINE_CALLSIGN = /^([A-Z]{3})\d/;
+
+/** "ARG1665" → Aerolíneas Argentinas. Los indicativos que son matrículas ("LVCXS") no tienen aerolínea. */
+export function airlineFromCallsign(callsign: string | null): Airline | null {
+  const code = callsign ? AIRLINE_CALLSIGN.exec(callsign)?.[1] : undefined;
+  return code ? { code, name: AIRLINES[code] ?? null } : null;
+}
+
+/** Nombre para mostrar: el conocido o, si no, el código. */
+export function airlineName(airline: Airline): string {
+  return airline.name ?? `Código ${airline.code}`;
+}
+
+/** Sólo se piden rutas de vuelos comerciales: los que tienen indicativo de aerolínea. */
+export function hasAirlineCallsign(callsign: string | null): callsign is string {
+  return callsign !== null && AIRLINE_CALLSIGN.test(callsign);
+}
+
+const routeAirportSchema = z.object({
+  iata: z.string().nullish(),
+  icao: z.string().min(1),
+  location: z.string().nullish(),
+  name: z.string().nullish(),
+  countryiso2: z.string().nullish(),
+});
+
+const routeSchema = z.object({
+  callsign: z.string().min(1),
+  plausible: z.union([z.boolean(), z.number()]).optional(),
+  _airports: z.array(routeAirportSchema).optional(),
+});
+
+/**
+ * Lee la respuesta de `POST /api/0/routeset` de adsb.lol: indicativo → aeropuertos. Descarta las
+ * rutas que adsb.lol marca como no plausibles (no coinciden con dónde está el avión): mejor no
+ * mostrar ruta que mostrar una equivocada.
+ */
+export function parseRouteset(json: unknown): Map<string, RouteAirport[]> {
+  const routes = new Map<string, RouteAirport[]>();
+  if (!Array.isArray(json)) return routes;
+  for (const raw of json) {
+    const parsed = routeSchema.safeParse(raw);
+    if (!parsed.success || !parsed.data.plausible) continue;
+    const airports = (parsed.data._airports ?? []).map((airport) => ({
+      iata: airport.iata?.trim() || null,
+      icao: airport.icao,
+      city: airport.location?.trim() || airport.name?.trim() || airport.icao,
+      country: airport.countryiso2?.trim() || "",
+    }));
+    if (airports.length >= 2) routes.set(parsed.data.callsign.trim(), airports);
+  }
+  return routes;
+}
+
+/** "Bariloche (BRC)". */
+export function formatRouteAirport(airport: RouteAirport): string {
+  return `${airport.city} (${airport.iata ?? airport.icao})`;
+}
+
+/** "BRC → AEP", para la lista. */
+export function routeCodes(route: RouteAirport[]): string {
+  return route.map((airport) => airport.iata ?? airport.icao).join(" → ");
 }
