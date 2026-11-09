@@ -55,3 +55,6 @@ export type EditorFormState = {
 
 /** Resultado de un cambio de la cobertura en vivo o de la galería de fotos. */
 export type ExtrasResult = { ok: true } | { ok: false; message: string };
+
+/** Estado del formulario "Traer nota desde un link". */
+export type ImportFormState = { message: string | null };

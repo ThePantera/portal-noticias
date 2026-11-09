@@ -3,10 +3,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ArticleEditor } from "@/components/admin/ArticleEditor";
 import { FreshOnNavigate } from "@/components/admin/FreshOnNavigate";
+import { ImportFromLink } from "@/components/admin/ImportFromLink";
 import { requirePermission } from "@/server/auth/current-user";
 import { MAX_FEATURED_RANK } from "@/server/services/article-commands";
 import { listCategoryOptions } from "@/server/services/articles";
 import { deleteArticleAction, saveArticleAction, uploadImageAction } from "../actions";
+import { importArticleAction } from "../import-actions";
 
 export const metadata: Metadata = { title: "Nueva nota" };
 
@@ -20,6 +22,9 @@ async function NewArticle() {
           ← Notas
         </Link>
         <h1 className="mt-2 font-display text-3xl font-semibold">Nueva nota</h1>
+      </div>
+      <div id="importar" className="scroll-mt-20">
+        <ImportFromLink categories={categories} importAction={importArticleAction} />
       </div>
       <FreshOnNavigate>
         <ArticleEditor

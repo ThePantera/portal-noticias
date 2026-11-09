@@ -43,12 +43,20 @@ async function ArticleList({ searchParams }: { searchParams: PageProps<"/admin/n
             {status ? ARTICLE_STATUS[status].plural : "Todas las notas"}
           </h1>
         </div>
-        <Link
-          href="/admin/notas/nueva"
-          className="rounded-sm bg-ink px-4 py-2.5 text-sm font-semibold text-paper"
-        >
-          Escribir una nota
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/notas/nueva#importar"
+            className="rounded-sm border border-ink px-4 py-2.5 text-sm font-semibold text-ink"
+          >
+            Traer desde un link
+          </Link>
+          <Link
+            href="/admin/notas/nueva"
+            className="rounded-sm bg-ink px-4 py-2.5 text-sm font-semibold text-paper"
+          >
+            Escribir una nota
+          </Link>
+        </div>
       </div>
 
       {deleted ? (

@@ -45,6 +45,7 @@ const NOTICES: Record<string, string> = {
   borrador:
     "La nota se guardó como borrador, pero no se pudo cambiar su estado. Revisá los datos y probá de nuevo.",
   publish: "Nota creada y publicada.",
+  importada: "Nota traída como borrador. Revisá el texto y la foto y, cuando esté lista, tocá Publicar.",
   schedule: "Nota creada y programada.",
   eliminar: "No se pudo eliminar: sólo se eliminan borradores y notas archivadas.",
 };
